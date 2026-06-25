@@ -6,6 +6,8 @@
 <title>Guru — Diagnóstico Digital</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
     --azul:       #1B3A6B;
@@ -24,309 +26,207 @@
     --blanco:     #FFFFFF;
     --font: 'Inter', system-ui, sans-serif;
     --sombra: 0 1px 3px rgba(27,58,107,0.08), 0 4px 16px rgba(27,58,107,0.06);
-    --sombra-lg: 0 4px 24px rgba(27,58,107,0.12);
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { background: var(--gris-bg); font-family: var(--font); color: var(--negro); font-size: 14px; line-height: 1.6; min-height: 100vh; }
 
-  /* ── HEADER ── */
   .header {
-    background: var(--blanco);
-    border-bottom: 1px solid var(--gris-borde);
-    padding: 0 32px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    background: var(--blanco); border-bottom: 1px solid var(--gris-borde);
+    padding: 0 32px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
     position: sticky; top: 0; z-index: 10;
   }
   .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-mark {
-    width: 32px; height: 32px;
-    background: var(--azul);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-weight: 700; font-size: 14px; letter-spacing: -0.5px;
-  }
+  .logo-mark { width: 32px; height: 32px; background: var(--azul); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
   .logo-text { font-size: 15px; font-weight: 700; color: var(--azul); letter-spacing: -0.3px; }
   .logo-text span { color: var(--azul-med); font-weight: 400; }
-  .header-badge {
-    font-size: 11px; font-weight: 600;
-    background: var(--azul-light); color: var(--azul-med);
-    padding: 3px 10px; border-radius: 20px;
-    letter-spacing: 0.3px; text-transform: uppercase;
-  }
+  .header-badge { font-size: 11px; font-weight: 600; background: var(--azul-light); color: var(--azul-med); padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
 
-  /* ── LAYOUT ── */
-  .layout {
-    display: grid;
-    grid-template-columns: 400px 1fr;
-    min-height: calc(100vh - 56px);
-    max-width: 1400px;
-    margin: 0 auto;
-  }
+  .layout { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 56px); max-width: 1400px; margin: 0 auto; }
   @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
 
-  /* ── PANEL FORM ── */
-  .panel-form {
-    background: var(--blanco);
-    border-right: 1px solid var(--gris-borde);
-    padding: 32px 28px;
-    display: flex; flex-direction: column; gap: 24px;
-  }
+  .panel-form { background: var(--blanco); border-right: 1px solid var(--gris-borde); padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; }
   .form-header h1 { font-size: 20px; font-weight: 700; color: var(--azul); letter-spacing: -0.4px; line-height: 1.3; }
   .form-header p { font-size: 13px; color: var(--gris-texto); margin-top: 6px; line-height: 1.55; }
 
-  /* ── CAMPOS ── */
   .form { display: flex; flex-direction: column; gap: 14px; }
   .field { display: flex; flex-direction: column; gap: 5px; }
   .field-row { display: grid; grid-template-columns: 1fr 80px; gap: 10px; }
   label { font-size: 11px; font-weight: 600; color: var(--azul); text-transform: uppercase; letter-spacing: 0.5px; }
-  input {
-    background: var(--blanco);
-    border: 1.5px solid var(--gris-borde);
-    border-radius: 8px;
-    padding: 10px 13px;
-    font-family: var(--font);
-    font-size: 14px;
-    color: var(--negro);
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    width: 100%;
-  }
+  input { background: var(--blanco); border: 1.5px solid var(--gris-borde); border-radius: 8px; padding: 10px 13px; font-family: var(--font); font-size: 14px; color: var(--negro); outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
   input::placeholder { color: #B0BAD0; }
   input:focus { border-color: var(--azul-med); box-shadow: 0 0 0 3px rgba(37,86,160,0.1); }
   input.err { border-color: var(--rojo); }
   .ferr { font-size: 11px; color: var(--rojo); display: none; }
   .ferr.v { display: block; }
-
-  .divider-label {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 11px; font-weight: 600; color: var(--gris-texto);
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .divider-label::before, .divider-label::after {
-    content: ''; flex: 1; height: 1px; background: var(--gris-borde);
-  }
-
-  /* Campo webhook colapsable */
-  .webhook-toggle {
-    font-size: 12px; color: var(--azul-med); cursor: pointer;
-    display: flex; align-items: center; gap: 4px;
-    background: none; border: none; font-family: var(--font);
-    padding: 0; text-decoration: underline; text-underline-offset: 2px;
-  }
+  .divider-label { display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.5px; }
+  .divider-label::before, .divider-label::after { content: ''; flex: 1; height: 1px; background: var(--gris-borde); }
+  .webhook-toggle { font-size: 12px; color: var(--azul-med); cursor: pointer; background: none; border: none; font-family: var(--font); padding: 0; text-decoration: underline; text-underline-offset: 2px; }
   .webhook-field { display: none; }
   .webhook-field.open { display: flex; flex-direction: column; gap: 5px; }
 
-  /* ── BOTÓN ── */
-  .btn-run {
-    background: var(--azul);
-    color: white;
-    border: none; border-radius: 8px;
-    padding: 13px 20px;
-    font-family: var(--font); font-size: 15px; font-weight: 600;
-    cursor: pointer; width: 100%;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: background 0.15s, transform 0.1s;
-    margin-top: 4px;
-    letter-spacing: -0.2px;
-  }
+  .btn-run { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 13px 20px; font-family: var(--font); font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; margin-top: 4px; }
   .btn-run:hover { background: var(--azul-med); }
-  .btn-run:active { transform: scale(0.99); }
-  .btn-run:disabled { background: #B0BAD0; cursor: not-allowed; transform: none; }
+  .btn-run:disabled { background: #B0BAD0; cursor: not-allowed; }
   .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
   .btn-run.loading .spinner { display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .costo-nota { text-align: center; font-size: 11px; color: #B0BAD0; padding-top: 4px; }
-
-  .err-banner {
-    background: var(--rojo-light); border: 1px solid rgba(200,48,42,0.2);
-    border-radius: 8px; padding: 12px 14px;
-    font-size: 13px; color: var(--rojo);
-    display: none; gap: 8px; align-items: flex-start;
-  }
+  .err-banner { background: var(--rojo-light); border: 1px solid rgba(200,48,42,0.2); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--rojo); display: none; gap: 8px; align-items: flex-start; }
   .err-banner.v { display: flex; }
 
-  /* ── PANEL RESULTADOS ── */
   .panel-results { padding: 32px 36px; overflow-y: auto; }
-
-  /* VACÍO */
-  .estado-vacio {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 480px; gap: 16px; text-align: center;
-  }
-  .vacio-icono {
-    width: 72px; height: 72px;
-    background: var(--azul-light);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 30px;
-  }
+  .estado-vacio { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 480px; gap: 16px; text-align: center; }
+  .vacio-icono { width: 72px; height: 72px; background: var(--azul-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; }
   .estado-vacio h2 { font-size: 16px; font-weight: 600; color: var(--azul); }
   .estado-vacio p { font-size: 13px; color: var(--gris-texto); max-width: 280px; }
 
-  /* LOADING */
   .estado-loading { display: none; flex-direction: column; gap: 0; }
   .estado-loading.v { display: flex; }
   .loading-header { font-size: 15px; font-weight: 600; color: var(--azul); margin-bottom: 20px; }
   .loading-header span { color: var(--azul-med); }
-
-  .paso {
-    display: flex; align-items: center; gap: 14px;
-    padding: 14px 0; border-bottom: 1px solid var(--gris-borde);
-  }
+  .paso { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--gris-borde); }
   .paso:last-child { border-bottom: none; }
-  .paso-icono {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 1.5px solid var(--gris-borde);
-    background: var(--blanco);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px; flex-shrink: 0;
-    transition: all 0.25s;
-  }
+  .paso-icono { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--gris-borde); background: var(--blanco); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; transition: all 0.25s; }
   .paso-icono.activo { border-color: var(--azul-med); box-shadow: 0 0 0 3px rgba(37,86,160,0.1); }
   .paso-icono.hecho { background: var(--verde-light); border-color: var(--verde); font-size: 13px; }
-  .paso-info .paso-nombre { font-size: 14px; font-weight: 500; color: var(--negro); }
+  .paso-info .paso-nombre { font-size: 14px; font-weight: 500; }
   .paso-info .paso-desc { font-size: 12px; color: var(--gris-texto); }
 
-  /* RESULTADOS */
   .estado-resultados { display: none; }
   .estado-resultados.v { display: block; }
 
-  /* CABECERA RESULTADO */
-  .res-header {
-    background: var(--blanco);
-    border: 1px solid var(--gris-borde);
-    border-radius: 12px;
-    padding: 24px 28px;
-    display: flex; align-items: center; gap: 24px;
-    margin-bottom: 20px;
-    box-shadow: var(--sombra);
-  }
-  /* Score círculo SVG */
+  .res-header { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 12px; padding: 24px 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 20px; box-shadow: var(--sombra); }
   .score-wrap { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
   .score-wrap svg { transform: rotate(-90deg); }
-  .score-num {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; font-weight: 700; color: var(--azul);
-    letter-spacing: -1px;
-  }
+  .score-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: var(--azul); letter-spacing: -1px; }
   .res-info { flex: 1; }
   .res-empresa { font-size: 20px; font-weight: 700; color: var(--azul); letter-spacing: -0.4px; }
   .res-url { font-size: 12px; color: var(--gris-texto); margin-top: 2px; }
   .res-fecha { font-size: 12px; color: var(--gris-texto); margin-top: 2px; }
-  .nivel-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 600;
-    padding: 5px 12px; border-radius: 20px;
-    margin-top: 10px; border: 1px solid;
-  }
-  .nivel-badge.bueno    { background: var(--verde-light);   color: var(--verde);   border-color: rgba(26,158,92,0.25); }
-  .nivel-badge.mejorable{ background: var(--naranja-lt);    color: var(--naranja); border-color: rgba(224,123,42,0.25); }
-  .nivel-badge.critico  { background: var(--rojo-light);    color: var(--rojo);    border-color: rgba(200,48,42,0.25); }
+  .nivel-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; margin-top: 10px; border: 1px solid; }
+  .nivel-badge.bueno    { background: var(--verde-light);  color: var(--verde);   border-color: rgba(26,158,92,0.25); }
+  .nivel-badge.mejorable{ background: var(--naranja-lt);   color: var(--naranja); border-color: rgba(224,123,42,0.25); }
+  .nivel-badge.critico  { background: var(--rojo-light);   color: var(--rojo);    border-color: rgba(200,48,42,0.25); }
 
-  /* BLOQUES */
-  .seccion-titulo {
-    font-size: 11px; font-weight: 700; color: var(--gris-texto);
-    text-transform: uppercase; letter-spacing: 0.6px;
-    margin-bottom: 12px; margin-top: 24px;
-  }
-  .bloques-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 4px;
-  }
+  .seccion-titulo { font-size: 11px; font-weight: 700; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; margin-top: 24px; }
+  .bloques-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   @media (max-width: 1100px) { .bloques-grid { grid-template-columns: 1fr; } }
-
-  .bloque {
-    background: var(--blanco);
-    border: 1px solid var(--gris-borde);
-    border-radius: 10px;
-    padding: 14px 16px;
-    display: flex; align-items: center; gap: 12px;
-    box-shadow: var(--sombra);
-    transition: border-color 0.15s;
-  }
-  .bloque:hover { border-color: var(--azul-med); }
+  .bloque { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: var(--sombra); }
   .bloque-emoji { font-size: 20px; line-height: 1; }
   .bloque-body { flex: 1; min-width: 0; }
-  .bloque-nombre { font-size: 13px; font-weight: 600; color: var(--negro); }
+  .bloque-nombre { font-size: 13px; font-weight: 600; }
   .barra-wrap { margin-top: 6px; background: var(--gris-bg); border-radius: 4px; height: 5px; }
   .barra { height: 5px; border-radius: 4px; transition: width 0.8s cubic-bezier(0.22,0.8,0.4,1); }
   .bloque-score { font-size: 18px; font-weight: 700; min-width: 40px; text-align: right; }
 
-  /* OPORTUNIDADES */
   .opps-lista { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-  .opp {
-    background: var(--blanco);
-    border: 1px solid var(--gris-borde);
-    border-left: 4px solid var(--naranja);
-    border-radius: 0 10px 10px 0;
-    padding: 12px 16px;
-    display: flex; align-items: flex-start; gap: 12px;
-    box-shadow: var(--sombra);
-  }
-  .opp-body { flex: 1; }
+  .opp { background: var(--blanco); border: 1px solid var(--gris-borde); border-left: 4px solid var(--naranja); border-radius: 0 10px 10px 0; padding: 12px 16px; box-shadow: var(--sombra); }
   .opp-area { font-size: 10px; font-weight: 700; color: var(--naranja); text-transform: uppercase; letter-spacing: 0.5px; }
   .opp-texto { font-size: 13px; color: var(--negro); margin-top: 2px; font-weight: 500; }
-  .opp-prod {
-    display: inline-block; margin-top: 5px;
-    font-size: 11px; font-weight: 600;
-    background: var(--azul-light); color: var(--azul-med);
-    padding: 2px 9px; border-radius: 20px;
-    border: 1px solid rgba(37,86,160,0.15);
-  }
+  .opp-prod { display: inline-block; margin-top: 5px; font-size: 11px; font-weight: 600; background: var(--azul-light); color: var(--azul-med); padding: 2px 9px; border-radius: 20px; }
 
-  /* ACCIONES */
   .acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .btn-sec {
-    flex: 1; min-width: 130px;
-    background: var(--blanco); color: var(--azul);
-    border: 1.5px solid var(--gris-borde);
-    border-radius: 8px; padding: 10px 16px;
-    font-family: var(--font); font-size: 13px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: border-color 0.15s, background 0.15s;
-  }
+  .btn-sec { flex: 1; min-width: 130px; background: var(--blanco); color: var(--azul); border: 1.5px solid var(--gris-borde); border-radius: 8px; padding: 10px 16px; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: border-color 0.15s, background 0.15s; }
   .btn-sec:hover { border-color: var(--azul-med); background: var(--azul-light); }
-  .btn-prim {
-    flex: 1; min-width: 130px;
-    background: var(--azul); color: white;
-    border: none; border-radius: 8px; padding: 10px 16px;
-    font-family: var(--font); font-size: 13px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: background 0.15s;
-  }
+  .btn-prim { flex: 1; min-width: 130px; background: var(--azul); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s; }
   .btn-prim:hover { background: var(--azul-med); }
+  .btn-prim:disabled { background: #B0BAD0; cursor: not-allowed; }
 
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--azul); color: white;
-    border-radius: 8px; padding: 11px 18px;
-    font-size: 13px; font-weight: 500;
-    display: flex; align-items: center; gap: 8px;
-    transform: translateY(60px); opacity: 0;
-    transition: all 0.3s cubic-bezier(0.22,0.8,0.4,1);
-    z-index: 100; pointer-events: none;
-    box-shadow: var(--sombra-lg);
-  }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--azul); color: white; border-radius: 8px; padding: 11px 18px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(60px); opacity: 0; transition: all 0.3s cubic-bezier(0.22,0.8,0.4,1); z-index: 100; pointer-events: none; box-shadow: 0 4px 24px rgba(27,58,107,0.2); }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  /* Separador de resultados GBP */
-  .gbp-card {
-    background: var(--azul-light);
-    border: 1px solid rgba(37,86,160,0.15);
-    border-radius: 10px; padding: 14px 16px;
-    margin-top: 10px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  /* ── PDF TEMPLATE (oculto, solo para render) ── */
+  #pdfTemplate {
+    position: fixed; left: -9999px; top: 0;
+    width: 794px; background: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; color: #111827;
+    z-index: -1; pointer-events: none;
   }
-  .gbp-item { font-size: 12px; }
-  .gbp-label { color: var(--gris-texto); font-weight: 500; }
-  .gbp-val { color: var(--azul); font-weight: 600; margin-top: 1px; }
+
+  /* Página PDF */
+  .pdf-page {
+    width: 794px; min-height: 1123px;
+    padding: 48px 52px;
+    position: relative;
+    page-break-after: always;
+    background: white;
+    display: flex; flex-direction: column;
+  }
+
+  /* Portada */
+  .pdf-portada { background: #1B3A6B !important; color: white; justify-content: space-between; }
+  .pdf-portada-top { display: flex; align-items: center; gap: 12px; }
+  .pdf-logo-mark { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #1B3A6B; font-weight: 700; font-size: 18px; }
+  .pdf-logo-txt { color: white; font-size: 16px; font-weight: 700; }
+  .pdf-logo-txt span { font-weight: 400; opacity: 0.7; }
+  .pdf-portada-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; }
+  .pdf-label-empresa { font-size: 12px; font-weight: 600; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .pdf-nombre-empresa { font-size: 38px; font-weight: 700; line-height: 1.2; letter-spacing: -1px; margin-bottom: 8px; }
+  .pdf-url-empresa { font-size: 14px; opacity: 0.6; }
+  .pdf-score-grande { margin-top: 32px; display: flex; align-items: flex-end; gap: 12px; }
+  .pdf-score-num-big { font-size: 80px; font-weight: 700; line-height: 1; letter-spacing: -3px; }
+  .pdf-score-label { font-size: 14px; opacity: 0.6; padding-bottom: 14px; }
+  .pdf-portada-bot { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .pdf-portada-bot-info { font-size: 12px; opacity: 0.6; line-height: 1.8; }
+  .pdf-portada-bot-fecha { font-size: 12px; opacity: 0.6; text-align: right; }
+
+  /* Header páginas internas */
+  .pdf-page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid #1B3A6B; }
+  .pdf-page-titulo { font-size: 20px; font-weight: 700; color: #1B3A6B; }
+  .pdf-page-empresa { font-size: 12px; color: #6B7A99; }
+  .pdf-page-num { font-size: 11px; color: #B0BAD0; }
+
+  /* Score resumen */
+  .pdf-score-fila { display: flex; align-items: center; gap: 32px; margin-bottom: 28px; padding: 20px 24px; background: #EBF1FA; border-radius: 10px; }
+  .pdf-score-circ { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: white; flex-shrink: 0; }
+  .pdf-score-info h2 { font-size: 22px; font-weight: 700; color: #1B3A6B; }
+  .pdf-score-info p { font-size: 13px; color: #6B7A99; margin-top: 3px; }
+  .pdf-nivel { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+
+  /* Tabla de bloques */
+  .pdf-tabla { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  .pdf-tabla th { background: #1B3A6B; color: white; padding: 10px 14px; font-size: 11px; font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pdf-tabla th:last-child { text-align: center; width: 80px; }
+  .pdf-tabla td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #DDE3EE; vertical-align: middle; }
+  .pdf-tabla tr:last-child td { border-bottom: none; }
+  .pdf-tabla tr:nth-child(even) td { background: #F5F7FB; }
+  .pdf-score-td { text-align: center; font-weight: 700; font-size: 15px; }
+  .pdf-barra-cont { background: #DDE3EE; border-radius: 3px; height: 6px; width: 120px; }
+  .pdf-barra-fill { height: 6px; border-radius: 3px; }
+
+  /* Variables detalle */
+  .pdf-seccion-h { font-size: 14px; font-weight: 700; color: #1B3A6B; margin-bottom: 10px; margin-top: 20px; padding-bottom: 6px; border-bottom: 1px solid #DDE3EE; display: flex; align-items: center; gap: 8px; }
+  .pdf-vars { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+  .pdf-vars td { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #F0F2F8; }
+  .pdf-vars tr:last-child td { border-bottom: none; }
+  .pdf-var-nombre { color: #374151; font-weight: 500; width: 55%; }
+  .pdf-var-estado { width: 25%; }
+  .pdf-var-score  { width: 20%; text-align: right; font-weight: 600; }
+  .chip { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .chip-ok  { background: #E6F6EE; color: #1A9E5C; }
+  .chip-mal { background: #FDECEA; color: #C8302A; }
+  .chip-med { background: #FEF3E8; color: #E07B2A; }
+  .chip-nd  { background: #F5F7FB; color: #6B7A99; }
+
+  /* Oportunidades */
+  .pdf-opp { margin-bottom: 10px; padding: 12px 16px; background: #FEF3E8; border-left: 4px solid #E07B2A; border-radius: 0 8px 8px 0; }
+  .pdf-opp-area { font-size: 10px; font-weight: 700; color: #E07B2A; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pdf-opp-txt { font-size: 13px; color: #111827; font-weight: 500; margin-top: 2px; }
+  .pdf-opp-prod { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; background: #EBF1FA; color: #2556A0; padding: 2px 8px; border-radius: 20px; }
+
+  /* Contraportada */
+  .pdf-contraportada { background: #F5F7FB !important; justify-content: space-between; }
+  .pdf-contra-top { text-align: center; padding-top: 60px; }
+  .pdf-contra-top h2 { font-size: 24px; font-weight: 700; color: #1B3A6B; }
+  .pdf-contra-top p { font-size: 14px; color: #6B7A99; margin-top: 8px; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .pdf-contra-vendedor { background: white; border-radius: 12px; padding: 24px; margin: 32px 0; box-shadow: 0 2px 12px rgba(27,58,107,0.08); }
+  .pdf-contra-vendedor h3 { font-size: 12px; font-weight: 600; color: #6B7A99; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .pdf-contra-vendedor p { font-size: 14px; color: #1B3A6B; font-weight: 500; margin-bottom: 4px; }
+  .pdf-contra-bot { text-align: center; padding-bottom: 20px; }
+  .pdf-contra-bot p { font-size: 11px; color: #B0BAD0; }
 </style>
 </head>
 <body>
@@ -342,27 +242,23 @@
 
 <div class="layout">
 
-  <!-- ── FORMULARIO ── -->
+  <!-- FORMULARIO -->
   <aside class="panel-form">
     <div class="form-header">
       <h1>Diagnóstico digital del cliente</h1>
       <p>Ingresa los datos del negocio y el sistema analiza su presencia en Google, directorios, IA, publicidad y redes sociales.</p>
     </div>
-
     <form class="form" id="diagForm" novalidate>
-
       <div class="field">
         <label for="empresa">Nombre de la empresa</label>
         <input id="empresa" type="text" placeholder="Ej: Restaurante El Portal" autocomplete="off">
         <span class="ferr" id="fe-empresa">Ingresa el nombre de la empresa</span>
       </div>
-
       <div class="field">
         <label for="url">Sitio web</label>
         <input id="url" type="text" placeholder="www.ejemplo.com" autocomplete="off">
         <span class="ferr" id="fe-url">Ingresa la URL del sitio</span>
       </div>
-
       <div class="field-row">
         <div class="field">
           <label for="ciudad">Ciudad</label>
@@ -373,62 +269,46 @@
           <input id="pais" type="text" placeholder="CO" maxlength="2" style="text-transform:uppercase">
         </div>
       </div>
-
       <div class="divider-label">Envío del informe</div>
-
       <div class="field">
         <label for="email_cliente">Email del cliente</label>
         <input id="email_cliente" type="email" placeholder="cliente@empresa.com">
         <span class="ferr" id="fe-ecli">Ingresa un email válido</span>
       </div>
-
       <div class="field">
         <label for="email_vendedor">Tu email (vendedor Guru)</label>
         <input id="email_vendedor" type="email" placeholder="nombre@gurusoluciones.com">
         <span class="ferr" id="fe-even">Ingresa un email válido</span>
       </div>
-
       <div class="field">
-        <button type="button" class="webhook-toggle" onclick="toggleWebhook()">
-          ⚙ Configurar URL del workflow
-        </button>
+        <button type="button" class="webhook-toggle" onclick="toggleWebhook()">⚙ Configurar URL del workflow</button>
         <div class="webhook-field" id="webhookField">
-          <label for="webhook_url">URL del webhook (n8n)</label>
+          <label for="webhook_url" style="margin-top:6px">URL del webhook (n8n)</label>
           <input id="webhook_url" type="text" placeholder="https://n8n.srv.../webhook/guru-diagnostico">
           <span class="ferr" id="fe-wh">Ingresa la URL del webhook</span>
         </div>
       </div>
-
-      <div class="err-banner" id="errBanner">
-        <span>⚠</span>
-        <span id="errMsg">Error al ejecutar el diagnóstico.</span>
-      </div>
-
+      <div class="err-banner" id="errBanner"><span>⚠</span><span id="errMsg">Error al ejecutar el diagnóstico.</span></div>
       <button type="submit" class="btn-run" id="btnRun">
         <div class="spinner"></div>
         <span id="btnLabel">▶ Analizar empresa</span>
       </button>
-
       <p class="costo-nota">Costo estimado por análisis: ~$0.01 USD</p>
     </form>
   </aside>
 
-  <!-- ── RESULTADOS ── -->
+  <!-- RESULTADOS -->
   <section class="panel-results" id="panelRes">
-
-    <!-- VACÍO -->
     <div class="estado-vacio" id="estadoVacio">
       <div class="vacio-icono">🔍</div>
       <h2>Listo para analizar</h2>
-      <p>Completa el formulario con los datos del cliente y haz clic en "Analizar empresa" para ver el diagnóstico completo.</p>
+      <p>Completa el formulario con los datos del cliente y haz clic en "Analizar empresa".</p>
     </div>
-
-    <!-- LOADING -->
     <div class="estado-loading" id="estadoLoading">
       <div class="loading-header">Analizando <span id="loadNombre">—</span>…</div>
       <div id="pasos">
         <div class="paso"><div class="paso-icono activo" id="pi0">🔍</div><div class="paso-info"><div class="paso-nombre">Validando datos</div><div class="paso-desc">Normalizando URL y configurando el análisis</div></div></div>
-        <div class="paso"><div class="paso-icono" id="pi1">🌐</div><div class="paso-info"><div class="paso-nombre">Descargando sitio web</div><div class="paso-desc">Analizando SSL, redirecciones y HTML</div></div></div>
+        <div class="paso"><div class="paso-icono" id="pi1">🌐</div><div class="paso-info"><div class="paso-nombre">Descargando sitio web</div><div class="paso-desc">SSL, redirecciones y HTML</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi2">🧪</div><div class="paso-info"><div class="paso-nombre">Escaneando estructura</div><div class="paso-desc">Meta tags, headings, contenido, analytics</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi3">📍</div><div class="paso-info"><div class="paso-nombre">Consultando Google Business</div><div class="paso-desc">Reseñas, fotos, horario, categoría</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi4">📋</div><div class="paso-info"><div class="paso-nombre">Verificando directorios (Yext)</div><div class="paso-desc">Facebook, Bing, directorios locales</div></div></div>
@@ -436,19 +316,12 @@
         <div class="paso"><div class="paso-icono" id="pi6">🏆</div><div class="paso-info"><div class="paso-nombre">Calculando puntajes</div><div class="paso-desc">Scoring ponderado por área</div></div></div>
       </div>
     </div>
-
-    <!-- RESULTADOS -->
     <div class="estado-resultados" id="estadoResultados">
-
-      <!-- CABECERA -->
       <div class="res-header">
         <div class="score-wrap">
           <svg width="96" height="96" viewBox="0 0 96 96">
             <circle cx="48" cy="48" r="40" fill="none" stroke="#DDE3EE" stroke-width="7"/>
-            <circle id="scoreArc" cx="48" cy="48" r="40" fill="none"
-              stroke="#1B3A6B" stroke-width="7" stroke-linecap="round"
-              stroke-dasharray="251" stroke-dashoffset="251"
-              style="transition: stroke-dashoffset 1s cubic-bezier(0.22,0.8,0.4,1), stroke 0.5s"/>
+            <circle id="scoreArc" cx="48" cy="48" r="40" fill="none" stroke="#1B3A6B" stroke-width="7" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251" style="transition:stroke-dashoffset 1s cubic-bezier(0.22,0.8,0.4,1),stroke 0.5s"/>
           </svg>
           <span class="score-num" id="scoreNum">0</span>
         </div>
@@ -459,272 +332,467 @@
           <div class="nivel-badge" id="resNivel">—</div>
         </div>
       </div>
-
-      <!-- BLOQUES -->
       <div class="seccion-titulo">Puntaje por área</div>
       <div class="bloques-grid" id="bloquesGrid"></div>
-
-      <!-- OPORTUNIDADES -->
       <div class="seccion-titulo" id="oppsLabel" style="display:none">Oportunidades detectadas para Guru</div>
       <div class="opps-lista" id="oppsList"></div>
-
-      <!-- ACCIONES -->
       <div class="acciones">
         <button class="btn-sec" onclick="copiarJSON()">⬚ Copiar JSON</button>
         <button class="btn-sec" onclick="nuevoDiagnostico()">↺ Nuevo análisis</button>
-        <button class="btn-prim" onclick="alert('PDF disponible en v2 — próximamente')">↓ Descargar PDF</button>
+        <button class="btn-prim" id="btnPDF" onclick="generarPDF()">↓ Descargar PDF</button>
       </div>
-
     </div>
   </section>
 </div>
 
+<!-- PDF TEMPLATE OCULTO -->
+<div id="pdfTemplate"></div>
+
 <div class="toast" id="toast">✓ <span id="toastMsg">Copiado</span></div>
 
 <script>
-// ── ESTADO ──
+const { jsPDF } = window.jspdf;
 let ultimoResultado = null;
+let ultimoData = {};
 let stepTimers = [];
-const DELAYS = [400, 1400, 2600, 4000, 5600, 7200, 9000];
+const DELAYS = [400,1400,2600,4000,5600,7200,9000];
 
-// ── WEBHOOK TOGGLE ──
 function toggleWebhook() {
-  const f = document.getElementById('webhookField');
-  f.classList.toggle('open');
+  document.getElementById('webhookField').classList.toggle('open');
 }
 
-// ── PASOS ANIMADOS ──
 function iniciarPasos(nombre) {
   document.getElementById('loadNombre').textContent = nombre;
-  for (let i = 0; i < 7; i++) {
-    const el = document.getElementById('pi' + i);
-    el.className = 'paso-icono';
-    el.textContent = ['🔍','🌐','🧪','📍','📋','🤖','🏆'][i];
+  for (let i=0;i<7;i++){
+    const el=document.getElementById('pi'+i);
+    el.className='paso-icono';
+    el.textContent=['🔍','🌐','🧪','📍','📋','🤖','🏆'][i];
   }
   document.getElementById('pi0').classList.add('activo');
-  DELAYS.forEach((d, i) => {
-    const t = setTimeout(() => {
-      if (i > 0) {
-        const prev = document.getElementById('pi' + (i-1));
-        prev.className = 'paso-icono hecho';
-        prev.textContent = '✓';
-      }
-      if (i < 7) document.getElementById('pi' + i).classList.add('activo');
-    }, d);
+  DELAYS.forEach((d,i)=>{
+    const t=setTimeout(()=>{
+      if(i>0){const p=document.getElementById('pi'+(i-1));p.className='paso-icono hecho';p.textContent='✓';}
+      if(i<7) document.getElementById('pi'+i).classList.add('activo');
+    },d);
     stepTimers.push(t);
   });
 }
-function completarPasos() {
-  stepTimers.forEach(t => clearTimeout(t));
-  for (let i = 0; i < 7; i++) {
-    const el = document.getElementById('pi' + i);
-    el.className = 'paso-icono hecho';
-    el.textContent = '✓';
-  }
+function completarPasos(){
+  stepTimers.forEach(t=>clearTimeout(t));
+  for(let i=0;i<7;i++){const el=document.getElementById('pi'+i);el.className='paso-icono hecho';el.textContent='✓';}
 }
 
-// ── VALIDACIÓN ──
-const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-function validar() {
-  let ok = true;
-  const wh = document.getElementById('webhookField').classList.contains('open');
-  const checks = [
-    { id: 'empresa',       err: 'fe-empresa', fn: v => v.trim().length > 1 },
-    { id: 'url',           err: 'fe-url',     fn: v => v.trim().length > 3 },
-    { id: 'email_cliente', err: 'fe-ecli',    fn: v => emailRe.test(v) },
-    { id: 'email_vendedor',err: 'fe-even',    fn: v => emailRe.test(v) },
-    ...(wh ? [{ id: 'webhook_url', err: 'fe-wh', fn: v => v.startsWith('http') }] : []),
+const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function validar(){
+  let ok=true;
+  const wh=document.getElementById('webhookField').classList.contains('open');
+  const checks=[
+    {id:'empresa',err:'fe-empresa',fn:v=>v.trim().length>1},
+    {id:'url',err:'fe-url',fn:v=>v.trim().length>3},
+    {id:'email_cliente',err:'fe-ecli',fn:v=>emailRe.test(v)},
+    {id:'email_vendedor',err:'fe-even',fn:v=>emailRe.test(v)},
+    ...(wh?[{id:'webhook_url',err:'fe-wh',fn:v=>v.startsWith('http')}]:[]),
   ];
-  checks.forEach(c => {
-    const inp = document.getElementById(c.id);
-    const errEl = document.getElementById(c.err);
-    const val = c.fn(inp.value);
-    inp.classList.toggle('err', !val);
-    errEl.classList.toggle('v', !val);
-    if (!val) ok = false;
+  checks.forEach(c=>{
+    const inp=document.getElementById(c.id);
+    const errEl=document.getElementById(c.err);
+    const val=c.fn(inp.value);
+    inp.classList.toggle('err',!val);
+    errEl.classList.toggle('v',!val);
+    if(!val) ok=false;
   });
   return ok;
 }
 
-// ── SUBMIT ──
-document.getElementById('diagForm').addEventListener('submit', async e => {
+document.getElementById('diagForm').addEventListener('submit',async e=>{
   e.preventDefault();
-  if (!validar()) return;
+  if(!validar()) return;
+  const empresa=document.getElementById('empresa').value.trim();
+  const url=document.getElementById('url').value.trim();
+  const ciudad=document.getElementById('ciudad').value.trim();
+  const pais=document.getElementById('pais').value.trim().toUpperCase()||'CO';
+  const emailCliente=document.getElementById('email_cliente').value.trim();
+  const emailVendedor=document.getElementById('email_vendedor').value.trim();
+  const webhookUrl=document.getElementById('webhook_url').value.trim()||localStorage.getItem('guru_wh')||'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
+  if(document.getElementById('webhook_url').value.trim()) localStorage.setItem('guru_wh',webhookUrl);
 
-  const empresa       = document.getElementById('empresa').value.trim();
-  const url           = document.getElementById('url').value.trim();
-  const ciudad        = document.getElementById('ciudad').value.trim();
-  const pais          = document.getElementById('pais').value.trim().toUpperCase() || 'CO';
-  const emailCliente  = document.getElementById('email_cliente').value.trim();
-  const emailVendedor = document.getElementById('email_vendedor').value.trim();
-  const webhookUrl    = document.getElementById('webhook_url').value.trim()
-                        || 'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
-
-  // UI loading
-  document.getElementById('estadoVacio').style.display     = 'none';
+  document.getElementById('estadoVacio').style.display='none';
   document.getElementById('estadoResultados').classList.remove('v');
   document.getElementById('estadoLoading').classList.add('v');
   document.getElementById('errBanner').classList.remove('v');
-  const btn = document.getElementById('btnRun');
-  btn.disabled = true;
-  btn.classList.add('loading');
-  document.getElementById('btnLabel').textContent = 'Analizando…';
+  const btn=document.getElementById('btnRun');
+  btn.disabled=true; btn.classList.add('loading');
+  document.getElementById('btnLabel').textContent='Analizando…';
   iniciarPasos(empresa);
 
   try {
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ empresa, url, ciudad, pais, email_cliente: emailCliente, email_vendedor: emailVendedor })
-    });
-    const text = await res.text();
-    if (!text || !text.trim()) throw new Error('El workflow no devolvió datos. Revisa que esté activo en n8n.');
-    const data = JSON.parse(text);
-    if (!res.ok || data.success === false) throw new Error(data.error || data.message || 'Error en el diagnóstico.');
-
+    const res=await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empresa,url,ciudad,pais,email_cliente:emailCliente,email_vendedor:emailVendedor})});
+    const text=await res.text();
+    if(!text||!text.trim()) throw new Error('El workflow no devolvió datos. Verifica que esté activo en n8n.');
+    const data=JSON.parse(text);
+    if(!res.ok||data.success===false) throw new Error(data.error||data.message||'Error en el diagnóstico.');
     completarPasos();
-    await new Promise(r => setTimeout(r, 400));
-    mostrarResultados(data, empresa, url);
-    ultimoResultado = data;
-  } catch (err) {
-    stepTimers.forEach(t => clearTimeout(t));
+    await new Promise(r=>setTimeout(r,400));
+    ultimoData={empresa,url,ciudad,pais,emailCliente,emailVendedor,fecha:new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})};
+    mostrarResultados(data,empresa,url);
+    ultimoResultado=data;
+  } catch(err){
+    stepTimers.forEach(t=>clearTimeout(t));
     document.getElementById('estadoLoading').classList.remove('v');
-    document.getElementById('estadoVacio').style.display = 'flex';
+    document.getElementById('estadoVacio').style.display='flex';
     document.getElementById('errBanner').classList.add('v');
-    document.getElementById('errMsg').textContent = err.message;
+    document.getElementById('errMsg').textContent=err.message;
   } finally {
-    btn.disabled = false;
-    btn.classList.remove('loading');
-    document.getElementById('btnLabel').textContent = '▶ Analizar empresa';
+    btn.disabled=false; btn.classList.remove('loading');
+    document.getElementById('btnLabel').textContent='▶ Analizar empresa';
   }
 });
 
-// ── MOSTRAR RESULTADOS ──
-function mostrarResultados(data, empresa, url) {
+function scoreColor(s){ return s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A'; }
+
+function mostrarResultados(data,empresa,url){
   document.getElementById('estadoLoading').classList.remove('v');
   document.getElementById('estadoResultados').classList.add('v');
-
-  const score   = data.score_global || 0;
-  const nivel   = data.nivel || 'mejorable';
-  const bloques = data.bloques || {};
-  const opps    = data.oportunidades || [];
-
-  // Arco SVG
-  const circ = 251;
-  const offset = circ - (score / 100) * circ;
-  const arc = document.getElementById('scoreArc');
-  const color = score >= 70 ? '#1A9E5C' : score >= 45 ? '#E07B2A' : '#C8302A';
-  arc.style.stroke = color;
-  setTimeout(() => { arc.style.strokeDashoffset = offset; }, 50);
-
-  // Contador animado
-  let cur = 0;
-  const numEl = document.getElementById('scoreNum');
-  numEl.style.color = color;
-  const iv = setInterval(() => {
-    cur = Math.min(cur + Math.ceil(score / 25), score);
-    numEl.textContent = cur;
-    if (cur >= score) clearInterval(iv);
-  }, 40);
-
-  // Info empresa
-  document.getElementById('resEmpresa').textContent = empresa;
-  document.getElementById('resUrl').textContent = url;
-  document.getElementById('resFecha').textContent = 'Generado el ' + new Date().toLocaleDateString('es-CO', { year:'numeric', month:'long', day:'numeric' });
-
-  // Nivel
-  const nivelEl = document.getElementById('resNivel');
-  nivelEl.className = 'nivel-badge ' + nivel;
-  const nivelTextos = { bueno: '● Presencia digital sólida', mejorable: '● Puede mejorar', critico: '● Requiere atención urgente' };
-  nivelEl.textContent = nivelTextos[nivel] || nivel;
-
-  // Bloques
-  const conf = [
-    { key: 'seo_local',       nombre: 'SEO Local',              emoji: '📍' },
-    { key: 'posicionamiento', nombre: 'Posicionamiento orgánico', emoji: '📈' },
-    { key: 'construccion',    nombre: 'Construcción del sitio',  emoji: '🏗️' },
-    { key: 'publicidad',      nombre: 'Publicidad',              emoji: '📢' },
-    { key: 'aiso',            nombre: 'AISO',                    emoji: '🤖' },
-    { key: 'conversion',      nombre: 'Conversión',              emoji: '💰' },
-    { key: 'redes_sociales',  nombre: 'Redes sociales',          emoji: '📱' },
+  const score=data.score_global||0;
+  const nivel=data.nivel||'mejorable';
+  const bloques=data.bloques||{};
+  const opps=data.oportunidades||[];
+  const circ=251;
+  const arc=document.getElementById('scoreArc');
+  const color=scoreColor(score);
+  arc.style.stroke=color;
+  setTimeout(()=>{arc.style.strokeDashoffset=circ-(score/100)*circ;},50);
+  let cur=0;
+  const numEl=document.getElementById('scoreNum');
+  numEl.style.color=color;
+  const iv=setInterval(()=>{cur=Math.min(cur+Math.ceil(score/25),score);numEl.textContent=cur;if(cur>=score)clearInterval(iv);},40);
+  document.getElementById('resEmpresa').textContent=empresa;
+  document.getElementById('resUrl').textContent=url;
+  document.getElementById('resFecha').textContent='Generado el '+ultimoData.fecha;
+  const nivelEl=document.getElementById('resNivel');
+  nivelEl.className='nivel-badge '+nivel;
+  nivelEl.textContent={bueno:'● Presencia digital sólida',mejorable:'● Puede mejorar',critico:'● Requiere atención urgente'}[nivel]||nivel;
+  const conf=[
+    {key:'seo_local',nombre:'SEO Local',emoji:'📍'},
+    {key:'posicionamiento',nombre:'Posicionamiento orgánico',emoji:'📈'},
+    {key:'construccion',nombre:'Construcción del sitio',emoji:'🏗️'},
+    {key:'publicidad',nombre:'Publicidad',emoji:'📢'},
+    {key:'aiso',nombre:'AISO',emoji:'🤖'},
+    {key:'conversion',nombre:'Conversión',emoji:'💰'},
+    {key:'redes_sociales',nombre:'Redes sociales',emoji:'📱'},
   ];
-  const grid = document.getElementById('bloquesGrid');
-  grid.innerHTML = '';
-  conf.forEach(b => {
-    const s = typeof bloques[b.key] === 'number' ? bloques[b.key] : 0;
-    const c = s >= 70 ? '#1A9E5C' : s >= 45 ? '#E07B2A' : '#C8302A';
-    grid.innerHTML += `
-      <div class="bloque">
-        <span class="bloque-emoji">${b.emoji}</span>
-        <div class="bloque-body">
-          <div class="bloque-nombre">${b.nombre}</div>
-          <div class="barra-wrap"><div class="barra" style="width:${s}%;background:${c}"></div></div>
-        </div>
-        <span class="bloque-score" style="color:${c}">${s}</span>
-      </div>`;
+  const grid=document.getElementById('bloquesGrid');
+  grid.innerHTML='';
+  conf.forEach(b=>{
+    const s=typeof bloques[b.key]==='number'?bloques[b.key]:0;
+    const c=scoreColor(s);
+    grid.innerHTML+=`<div class="bloque"><span class="bloque-emoji">${b.emoji}</span><div class="bloque-body"><div class="bloque-nombre">${b.nombre}</div><div class="barra-wrap"><div class="barra" style="width:${s}%;background:${c}"></div></div></div><span class="bloque-score" style="color:${c}">${s}</span></div>`;
   });
-
-  // Oportunidades
-  const oppsList = document.getElementById('oppsList');
-  const oppsLabel = document.getElementById('oppsLabel');
-  oppsList.innerHTML = '';
-  if (opps.length > 0) {
-    oppsLabel.style.display = 'block';
-    opps.forEach(op => {
-      oppsList.innerHTML += `
-        <div class="opp">
-          <div class="opp-body">
-            <div class="opp-area">${op.bloque}</div>
-            <div class="opp-texto">${op.oportunidad}</div>
-            <span class="opp-prod">${op.producto}</span>
-          </div>
-        </div>`;
-    });
+  const oppsList=document.getElementById('oppsList');
+  const oppsLabel=document.getElementById('oppsLabel');
+  oppsList.innerHTML='';
+  if(opps.length>0){
+    oppsLabel.style.display='block';
+    opps.forEach(op=>{oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${op.bloque}</div><div class="opp-texto">${op.oportunidad}</div><span class="opp-prod">${op.producto}</span></div>`;});
   }
-
-  document.getElementById('panelRes').scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('panelRes').scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── ACCIONES ──
-function copiarJSON() {
-  if (!ultimoResultado) return;
-  navigator.clipboard.writeText(JSON.stringify(ultimoResultado, null, 2))
-    .then(() => showToast('JSON copiado'));
+// ── GENERADOR DE PDF ──
+async function generarPDF(){
+  if(!ultimoResultado){ showToast('Primero ejecuta un diagnóstico'); return; }
+  const btn=document.getElementById('btnPDF');
+  btn.disabled=true; btn.textContent='⏳ Generando PDF…';
+  showToast('Generando PDF…');
+
+  try {
+    const data=ultimoResultado;
+    const score=data.score_global||0;
+    const nivel=data.nivel||'mejorable';
+    const bloques=data.bloques||{};
+    const opps=data.oportunidades||[];
+    const sitio=data.analisis_sitio||{};
+    const ssl=data.analisis_ssl||{};
+    const gbp=data.google_business||{};
+    const dirs=data.directorios||{};
+    const redes=data.redes_sociales||{};
+    const aiso=data.aiso||{};
+    const empresa=ultimoData.empresa;
+    const url=ultimoData.url;
+    const fecha=ultimoData.fecha;
+    const emailVendedor=ultimoData.emailVendedor;
+    const colorScore=score>=70?'#1A9E5C':score>=45?'#E07B2A':'#C8302A';
+    const nivelTexto={bueno:'Presencia digital sólida',mejorable:'Puede mejorar',critico:'Requiere atención urgente'}[nivel]||nivel;
+
+    const chip=(v,ok,mal,nd='No detectado')=>{
+      if(v===null||v===undefined) return `<span class="chip chip-nd">${nd}</span>`;
+      if(v===true||v==='ok'||v==='completo'||v==='encontrado'||v==='ssl_completo'||v==='https_activo') return `<span class="chip chip-ok">Sí</span>`;
+      if(v===false||v==='no_encontrado'||v==='sin_ssl') return `<span class="chip chip-mal">No</span>`;
+      return `<span class="chip chip-med">${v}</span>`;
+    };
+    const scoreChip=(s)=>{
+      const c=s>=70?'chip-ok':s>=45?'chip-med':'chip-mal';
+      return `<span class="chip ${c}">${s}/100</span>`;
+    };
+
+    const confBloques=[
+      {key:'seo_local',nombre:'SEO Local',emoji:'📍'},
+      {key:'posicionamiento',nombre:'Posicionamiento orgánico',emoji:'📈'},
+      {key:'construccion',nombre:'Construcción del sitio',emoji:'🏗️'},
+      {key:'publicidad',nombre:'Publicidad',emoji:'📢'},
+      {key:'aiso',nombre:'AISO',emoji:'🤖'},
+      {key:'conversion',nombre:'Conversión',emoji:'💰'},
+      {key:'redes_sociales',nombre:'Redes sociales',emoji:'📱'},
+    ];
+
+    const html=`
+    <div style="font-family:'Inter',sans-serif;background:white;">
+
+    <!-- PÁGINA 1: PORTADA -->
+    <div class="pdf-page pdf-portada">
+      <div class="pdf-portada-top">
+        <div class="pdf-logo-mark">G</div>
+        <div class="pdf-logo-txt">Guru <span>Diagnóstico Digital</span></div>
+      </div>
+      <div class="pdf-portada-mid">
+        <div class="pdf-label-empresa">Informe para</div>
+        <div class="pdf-nombre-empresa">${empresa}</div>
+        <div class="pdf-url-empresa">${url}</div>
+        <div class="pdf-score-grande">
+          <div class="pdf-score-num-big" style="color:${colorScore}">${score}</div>
+          <div class="pdf-score-label">de 100<br>puntaje global</div>
+        </div>
+      </div>
+      <div class="pdf-portada-bot">
+        <div class="pdf-portada-bot-info">
+          Generado el ${fecha}<br>
+          Herramienta: Guru Diagnóstico Digital
+        </div>
+        <div class="pdf-portada-bot-fecha">
+          Elaborado por:<br>${emailVendedor}
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 2: RESUMEN EJECUTIVO -->
+    <div class="pdf-page">
+      <div class="pdf-page-header">
+        <div class="pdf-page-titulo">Resumen ejecutivo</div>
+        <div class="pdf-page-empresa">${empresa}</div>
+        <div class="pdf-page-num">2</div>
+      </div>
+      <div class="pdf-score-fila">
+        <div class="pdf-score-circ" style="background:${colorScore}">${score}</div>
+        <div class="pdf-score-info">
+          <h2>${empresa}</h2>
+          <p>${url} · ${ultimoData.ciudad||''}, ${ultimoData.pais||''}</p>
+          <span class="pdf-nivel" style="background:${score>=70?'#E6F6EE':score>=45?'#FEF3E8':'#FDECEA'};color:${colorScore}">${nivelTexto}</span>
+        </div>
+      </div>
+      <table class="pdf-tabla">
+        <tr><th>Área</th><th>Descripción</th><th>Puntaje</th></tr>
+        ${confBloques.map(b=>{
+          const s=typeof bloques[b.key]==='number'?bloques[b.key]:0;
+          const c=s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A';
+          return `<tr>
+            <td><strong>${b.emoji} ${b.nombre}</strong></td>
+            <td><div class="pdf-barra-cont"><div class="pdf-barra-fill" style="width:${s}%;background:${c};height:6px;border-radius:3px"></div></div></td>
+            <td class="pdf-score-td" style="color:${c}">${s}</td>
+          </tr>`;
+        }).join('')}
+      </table>
+    </div>
+
+    <!-- PÁGINA 3: SEO LOCAL + POSICIONAMIENTO -->
+    <div class="pdf-page">
+      <div class="pdf-page-header">
+        <div class="pdf-page-titulo">SEO Local · Posicionamiento</div>
+        <div class="pdf-page-empresa">${empresa}</div>
+        <div class="pdf-page-num">3</div>
+      </div>
+      <div class="pdf-seccion-h">📍 SEO Local — Puntaje: ${bloques.seo_local||0}/100</div>
+      <table class="pdf-vars">
+        <tr><td class="pdf-var-nombre">Perfil Google Business</td><td class="pdf-var-estado">${gbp.encontrado?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No encontrado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(gbp.score||0)}">${gbp.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">GBP Reclamado</td><td class="pdf-var-estado">${chip(gbp.reclamado)}</td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Reseñas</td><td class="pdf-var-estado"><span class="chip chip-nd">${gbp.datos?.total_resenas!=null?gbp.datos.total_resenas+' reseñas':'No verificado'}</span></td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Calificación</td><td class="pdf-var-estado"><span class="chip chip-nd">${gbp.datos?.calificacion!=null?gbp.datos.calificacion+'/5':'No verificado'}</span></td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Directorios locales (Yext)</td><td class="pdf-var-estado"><span class="chip ${(dirs.encontrados||0)>0?'chip-ok':'chip-mal'}">${dirs.encontrados||0} encontrados</span></td><td class="pdf-var-score" style="color:${scoreColor(dirs.score||0)}">${dirs.score||0}</td></tr>
+      </table>
+      <div class="pdf-seccion-h">📈 Posicionamiento orgánico — Puntaje: ${bloques.posicionamiento||0}/100</div>
+      <table class="pdf-vars">
+        <tr><td class="pdf-var-nombre">Google Analytics / GTM</td><td class="pdf-var-estado">${sitio.analytics?.google_analytics||sitio.analytics?.google_tag_manager?`<span class="chip chip-ok">Detectado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.analytics?.score||0)}">${sitio.analytics?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Cantidad de contenido</td><td class="pdf-var-estado"><span class="chip chip-nd">${sitio.contenido?.palabras||0} palabras</span></td><td class="pdf-var-score" style="color:${scoreColor(sitio.contenido?.score||0)}">${sitio.contenido?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Título de página</td><td class="pdf-var-estado">${sitio.titulo_pagina?.valor?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.titulo_pagina?.score||0)}">${sitio.titulo_pagina?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Meta descripción</td><td class="pdf-var-estado">${sitio.meta_descripcion?.valor?`<span class="chip chip-ok">Encontrada</span>`:`<span class="chip chip-mal">No detectada</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.meta_descripcion?.score||0)}">${sitio.meta_descripcion?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Última actualización</td><td class="pdf-var-estado"><span class="chip chip-nd">${sitio.ultima_actualizacion?.fecha||'No detectada'}</span></td><td class="pdf-var-score" style="color:${scoreColor(sitio.ultima_actualizacion?.score||50)}">${sitio.ultima_actualizacion?.score||50}</td></tr>
+      </table>
+    </div>
+
+    <!-- PÁGINA 4: CONSTRUCCIÓN DEL SITIO -->
+    <div class="pdf-page">
+      <div class="pdf-page-header">
+        <div class="pdf-page-titulo">Construcción del sitio</div>
+        <div class="pdf-page-empresa">${empresa}</div>
+        <div class="pdf-page-num">4</div>
+      </div>
+      <div class="pdf-seccion-h">🏗️ Construcción del sitio — Puntaje: ${bloques.construccion||0}/100</div>
+      <table class="pdf-vars">
+        <tr><td class="pdf-var-nombre">Encriptación SSL</td><td class="pdf-var-estado"><span class="chip ${ssl.score>=80?'chip-ok':ssl.score>0?'chip-med':'chip-mal'}">${ssl.estado||'Sin datos'}</span></td><td class="pdf-var-score" style="color:${scoreColor(ssl.score||0)}">${ssl.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Datos de contacto</td><td class="pdf-var-estado">${chip(sitio.contacto?.email||sitio.contacto?.telefono)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.contacto?.score||0)}">${sitio.contacto?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Botón clic para contactar</td><td class="pdf-var-estado">${chip(sitio.cta?.tel||sitio.cta?.email)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.cta?.score||0)}">${sitio.cta?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Preguntas frecuentes (FAQ)</td><td class="pdf-var-estado">${sitio.faq?.schema?`<span class="chip chip-ok">Con schema</span>`:sitio.faq?.encontrado?`<span class="chip chip-med">Sin schema</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.faq?.score||0)}">${sitio.faq?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Encabezados H1/H2</td><td class="pdf-var-estado"><span class="chip ${(sitio.headings?.problemas||[]).length===0?'chip-ok':'chip-mal'}">${(sitio.headings?.problemas||[]).length===0?'Correcto':(sitio.headings?.problemas||[]).join(', ')}</span></td><td class="pdf-var-score" style="color:${scoreColor(sitio.headings?.score||0)}">${sitio.headings?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Blog / contenidos</td><td class="pdf-var-estado">${chip(sitio.blog?.encontrado)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.blog?.score||0)}">${sitio.blog?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Favicon</td><td class="pdf-var-estado">${chip(sitio.favicon?.encontrado)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.favicon?.score||0)}">${sitio.favicon?.score||0}</td></tr>
+      </table>
+    </div>
+
+    <!-- PÁGINA 5: AISO + PUBLICIDAD -->
+    <div class="pdf-page">
+      <div class="pdf-page-header">
+        <div class="pdf-page-titulo">AISO · Publicidad</div>
+        <div class="pdf-page-empresa">${empresa}</div>
+        <div class="pdf-page-num">5</div>
+      </div>
+      <div class="pdf-seccion-h">🤖 AISO (Presencia en IA) — Puntaje: ${bloques.aiso||0}/100</div>
+      <table class="pdf-vars">
+        <tr><td class="pdf-var-nombre">Preparación para IA</td><td class="pdf-var-estado">${scoreChip(aiso.preparacion_ia?.score||0)}</td><td class="pdf-var-score" style="color:${scoreColor(aiso.preparacion_ia?.score||0)}">${aiso.preparacion_ia?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Schema LocalBusiness</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.local_business_schema)}</td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Schema FAQ</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.faq_schema)}</td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Rastreadores IA permitidos</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.ia_crawlers_permitidos)}</td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Sitemap referenciado</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.sitemap)}</td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">ChatGPT</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Google Gemini</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
+      </table>
+      <div class="pdf-seccion-h">📢 Publicidad — Puntaje: ${bloques.publicidad||0}/100</div>
+      <table class="pdf-vars">
+        <tr><td class="pdf-var-nombre">Google Ads (búsqueda)</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Anuncios display Google</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
+        <tr><td class="pdf-var-nombre">Anuncios Facebook/Meta</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
+      </table>
+    </div>
+
+    <!-- PÁGINA 6: CONVERSIÓN + REDES -->
+    <div class="pdf-page">
+      <div class="pdf-page-header">
+        <div class="pdf-page-titulo">Conversión · Redes sociales</div>
+        <div class="pdf-page-empresa">${empresa}</div>
+        <div class="pdf-page-num">6</div>
+      </div>
+      <div class="pdf-seccion-h">💰 Conversión — Puntaje: ${bloques.conversion||0}/100</div>
+      <table class="pdf-vars">
+        <tr><td class="pdf-var-nombre">Chat en vivo</td><td class="pdf-var-estado">${sitio.chat?.herramienta?`<span class="chip chip-ok">${sitio.chat.herramienta}</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.chat?.score||0)}">${sitio.chat?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Comercio electrónico</td><td class="pdf-var-estado">${sitio.ecommerce?.plataforma?`<span class="chip chip-ok">${sitio.ecommerce.plataforma}</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.ecommerce?.score||0)}">${sitio.ecommerce?.score||0}</td></tr>
+      </table>
+      <div class="pdf-seccion-h">📱 Redes sociales — Puntaje: ${bloques.redes_sociales||0}/100</div>
+      <table class="pdf-vars">
+        <tr><td class="pdf-var-nombre">Facebook</td><td class="pdf-var-estado">${redes.facebook?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.facebook?.score||0)}">${redes.facebook?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">Instagram</td><td class="pdf-var-estado">${redes.instagram?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.instagram?.score||0)}">${redes.instagram?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">TikTok</td><td class="pdf-var-estado">${redes.tiktok?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.tiktok?.score||0)}">${redes.tiktok?.score||0}</td></tr>
+        <tr><td class="pdf-var-nombre">LinkedIn</td><td class="pdf-var-estado">${redes.linkedin?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.linkedin?.score||0)}">${redes.linkedin?.score||0}</td></tr>
+      </table>
+    </div>
+
+    <!-- PÁGINA 7: OPORTUNIDADES -->
+    <div class="pdf-page">
+      <div class="pdf-page-header">
+        <div class="pdf-page-titulo">Oportunidades para Guru</div>
+        <div class="pdf-page-empresa">${empresa}</div>
+        <div class="pdf-page-num">7</div>
+      </div>
+      <p style="font-size:13px;color:#6B7A99;margin-bottom:20px">Basado en el análisis, estas son las áreas con mayor potencial de mejora y los servicios de Guru Soluciones que pueden ayudar:</p>
+      ${opps.length>0?opps.map(op=>`
+        <div class="pdf-opp">
+          <div class="pdf-opp-area">${op.bloque}</div>
+          <div class="pdf-opp-txt">${op.oportunidad}</div>
+          <span class="pdf-opp-prod">${op.producto}</span>
+        </div>`).join(''):'<p style="color:#6B7A99;font-size:13px">No se detectaron oportunidades críticas en este análisis.</p>'}
+    </div>
+
+    <!-- PÁGINA 8: CONTRAPORTADA -->
+    <div class="pdf-page pdf-contraportada">
+      <div class="pdf-contra-top">
+        <div style="font-size:36px;margin-bottom:16px">🎯</div>
+        <h2>¿Listo para mejorar tu presencia digital?</h2>
+        <p>Guru Soluciones tiene los servicios exactos para llevar cada área de este diagnóstico al nivel que tu negocio merece.</p>
+      </div>
+      <div class="pdf-contra-vendedor">
+        <h3>Tu asesor digital</h3>
+        <p>📧 ${emailVendedor}</p>
+        <p style="margin-top:8px;font-size:13px;color:#6B7A99">Guru Soluciones · gurusoluciones.com</p>
+      </div>
+      <div class="pdf-contra-bot">
+        <p>Diagnóstico generado el ${fecha} · Guru Diagnóstico Digital v1</p>
+      </div>
+    </div>
+
+    </div>`;
+
+    const container=document.getElementById('pdfTemplate');
+    container.innerHTML=html;
+    container.style.left='-9999px';
+    container.style.position='fixed';
+    await new Promise(r=>setTimeout(r,300));
+
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pages=container.querySelectorAll('.pdf-page');
+    const A4_W=210, A4_H=297;
+
+    for(let i=0;i<pages.length;i++){
+      if(i>0) pdf.addPage();
+      const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+      const imgData=canvas.toDataURL('image/jpeg',0.92);
+      const ratio=Math.min(A4_W/canvas.width*2,A4_H/canvas.height*2);
+      const w=canvas.width*ratio/2*0.264583;
+      const h=canvas.height*ratio/2*0.264583;
+      const x=(A4_W-w)/2;
+      const y=(A4_H-h)/2;
+      pdf.addImage(imgData,'JPEG',x,y,w,h);
+    }
+
+    container.innerHTML='';
+    const nombre=`guru-diagnostico-${empresa.toLowerCase().replace(/\s+/g,'-')}.pdf`;
+    pdf.save(nombre);
+    showToast('PDF descargado correctamente');
+  } catch(err){
+    console.error(err);
+    showToast('Error generando PDF: '+err.message);
+  } finally {
+    btn.disabled=false; btn.textContent='↓ Descargar PDF';
+  }
 }
-function nuevoDiagnostico() {
-  ultimoResultado = null;
+
+function copiarJSON(){
+  if(!ultimoResultado) return;
+  navigator.clipboard.writeText(JSON.stringify(ultimoResultado,null,2)).then(()=>showToast('JSON copiado'));
+}
+function nuevoDiagnostico(){
+  ultimoResultado=null; ultimoData={};
   document.getElementById('estadoResultados').classList.remove('v');
   document.getElementById('estadoLoading').classList.remove('v');
-  document.getElementById('estadoVacio').style.display = 'flex';
+  document.getElementById('estadoVacio').style.display='flex';
   document.getElementById('diagForm').reset();
   document.getElementById('webhookField').classList.remove('open');
   document.getElementById('errBanner').classList.remove('v');
 }
-function showToast(msg) {
-  document.getElementById('toastMsg').textContent = msg;
-  const t = document.getElementById('toast');
+function showToast(msg){
+  document.getElementById('toastMsg').textContent=msg;
+  const t=document.getElementById('toast');
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
-
-// Limpiar errores al escribir
-['empresa','url','email_cliente','email_vendedor','webhook_url'].forEach(id => {
-  document.getElementById(id)?.addEventListener('input', () => {
+['empresa','url','email_cliente','email_vendedor','webhook_url'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input',()=>{
     document.getElementById(id).classList.remove('err');
-    const map = { empresa:'fe-empresa', url:'fe-url', email_cliente:'fe-ecli', email_vendedor:'fe-even', webhook_url:'fe-wh' };
+    const map={empresa:'fe-empresa',url:'fe-url',email_cliente:'fe-ecli',email_vendedor:'fe-even',webhook_url:'fe-wh'};
     document.getElementById(map[id])?.classList.remove('v');
     document.getElementById('errBanner').classList.remove('v');
   });
 });
-document.getElementById('pais').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-
-// Pre-cargar webhook URL si está guardada
-window.addEventListener('load', () => {
-  const saved = localStorage.getItem('guru_webhook_url');
-  if (saved) document.getElementById('webhook_url').value = saved;
-});
-document.getElementById('webhook_url')?.addEventListener('change', function() {
-  localStorage.setItem('guru_webhook_url', this.value);
+document.getElementById('pais').addEventListener('input',function(){this.value=this.value.toUpperCase();});
+window.addEventListener('load',()=>{
+  const saved=localStorage.getItem('guru_wh');
+  if(saved) document.getElementById('webhook_url').value=saved;
 });
 </script>
 </body>
