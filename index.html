@@ -459,10 +459,23 @@ function scoreColor(s){ return s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A'; }
 function mostrarResultados(data,empresa,url){
   document.getElementById('estadoLoading').classList.remove('v');
   document.getElementById('estadoResultados').classList.add('v');
-  const score=data.score_global||0;
-  const nivel=data.nivel||'mejorable';
-  const bloques=data.bloques||{};
-  const opps=data.oportunidades||[];
+  // ── Mapear estructura v4 de n8n ──
+  const score=(data.scores?.global||data.score_global||0);
+  const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
+  const bloques={
+    seo_local:       data.scores?.seoLocal        || data.bloques?.seo_local        || 0,
+    posicionamiento: data.scores?.posicionamiento  || data.bloques?.posicionamiento  || 0,
+    construccion:    data.scores?.construccion     || data.bloques?.construccion     || 0,
+    publicidad:      data.scores?.publicidad       || data.bloques?.publicidad       || 0,
+    aiso:            data.scores?.aiso             || data.bloques?.aiso             || 0,
+    conversion:      data.scores?.conversion       || data.bloques?.conversion       || 0,
+    redes_sociales:  data.scores?.redes            || data.bloques?.redes_sociales   || 0,
+  };
+  const opps=(data.oportunidades||[]).map(op=>({
+    bloque:     op.area      || op.bloque     || '',
+    oportunidad:op.desc      || op.oportunidad|| '',
+    producto:   op.producto  || ''
+  }));
   const circ=251;
   const arc=document.getElementById('scoreArc');
   const color=scoreColor(score);
@@ -499,7 +512,12 @@ function mostrarResultados(data,empresa,url){
   oppsList.innerHTML='';
   if(opps.length>0){
     oppsLabel.style.display='block';
-    opps.forEach(op=>{oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${op.bloque}</div><div class="opp-texto">${op.oportunidad}</div><span class="opp-prod">${op.producto}</span></div>`;});
+    opps.forEach(op=>{
+      const area = op.area || op.bloque || '';
+      const desc = op.desc || op.oportunidad || '';
+      const prod = op.producto || '';
+      oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${area}</div><div class="opp-texto">${desc}</div><span class="opp-prod">${prod}</span></div>`;
+    });
   }
   document.getElementById('panelRes').scrollTo({top:0,behavior:'smooth'});
 }
@@ -513,16 +531,132 @@ async function generarPDF(){
 
   try {
     const data=ultimoResultado;
-    const score=data.score_global||0;
-    const nivel=data.nivel||'mejorable';
-    const bloques=data.bloques||{};
-    const opps=data.oportunidades||[];
-    const sitio=data.analisis_sitio||{};
-    const ssl=data.analisis_ssl||{};
-    const gbp=data.google_business||{};
-    const dirs=data.directorios||{};
-    const redes=data.redes_sociales||{};
-    const aiso=data.aiso||{};
+    // ── Mapear estructura v4 ──
+    const score=(data.scores?.global||data.score_global||0);
+    const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
+    const bloques={
+      seo_local:       data.scores?.seoLocal        || 0,
+      posicionamiento: data.scores?.posicionamiento  || 0,
+      construccion:    data.scores?.construccion     || 0,
+      publicidad:      data.scores?.publicidad       || 0,
+      aiso:            data.scores?.aiso             || 0,
+      conversion:      data.scores?.conversion       || 0,
+      redes_sociales:  data.scores?.redes            || 0,
+    };
+    const opps=(data.oportunidades||[]).map(op=>({
+      bloque:     op.area      || op.bloque     || '',
+      oportunidad:op.desc      || op.oportunidad|| '',
+      producto:   op.producto  || ''
+    }));
+    // Mapear objetos internos desde estructura v4
+    const gbpRaw    = data.seoLocal?.gbp       || {};
+    const dirsRaw   = data.seoLocal?.directorios || {};
+    const posRaw    = data.posicionamiento      || {};
+    const consRaw   = data.construccion         || {};
+    const aisoRaw   = data.aiso                 || {};
+    const pubRaw    = data.publicidad           || {};
+    const convRaw   = data.conversion           || {};
+    const redesRaw  = data.redes                || {};
+
+    // Adaptar a la estructura que espera el HTML
+    const gbp = {
+      encontrado:       gbpRaw.encontrado   || false,
+      reclamado:        gbpRaw.reclamado    || false,
+      score:            gbpRaw.scoreGBP     || 0,
+      website_coincide: !!(gbpRaw.website),
+      dias_desde_ultimo_post: gbpRaw.ultimaPublicacion ? 5 : null,
+      datos: {
+        nombre:         gbpRaw.nombre       || empresa,
+        direccion:      gbpRaw.direccion    || '',
+        telefono:       gbpRaw.telefono     || '',
+        calificacion:   gbpRaw.rating       || 0,
+        total_resenas:  gbpRaw.resenas      || 0,
+        fotos:          gbpRaw.fotosCount   || 0,
+        categorias:     (gbpRaw.categorias  || []).join(', '),
+        tiene_horario:  gbpRaw.horario      || false,
+        tiene_posts:    !!(gbpRaw.ultimaPublicacion),
+        foto_principal: gbpRaw.urlFoto      || null,
+        logo:           gbpRaw.urlLogo      || null,
+        ultimo_post:    gbpRaw.urlPost ? { image: gbpRaw.urlPost, body: '' } : null,
+      }
+    };
+    const dirs = {
+      score:          dirsRaw.scoreYext    || 0,
+      encontrados:    dirsRaw.encontrados  || 0,
+      inconsistentes: dirsRaw.inconsistentes || 0,
+      total_revisados:dirsRaw.total        || 17,
+    };
+    const sitio = {
+      analytics: {
+        google_analytics:    posRaw.analyticsDetectado || false,
+        google_tag_manager:  posRaw.analyticsDetectado || false,
+        facebook_pixel:      !!(posRaw.herramientas?.includes('Meta Pixel')),
+        score:               posRaw.scoreAnalytics || 0,
+      },
+      contenido: {
+        palabras: posRaw.palabras || 0,
+        score:    posRaw.scoreContenido || 0,
+      },
+      titulo_pagina: {
+        valor:  (posRaw.titles||[]).length > 0,
+        score:  posRaw.scoreTitulos || 0,
+      },
+      meta_descripcion: {
+        valor:  (posRaw.descs||[]).length > 0,
+        score:  posRaw.scoreTitulos || 0,
+      },
+      ultima_actualizacion: {
+        fecha:  posRaw.anioReciente ? 'Reciente' : `Año ${posRaw.anioDetectado||'?'}`,
+        score:  posRaw.scoreUltimaActu || 0,
+      },
+      blog:    { encontrado: consRaw.blogDetectado  || false, score: consRaw.scoreBlog    || 0 },
+      favicon: { encontrado: consRaw.faviconDetectado||false, score: consRaw.scoreFavicon || 0 },
+      contacto:{ email: consRaw.tieneEmail||false, telefono: consRaw.tieneTel||false, score: 100 },
+      cta:     { tel: consRaw.tieneTel||false, email: consRaw.tieneEmail||false, score: consRaw.scoreCTA||0 },
+      faq:     { encontrado: consRaw.faqDetectada||false, schema: consRaw.schemaFAQ||false, score: consRaw.scoreFAQ||0 },
+      headings:{ problemas: consRaw.multipleH1?['Múltiples H1']:consRaw.sinH1?['Sin H1']:[], score: consRaw.scoreEnc||0 },
+      chat:    { herramienta: convRaw.chatTipo||null,   score: convRaw.scoreChat||0 },
+      ecommerce:{ plataforma: convRaw.ecommerceDetectado?'Detectado':null, score: convRaw.scoreEcom||0 },
+    };
+    const ssl = {
+      estado: consRaw.ssl ? 'ssl_completo' : 'sin_ssl',
+      score:  consRaw.scoreSSL || 0,
+    };
+    const aiso = {
+      preparacion_ia: {
+        score:                  aisoRaw.scoreAISOPrep || 0,
+        local_business_schema:  aisoRaw.schemaLocalBusiness || false,
+        faq_schema:             aisoRaw.schemaFAQ     || false,
+        ia_crawlers_permitidos: aisoRaw.iasPermitidas || false,
+        sitemap:                aisoRaw.sitemapRef    || false,
+      },
+      chatgpt: {
+        aparece:   aisoRaw.chatgpt_aparece  || false,
+        posicion:  aisoRaw.chatgpt_posicion || null,
+        score:     aisoRaw.score_chatgpt    || 0,
+      },
+      gemini: {
+        aparece:   aisoRaw.gemini_aparece   || false,
+        posicion:  aisoRaw.gemini_posicion  || null,
+        score:     aisoRaw.score_gemini     || 0,
+      },
+      motivo:         aisoRaw.motivo           || '',
+      recomendaciones:aisoRaw.recomendaciones  || [],
+    };
+    const pub = {
+      google_ads:   pubRaw.googleAds    || false,
+      display_ads:  pubRaw.displayAds   || false,
+      meta_ads:     pubRaw.metaAds      || false,
+      url_google:   pubRaw.urlGoogleAds || '',
+      url_meta:     pubRaw.urlMetaAds   || '',
+    };
+    const redes = {
+      facebook:  redesRaw.facebook  ? { url: redesRaw.facebook,  score: redesRaw.fbScore||0, seguidores: redesRaw.fbSeguidores||0 } : null,
+      instagram: redesRaw.instagram ? { url: redesRaw.instagram, score: redesRaw.igScore||0 } : null,
+      tiktok:    redesRaw.tiktok    ? { url: redesRaw.tiktok,    score: redesRaw.ttScore||0 } : null,
+      linkedin:  redesRaw.linkedin  ? { url: redesRaw.linkedin,  score: redesRaw.liScore||0 } : null,
+      twitter:   redesRaw.twitter   ? { url: redesRaw.twitter,   score: redesRaw.twScore||0 } : null,
+    };
     const empresa=ultimoData.empresa;
     const url=ultimoData.url;
     const fecha=ultimoData.fecha;
@@ -797,15 +931,15 @@ async function generarPDF(){
     fila('Schema FAQ', chip(aiso.preparacion_ia?.faq_schema), null, false),
     fila('Rastreadores IA permitidos', chip(aiso.preparacion_ia?.ia_crawlers_permitidos,'Permitidos'), null, false),
     fila('Sitemap referenciado', chip(aiso.preparacion_ia?.sitemap), null, false),
-    fila('ChatGPT', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Próximamente</span>`, null, false),
-    fila('Google Gemini', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Próximamente</span>`, null, false),
+    fila('ChatGPT', aiso.chatgpt?.aparece?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Aparece · Pos. ${aiso.chatgpt.posicion||'—'}</span>`:`<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">No se encontró</span>`, aiso.chatgpt?.score||0),
+    fila('Google Gemini', aiso.gemini?.aparece?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Aparece · Pos. ${aiso.gemini.posicion||'—'}</span>`:`<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">No se encontró</span>`, aiso.gemini?.score||0),
   ].join(''))}
   ${impacto('Para 2026, el 30% de las búsquedas de negocios locales ya pasan por IAs. Si su sitio no tiene los marcadores técnicos correctos (Schema.org), las IAs simplemente no lo recomendarán, independientemente de qué tan bueno sea su servicio.')}
   ${seccion('📢','Publicidad Digital Activa',bloques.publicidad||0)}
   ${tabla([
-    fila('Google Ads (búsqueda paga)', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Análisis próximamente</span>`, null, false),
-    fila('Anuncios display Google', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Análisis próximamente</span>`, null, false),
-    fila('Anuncios Facebook/Meta', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Análisis próximamente</span>`, null, false),
+    fila('Google Ads (búsqueda paga)', chip(pub.google_ads,'Encontrado'), pubRaw.scoreGoogleAds||0),
+    fila('Anuncios display Google', chip(pub.display_ads,'Encontrado'), pubRaw.scoreDisplayAds||0),
+    fila('Anuncios Facebook/Meta', chip(pub.meta_ads,'Encontrado'), pubRaw.scoreMetaAds||0),
   ].join(''))}
   ${impacto('La publicidad digital bien administrada retorna entre $3 y $8 por cada $1 invertido. Saber si su competencia está pautando (y usted no) es información estratégica que puede cambiar su posición en el mercado.')}
 </div>
