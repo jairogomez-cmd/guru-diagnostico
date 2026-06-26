@@ -508,7 +508,7 @@ async function generarPDF(){
   if(!ultimoResultado){ showToast('Primero ejecuta un diagnóstico'); return; }
   const btn=document.getElementById('btnPDF');
   btn.disabled=true; btn.textContent='⏳ Generando PDF…';
-  showToast('Generando PDF…');
+  showToast('Generando PDF… puede tardar unos segundos');
 
   try {
     const data=ultimoResultado;
@@ -526,20 +526,46 @@ async function generarPDF(){
     const url=ultimoData.url;
     const fecha=ultimoData.fecha;
     const emailVendedor=ultimoData.emailVendedor;
-    const colorScore=score>=70?'#1A9E5C':score>=45?'#E07B2A':'#C8302A';
+    const ciudad=ultimoData.ciudad||'';
+    const pais=ultimoData.pais||'';
+    const cScore=s=>s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A';
+    const colorScore=cScore(score);
     const nivelTexto={bueno:'Presencia digital sólida',mejorable:'Puede mejorar',critico:'Requiere atención urgente'}[nivel]||nivel;
+    const nivelBg={bueno:'#E6F6EE',mejorable:'#FEF3E8',critico:'#FDECEA'}[nivel]||'#FDECEA';
 
-    const chip=(v,ok,mal,nd='No detectado')=>{
-      if(v===null||v===undefined) return `<span class="chip chip-nd">${nd}</span>`;
-      if(v===true||v==='ok'||v==='completo'||v==='encontrado'||v==='ssl_completo'||v==='https_activo') return `<span class="chip chip-ok">Sí</span>`;
-      if(v===false||v==='no_encontrado'||v==='sin_ssl') return `<span class="chip chip-mal">No</span>`;
-      return `<span class="chip chip-med">${v}</span>`;
+    // ── HELPERS ──
+    const chip=(v,etiq)=>{
+      if(v===null||v===undefined) return `<span style="background:#F5F7FB;color:#6B7A99;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase">No detectado</span>`;
+      if(v===true||v==='ssl_completo'||v==='https_activo'||v==='encontrado'||v==='con_schema') return `<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'Sí'}</span>`;
+      if(v===false||v==='no_encontrado'||v==='sin_ssl') return `<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'No'}</span>`;
+      return `<span style="background:#FEF3E8;color:#E07B2A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${v}</span>`;
     };
-    const scoreChip=(s)=>{
-      const c=s>=70?'chip-ok':s>=45?'chip-med':'chip-mal';
-      return `<span class="chip ${c}">${s}/100</span>`;
-    };
+    const sc=(s)=>`<span style="font-weight:700;color:${cScore(s||0)}">${s||0}</span>`;
+    const barra=(s,w=120)=>`<div style="background:#DDE3EE;border-radius:3px;height:5px;width:${w}px;display:inline-block;vertical-align:middle"><div style="width:${Math.min(s||0,100)}%;height:5px;border-radius:3px;background:${cScore(s||0)}"></div></div>`;
+    const fila=(nombre,estado,score,mostrarScore=true)=>`
+      <tr>
+        <td style="padding:9px 14px;font-size:12px;color:#374151;font-weight:500;border-bottom:1px solid #F0F2F8;width:42%">${nombre}</td>
+        <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:35%">${estado}</td>
+        <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:23%;text-align:right">${mostrarScore?sc(score):''}</td>
+      </tr>`;
+    const pageHeader=(titulo,num)=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:14px;border-bottom:2.5px solid #1B3A6B">
+        <div style="font-size:20px;font-weight:700;color:#1B3A6B">${titulo}</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <span style="font-size:12px;color:#6B7A99">${empresa}</span>
+          <span style="font-size:11px;color:#B0BAD0">Pág. ${num}/10</span>
+        </div>
+      </div>`;
+    const seccion=(emoji,titulo,puntaje)=>`
+      <div style="display:flex;align-items:center;gap:8px;margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid #DDE3EE">
+        <span style="font-size:16px">${emoji}</span>
+        <span style="font-size:14px;font-weight:700;color:#1B3A6B">${titulo}</span>
+        <span style="margin-left:auto;font-size:13px;font-weight:700;color:${cScore(puntaje)}">${puntaje}/100</span>
+      </div>`;
+    const tabla=(filas)=>`<table style="width:100%;border-collapse:collapse">${filas}</table>`;
+    const impacto=(texto)=>`<div style="background:#EBF1FA;border-left:3px solid #2556A0;border-radius:0 6px 6px 0;padding:8px 12px;margin:10px 0;font-size:11px;color:#1B3A6B;line-height:1.5">💡 ${texto}</div>`;
 
+    // ── BLOQUES config ──
     const confBloques=[
       {key:'seo_local',nombre:'SEO Local',emoji:'📍'},
       {key:'posicionamiento',nombre:'Posicionamiento orgánico',emoji:'📈'},
@@ -550,188 +576,220 @@ async function generarPDF(){
       {key:'redes_sociales',nombre:'Redes sociales',emoji:'📱'},
     ];
 
-    const html=`
-    <div style="font-family:'Inter',sans-serif;background:white;">
+    // ── OPORTUNIDADES agrupadas por área (máx 3 por página) ──
+    const oppsGrupos=[];
+    const oppsChunk=3;
+    for(let i=0;i<opps.length;i+=oppsChunk) oppsGrupos.push(opps.slice(i,i+oppsChunk));
 
-    <!-- PÁGINA 1: PORTADA -->
-    <div class="pdf-page pdf-portada">
-      <div class="pdf-portada-top">
-        <div class="pdf-logo-mark">G</div>
-        <div class="pdf-logo-txt">Guru <span>Diagnóstico Digital</span></div>
-      </div>
-      <div class="pdf-portada-mid">
-        <div class="pdf-label-empresa">Informe para</div>
-        <div class="pdf-nombre-empresa">${empresa}</div>
-        <div class="pdf-url-empresa">${url}</div>
-        <div class="pdf-score-grande">
-          <div class="pdf-score-num-big" style="color:${colorScore}">${score}</div>
-          <div class="pdf-score-label">de 100<br>puntaje global</div>
-        </div>
-      </div>
-      <div class="pdf-portada-bot">
-        <div class="pdf-portada-bot-info">
-          Generado el ${fecha}<br>
-          Herramienta: Guru Diagnóstico Digital
-        </div>
-        <div class="pdf-portada-bot-fecha">
-          Elaborado por:<br>${emailVendedor}
-        </div>
+    // Mensajes de impacto por tipo de oportunidad
+    const impactos={
+      'Sin presencia en directorios locales':'Sus clientes buscan negocios como el suyo en Google Maps, Bing y directorios locales. Sin presencia ahí, está perdiendo clientes que ya están buscando sus productos o servicios.',
+      'El website en GBP no coincide con el analizado':'Google puede mostrar el sitio incorrecto a sus clientes, generando confusión y pérdida de visitas.',
+      'Contenido insuficiente en el sitio web':'Google premia los sitios con contenido útil. Con pocas palabras, su página difícilmente aparecerá en los primeros resultados de búsqueda.',
+      'Sin blog de contenidos':'Las empresas con blog generan hasta 3x más visitas orgánicas. Es la herramienta más económica para atraer clientes sin pagar publicidad.',
+      'Sin analítica web instalada (GA4/GTM)':'Sin analítica, usted está manejando su negocio digital a ciegas. No sabe cuántas personas visitan su web, de dónde vienen ni qué les interesa.',
+      'Sin título de página optimizado':'El título es lo primero que ve un cliente en Google. Sin un título optimizado, su negocio pierde clics frente a la competencia.',
+      'Sin meta descripción':'La descripción debajo del enlace en Google convence al cliente de hacer clic. Sin ella, Google genera una automática que puede no ser atractiva.',
+      'Problemas de SSL / HTTPS':'Un sitio sin HTTPS muestra "No seguro" en el navegador. Esto hace que sus clientes desconfíen y abandonen la página antes de contactarlo.',
+      'Sin datos de contacto visibles':'Si un cliente potencial no encuentra rápidamente cómo contactarlo, simplemente se va a buscar a la competencia.',
+      'Sin botón de contacto directo (tel/email)':'Un botón de llamada directa puede duplicar las consultas desde móviles, donde la mayoría de sus clientes lo buscan.',
+      'Sin sección de preguntas frecuentes':'Las FAQ responden las dudas de sus clientes antes de que tengan que llamar, acelerando la decisión de compra.',
+      'Sitio no optimizado para motores de IA':'ChatGPT, Gemini y otras IAs ya son fuente de referencia de negocios. Si su sitio no está preparado, no aparecerá cuando alguien le pregunte a una IA por su categoría.',
+      'Sin Schema.org LocalBusiness':'Este código invisible ayuda a Google y a las IAs a entender exactamente qué hace su negocio, mejorando su visibilidad en búsquedas locales.',
+      'Sin chat en vivo ni WhatsApp detectado':'El 67% de los clientes prefiere chatear antes que llamar. Sin chat, está perdiendo consultas de clientes que no quieren esperar.',
+      'Sin tienda en línea detectada':'El comercio electrónico le permite vender las 24 horas, los 7 días de la semana, sin costo de local adicional.',
+      'Sin página de Facebook detectada':'Facebook sigue siendo la red social más usada en Latinoamérica. Sin presencia, pierde visibilidad ante millones de clientes potenciales.',
+      'Sin cuenta de Instagram detectada':'Instagram es el escaparate visual de su negocio. Es donde sus clientes deciden si confían en usted antes de contactarlo.',
+    };
+
+    const oppCard=(op)=>`
+      <div style="margin-bottom:12px;padding:14px 16px;background:#FEF9F0;border-left:4px solid #E07B2A;border-radius:0 8px 8px 0">
+        <div style="font-size:10px;font-weight:700;color:#E07B2A;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${op.bloque}</div>
+        <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:6px">${op.oportunidad}</div>
+        ${impactos[op.oportunidad]?`<div style="font-size:12px;color:#4B5563;line-height:1.5;margin-bottom:6px">${impactos[op.oportunidad]}</div>`:''}
+        <span style="display:inline-block;background:#EBF1FA;color:#2556A0;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px">🎯 Solución Guru: ${op.producto}</span>
+      </div>`;
+
+    const html=`<div style="font-family:'Inter',Arial,sans-serif;background:white;color:#111827">
+
+<!-- PÁG 1: PORTADA -->
+<div style="width:794px;min-height:1123px;background:#1B3A6B;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#1B3A6B">G</div>
+    <span style="color:white;font-size:16px;font-weight:700">Guru <span style="font-weight:400;opacity:0.7">Diagnóstico Digital</span></span>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0">
+    <div style="font-size:13px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px">INFORME PARA</div>
+    <div style="font-size:44px;font-weight:700;color:white;letter-spacing:-1.5px;line-height:1.1;margin-bottom:10px">${empresa}</div>
+    <div style="font-size:15px;color:#8AADD4;margin-bottom:40px">${url} · ${ciudad}, ${pais}</div>
+    <div style="display:flex;align-items:flex-end;gap:16px">
+      <div style="font-size:96px;font-weight:700;line-height:1;color:${colorScore};letter-spacing:-4px">${score}</div>
+      <div style="padding-bottom:12px">
+        <div style="font-size:15px;color:white;opacity:0.7">de 100 · puntaje global</div>
+        <div style="margin-top:8px;background:${nivelBg};color:${colorScore};font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;display:inline-block">${nivelTexto}</div>
       </div>
     </div>
+  </div>
+  <div style="border-top:1px solid rgba(255,255,255,0.15);padding-top:20px;display:flex;justify-content:space-between;align-items:flex-end">
+    <div style="font-size:12px;color:#8AADD4;line-height:2">Generado el ${fecha}<br>Guru Diagnóstico Digital v2</div>
+    <div style="font-size:12px;color:#8AADD4;text-align:right;line-height:2">Elaborado por:<br>${emailVendedor}</div>
+  </div>
+</div>
 
-    <!-- PÁGINA 2: RESUMEN EJECUTIVO -->
-    <div class="pdf-page">
-      <div class="pdf-page-header">
-        <div class="pdf-page-titulo">Resumen ejecutivo</div>
-        <div class="pdf-page-empresa">${empresa}</div>
-        <div class="pdf-page-num">2</div>
-      </div>
-      <div class="pdf-score-fila">
-        <div class="pdf-score-circ" style="background:${colorScore}">${score}</div>
-        <div class="pdf-score-info">
-          <h2>${empresa}</h2>
-          <p>${url} · ${ultimoData.ciudad||''}, ${ultimoData.pais||''}</p>
-          <span class="pdf-nivel" style="background:${score>=70?'#E6F6EE':score>=45?'#FEF3E8':'#FDECEA'};color:${colorScore}">${nivelTexto}</span>
-        </div>
-      </div>
-      <table class="pdf-tabla">
-        <tr><th>Área</th><th>Descripción</th><th>Puntaje</th></tr>
-        ${confBloques.map(b=>{
-          const s=typeof bloques[b.key]==='number'?bloques[b.key]:0;
-          const c=s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A';
-          return `<tr>
-            <td><strong>${b.emoji} ${b.nombre}</strong></td>
-            <td><div class="pdf-barra-cont"><div class="pdf-barra-fill" style="width:${s}%;background:${c};height:6px;border-radius:3px"></div></div></td>
-            <td class="pdf-score-td" style="color:${c}">${s}</td>
-          </tr>`;
-        }).join('')}
-      </table>
+<!-- PÁG 2: RESUMEN EJECUTIVO -->
+<div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
+  ${pageHeader('Resumen ejecutivo','2')}
+  <div style="background:#EBF1FA;border-radius:12px;padding:24px;margin-bottom:28px;display:flex;align-items:center;gap:24px">
+    <div style="width:80px;height:80px;border-radius:50%;background:${colorScore};display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;flex-shrink:0">${score}</div>
+    <div>
+      <div style="font-size:20px;font-weight:700;color:#1B3A6B">${empresa}</div>
+      <div style="font-size:13px;color:#6B7A99;margin-top:2px">${url} · ${ciudad}, ${pais}</div>
+      <div style="margin-top:8px;background:${nivelBg};color:${colorScore};font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;display:inline-block">${nivelTexto}</div>
     </div>
+  </div>
+  <table style="width:100%;border-collapse:collapse">
+    <tr style="background:#1B3A6B"><th style="padding:10px 14px;font-size:11px;font-weight:600;color:white;text-align:left;text-transform:uppercase;letter-spacing:0.5px">Área</th><th style="padding:10px 14px;font-size:11px;font-weight:600;color:white;text-align:left;text-transform:uppercase">Progreso</th><th style="padding:10px 14px;font-size:11px;font-weight:600;color:white;text-align:center;text-transform:uppercase">Puntaje</th></tr>
+    ${confBloques.map((b,i)=>{const s=bloques[b.key]||0;return`<tr style="background:${i%2===0?'white':'#F5F7FB'}"><td style="padding:11px 14px;font-size:13px;font-weight:600">${b.emoji} ${b.nombre}</td><td style="padding:11px 14px">${barra(s,160)}</td><td style="padding:11px 14px;text-align:center;font-size:15px;font-weight:700;color:${cScore(s)}">${s}</td></tr>`}).join('')}
+  </table>
+  <div style="margin-top:24px;padding:16px 20px;background:#F5F7FB;border-radius:10px;font-size:12px;color:#4B5563;line-height:1.7">
+    <strong style="color:#1B3A6B;font-size:13px">¿Qué significa este diagnóstico?</strong><br>
+    Este informe analiza la presencia digital de <strong>${empresa}</strong> en 7 áreas clave. Un puntaje alto significa que su negocio es fácil de encontrar en Google, en mapas, en redes sociales y en inteligencias artificiales como ChatGPT. Un puntaje bajo indica oportunidades concretas para atraer más clientes sin aumentar el presupuesto publicitario.
+  </div>
+</div>
 
-    <!-- PÁGINA 3: SEO LOCAL + POSICIONAMIENTO -->
-    <div class="pdf-page">
-      <div class="pdf-page-header">
-        <div class="pdf-page-titulo">SEO Local · Posicionamiento</div>
-        <div class="pdf-page-empresa">${empresa}</div>
-        <div class="pdf-page-num">3</div>
-      </div>
-      <div class="pdf-seccion-h">📍 SEO Local — Puntaje: ${bloques.seo_local||0}/100</div>
-      <table class="pdf-vars">
-        <tr><td class="pdf-var-nombre">Perfil Google Business</td><td class="pdf-var-estado">${gbp.encontrado?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No encontrado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(gbp.score||0)}">${gbp.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">GBP Reclamado</td><td class="pdf-var-estado">${chip(gbp.reclamado)}</td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Reseñas</td><td class="pdf-var-estado"><span class="chip chip-nd">${gbp.datos?.total_resenas!=null?gbp.datos.total_resenas+' reseñas':'No verificado'}</span></td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Calificación</td><td class="pdf-var-estado"><span class="chip chip-nd">${gbp.datos?.calificacion!=null?gbp.datos.calificacion+'/5':'No verificado'}</span></td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Directorios locales (Yext)</td><td class="pdf-var-estado"><span class="chip ${(dirs.encontrados||0)>0?'chip-ok':'chip-mal'}">${dirs.encontrados||0} encontrados</span></td><td class="pdf-var-score" style="color:${scoreColor(dirs.score||0)}">${dirs.score||0}</td></tr>
-      </table>
-      <div class="pdf-seccion-h">📈 Posicionamiento orgánico — Puntaje: ${bloques.posicionamiento||0}/100</div>
-      <table class="pdf-vars">
-        <tr><td class="pdf-var-nombre">Google Analytics / GTM</td><td class="pdf-var-estado">${sitio.analytics?.google_analytics||sitio.analytics?.google_tag_manager?`<span class="chip chip-ok">Detectado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.analytics?.score||0)}">${sitio.analytics?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Cantidad de contenido</td><td class="pdf-var-estado"><span class="chip chip-nd">${sitio.contenido?.palabras||0} palabras</span></td><td class="pdf-var-score" style="color:${scoreColor(sitio.contenido?.score||0)}">${sitio.contenido?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Título de página</td><td class="pdf-var-estado">${sitio.titulo_pagina?.valor?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.titulo_pagina?.score||0)}">${sitio.titulo_pagina?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Meta descripción</td><td class="pdf-var-estado">${sitio.meta_descripcion?.valor?`<span class="chip chip-ok">Encontrada</span>`:`<span class="chip chip-mal">No detectada</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.meta_descripcion?.score||0)}">${sitio.meta_descripcion?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Última actualización</td><td class="pdf-var-estado"><span class="chip chip-nd">${sitio.ultima_actualizacion?.fecha||'No detectada'}</span></td><td class="pdf-var-score" style="color:${scoreColor(sitio.ultima_actualizacion?.score||50)}">${sitio.ultima_actualizacion?.score||50}</td></tr>
-      </table>
+<!-- PÁG 3: SEO LOCAL -->
+<div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
+  ${pageHeader('SEO Local','3')}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">El SEO Local determina qué tan fácil es encontrar su negocio cuando alguien busca en Google Maps o escribe "cerca de mí". Es la primera puerta de entrada de clientes nuevos.</p>
+  ${seccion('📍','Google Business Profile',gbp.score||0)}
+  ${tabla([
+    fila('Perfil encontrado', chip(gbp.encontrado,'Encontrado'), gbp.score||0),
+    fila('Perfil reclamado', chip(gbp.reclamado), null, false),
+    fila('Reseñas totales', gbp.datos?.total_resenas?`<span style="color:#1B3A6B;font-weight:600">${gbp.datos.total_resenas} reseñas</span>`:'No verificado', null, false),
+    fila('Calificación promedio', gbp.datos?.calificacion?`<span style="color:${gbp.datos.calificacion>=4?'#1A9E5C':'#E07B2A'};font-weight:600">${gbp.datos.calificacion}/5 ⭐</span>`:'No verificado', null, false),
+    fila('Fotos cargadas', gbp.datos?.fotos?`<span style="color:#1B3A6B;font-weight:600">${gbp.datos.fotos} fotos</span>`:'Sin fotos', null, false),
+    fila('Horario publicado', chip(gbp.datos?.tiene_horario), null, false),
+    fila('Publicaciones recientes', gbp.datos?.tiene_posts?`<span style="color:#1A9E5C;font-weight:600">Última hace ${gbp.dias_desde_ultimo_post||'?'} días</span>`:chip(false), null, false),
+    fila('Website en GBP coincide', chip(gbp.website_coincide,'Coincide'), null, false),
+  ].join(''))}
+  ${gbp.datos?.calificacion<4?impacto(`Calificación de ${gbp.datos.calificacion}/5: Una calificación por debajo de 4 estrellas hace que muchos clientes elijan a la competencia. Con una estrategia de respuesta a reseñas y solicitud activa de valoraciones, se puede mejorar significativamente en 90 días.`):''}
+  ${seccion('📋','Directorios Locales (Yext)',dirs.score||0)}
+  ${tabla([
+    fila('Directorios encontrados', dirs.encontrados>0?`<span style="color:#1A9E5C;font-weight:600">${dirs.encontrados} de ${dirs.total_revisados||'?'} revisados</span>`:`<span style="color:#C8302A;font-weight:600">0 encontrados</span>`, dirs.score||0),
+    fila('Inconsistencias NAP', dirs.inconsistentes>0?`<span style="color:#E07B2A;font-weight:600">${dirs.inconsistentes} inconsistencias</span>`:chip(true,'Sin inconsistencias'), null, false),
+  ].join(''))}
+  ${impacto('Los directorios locales (Google, Bing, Facebook, Infobel, etc.) son como las "páginas amarillas" digitales. Estar presente y con información coherente mejora la confianza de Google y hace que su negocio aparezca más veces en búsquedas locales.')}
+</div>
+
+<!-- PÁG 4: POSICIONAMIENTO ORGÁNICO -->
+<div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
+  ${pageHeader('Posicionamiento Orgánico','4')}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">El posicionamiento orgánico mide qué tan bien estructurado está su sitio web para aparecer en Google sin pagar publicidad. Un buen posicionamiento atrae clientes de manera constante y gratuita.</p>
+  ${seccion('📈','Análisis del sitio web',bloques.posicionamiento||0)}
+  ${tabla([
+    fila('Analítica web (GA4/GTM)', sitio.analytics?.google_analytics||sitio.analytics?.google_tag_manager?chip(true,'Detectado'):chip(false,'No detectado'), sitio.analytics?.score||0),
+    fila('Contenido de la página', sitio.contenido?.palabras?`<span style="color:${sitio.contenido.palabras>=300?'#1A9E5C':'#C8302A'};font-weight:600">${sitio.contenido.palabras} palabras</span>`:'No detectado', sitio.contenido?.score||0),
+    fila('Título de página (SEO)', sitio.titulo_pagina?.valor?chip(true,'Encontrado'):chip(false,'No encontrado'), sitio.titulo_pagina?.score||0),
+    fila('Meta descripción', sitio.meta_descripcion?.valor?chip(true,'Encontrada'):chip(false,'No encontrada'), sitio.meta_descripcion?.score||0),
+    fila('Última actualización', sitio.ultima_actualizacion?.fecha||'No detectada', sitio.ultima_actualizacion?.score||50),
+    fila('Blog / contenidos', chip(sitio.blog?.encontrado), sitio.blog?.score||0),
+    fila('Facebook Pixel', chip(sitio.analytics?.facebook_pixel,'Detectado'), null, false),
+  ].join(''))}
+  ${impacto('Las empresas que actualizan su sitio web regularmente y tienen un blog reciben 3 veces más visitas orgánicas. Cada artículo es una nueva puerta de entrada para clientes que buscan soluciones que usted ofrece.')}
+  ${(sitio.contenido?.palabras||0)<300?impacto(`Su sitio tiene solo ${sitio.contenido?.palabras||0} palabras visibles. Google recomienda al menos 300 palabras por página para considerarla relevante. Esto afecta directamente su posición en los resultados de búsqueda.`):''}
+</div>
+
+<!-- PÁG 5: CONSTRUCCIÓN DEL SITIO -->
+<div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
+  ${pageHeader('Construcción del Sitio','5')}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">La construcción del sitio evalúa si su página web tiene los elementos técnicos que generan confianza y facilitan que los clientes la encuentren y contacten. Un sitio bien construido convierte más visitantes en clientes.</p>
+  ${seccion('🏗️','Elementos técnicos del sitio',bloques.construccion||0)}
+  ${tabla([
+    fila('Encriptación SSL (HTTPS)', chip(ssl.estado==='ssl_completo'||ssl.estado==='https_activo','Activo'), ssl.score||0),
+    fila('Datos de contacto visibles', chip(sitio.contacto?.email||sitio.contacto?.telefono,'Visible'), sitio.contacto?.score||0),
+    fila('Botón clic para contactar', chip(sitio.cta?.tel||sitio.cta?.email,'Disponible'), sitio.cta?.score||0),
+    fila('Preguntas frecuentes (FAQ)', sitio.faq?.schema?chip(true,'Con Schema'):sitio.faq?.encontrado?chip(null,'Sin Schema'):chip(false,'No detectado'), sitio.faq?.score||0),
+    fila('Encabezados H1/H2', sitio.headings?.problemas?.length===0?chip(true,'Correcto'):`<span style="color:#E07B2A;font-size:11px">${sitio.headings?.problemas?.join(', ')||'Con problemas'}</span>`, sitio.headings?.score||0),
+    fila('Blog de contenidos', chip(sitio.blog?.encontrado), sitio.blog?.score||0),
+    fila('Favicon (ícono del sitio)', chip(sitio.favicon?.encontrado), sitio.favicon?.score||0),
+  ].join(''))}
+  ${ssl.score<80?impacto('URGENTE: Un sitio sin HTTPS muestra "No seguro" en Chrome y Safari. El 85% de los usuarios abandona inmediatamente un sitio marcado como inseguro. Esto afecta directamente sus ventas.'):''}
+  ${!sitio.cta?.tel&&!sitio.cta?.email?impacto('Sin un botón de llamada o email directo, sus visitantes móviles tienen que buscar el número manualmente. Agregar href="tel:+..." puede aumentar las consultas telefónicas hasta un 40%.'):''}
+  ${!sitio.faq?.encontrado?impacto('Una sección de preguntas frecuentes reduce la carga de su equipo de ventas y ayuda a Google a entender mejor su negocio. Las páginas con FAQ tienen hasta 2x más clics en búsquedas.'):''}
+</div>
+
+<!-- PÁG 6: AISO + PUBLICIDAD -->
+<div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
+  ${pageHeader('AISO · Publicidad Digital','6')}
+  ${seccion('🤖','Presencia en Inteligencia Artificial (AISO)',bloques.aiso||0)}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:16px;line-height:1.6">AISO mide qué tan preparado está su negocio para aparecer cuando alguien le pregunta a ChatGPT, Google Gemini u otras IAs: "¿Cuál es el mejor [su categoría] en [su ciudad]?"</p>
+  ${tabla([
+    fila('Preparación para IA', `${aiso.preparacion_ia?.score||0}/100`, aiso.preparacion_ia?.score||0),
+    fila('Schema.org LocalBusiness', chip(aiso.preparacion_ia?.local_business_schema), null, false),
+    fila('Schema FAQ', chip(aiso.preparacion_ia?.faq_schema), null, false),
+    fila('Rastreadores IA permitidos', chip(aiso.preparacion_ia?.ia_crawlers_permitidos,'Permitidos'), null, false),
+    fila('Sitemap referenciado', chip(aiso.preparacion_ia?.sitemap), null, false),
+    fila('ChatGPT', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Próximamente</span>`, null, false),
+    fila('Google Gemini', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Próximamente</span>`, null, false),
+  ].join(''))}
+  ${impacto('Para 2026, el 30% de las búsquedas de negocios locales ya pasan por IAs. Si su sitio no tiene los marcadores técnicos correctos (Schema.org), las IAs simplemente no lo recomendarán, independientemente de qué tan bueno sea su servicio.')}
+  ${seccion('📢','Publicidad Digital Activa',bloques.publicidad||0)}
+  ${tabla([
+    fila('Google Ads (búsqueda paga)', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Análisis próximamente</span>`, null, false),
+    fila('Anuncios display Google', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Análisis próximamente</span>`, null, false),
+    fila('Anuncios Facebook/Meta', `<span style="background:#EBF1FA;color:#2556A0;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Análisis próximamente</span>`, null, false),
+  ].join(''))}
+  ${impacto('La publicidad digital bien administrada retorna entre $3 y $8 por cada $1 invertido. Saber si su competencia está pautando (y usted no) es información estratégica que puede cambiar su posición en el mercado.')}
+</div>
+
+<!-- PÁG 7: CONVERSIÓN + REDES -->
+<div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
+  ${pageHeader('Conversión · Redes Sociales','7')}
+  ${seccion('💰','Elementos de Conversión',bloques.conversion||0)}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:16px;line-height:1.6">La conversión mide si su sitio web está equipado para transformar visitantes en clientes reales. Sin herramientas de conversión, el tráfico que llega a su sitio se pierde.</p>
+  ${tabla([
+    fila('Chat en vivo / WhatsApp', sitio.chat?.herramienta?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${sitio.chat.herramienta}</span>`:chip(false,'No detectado'), sitio.chat?.score||0),
+    fila('Tienda en línea (ecommerce)', sitio.ecommerce?.plataforma?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${sitio.ecommerce.plataforma}</span>`:chip(false,'No detectado'), sitio.ecommerce?.score||0),
+  ].join(''))}
+  ${!sitio.chat?.herramienta?impacto('El 67% de los clientes en Latinoamérica prefiere contactar un negocio por WhatsApp antes de llamar. Sin un botón de chat visible, está perdiendo la mayoría de las consultas de clientes móviles.'):''}
+  ${seccion('📱','Presencia en Redes Sociales',bloques.redes_sociales||0)}
+  ${tabla([
+    fila('Facebook', redes.facebook?.url?`<a style="color:#2556A0;font-size:11px" href="${redes.facebook.url}">${redes.facebook.url.replace('https://','').substring(0,45)}...</a>`:chip(false,'No detectado'), redes.facebook?.score||0),
+    fila('Instagram', redes.instagram?.url?`<a style="color:#2556A0;font-size:11px" href="${redes.instagram.url}">${redes.instagram.url.replace('https://','').substring(0,45)}...</a>`:chip(false,'No detectado'), redes.instagram?.score||0),
+    fila('TikTok', redes.tiktok?.url?chip(true,'Encontrado'):chip(false,'No detectado'), redes.tiktok?.score||0),
+    fila('LinkedIn', redes.linkedin?.url?chip(true,'Encontrado'):chip(false,'No detectado'), redes.linkedin?.score||0),
+    fila('Twitter / X', redes.twitter?.url?chip(true,'Encontrado'):chip(false,'No detectado'), redes.twitter?.score||0),
+  ].join(''))}
+  ${impacto('En Latinoamérica, el 78% de los consumidores revisa las redes sociales de un negocio antes de comprar. Una presencia activa en redes es hoy tan importante como tener un aviso en la puerta del local.')}
+</div>
+
+<!-- PÁGINAS 8-9+: OPORTUNIDADES (una por grupo de 3) -->
+${oppsGrupos.map((grupo,gi)=>`
+<div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
+  ${pageHeader('Oportunidades para Guru Soluciones',String(8+gi))}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">Basado en el análisis de <strong>${empresa}</strong>, estas son las áreas con mayor potencial de mejora y cómo Guru Soluciones puede ayudarle a resolverlas:</p>
+  ${grupo.map(op=>oppCard(op)).join('')}
+</div>`).join('')}
+
+<!-- PÁG FINAL: CONTRAPORTADA -->
+<div style="width:794px;min-height:1123px;background:#F5F7FB;padding:52px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 0">
+    <div style="font-size:48px;margin-bottom:24px">🎯</div>
+    <div style="font-size:26px;font-weight:700;color:#1B3A6B;letter-spacing:-0.5px;margin-bottom:14px">¿Listo para crecer<br>en el mundo digital?</div>
+    <div style="font-size:14px;color:#6B7A99;max-width:440px;line-height:1.7;margin-bottom:32px">Guru Soluciones tiene los servicios exactos para llevar cada área de este diagnóstico al nivel que su negocio merece. Sin tecnicismos, sin complicaciones — nosotros nos encargamos de todo.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:500px;margin-bottom:32px">
+      ${['📍 SEO Local & GBP','📈 Posicionamiento Web','🤖 Webs AISO','📢 Publicidad Digital','💬 Luna Chat IA','📱 Gestión de Redes'].map(s=>`<div style="background:white;border:1px solid #DDE3EE;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:500;color:#1B3A6B">${s}</div>`).join('')}
     </div>
+  </div>
+  <div style="background:white;border-radius:12px;padding:24px;margin-bottom:24px;border:1px solid #DDE3EE">
+    <div style="font-size:11px;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Tu asesor digital</div>
+    <div style="font-size:15px;font-weight:600;color:#1B3A6B;margin-bottom:4px">📧 ${emailVendedor}</div>
+    <div style="font-size:13px;color:#6B7A99">Guru Soluciones · gurusoluciones.com</div>
+  </div>
+  <div style="text-align:center;font-size:11px;color:#B0BAD0">Diagnóstico generado el ${fecha} · Guru Diagnóstico Digital v2 · Información basada en datos públicos</div>
+</div>
 
-    <!-- PÁGINA 4: CONSTRUCCIÓN DEL SITIO -->
-    <div class="pdf-page">
-      <div class="pdf-page-header">
-        <div class="pdf-page-titulo">Construcción del sitio</div>
-        <div class="pdf-page-empresa">${empresa}</div>
-        <div class="pdf-page-num">4</div>
-      </div>
-      <div class="pdf-seccion-h">🏗️ Construcción del sitio — Puntaje: ${bloques.construccion||0}/100</div>
-      <table class="pdf-vars">
-        <tr><td class="pdf-var-nombre">Encriptación SSL</td><td class="pdf-var-estado"><span class="chip ${ssl.score>=80?'chip-ok':ssl.score>0?'chip-med':'chip-mal'}">${ssl.estado||'Sin datos'}</span></td><td class="pdf-var-score" style="color:${scoreColor(ssl.score||0)}">${ssl.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Datos de contacto</td><td class="pdf-var-estado">${chip(sitio.contacto?.email||sitio.contacto?.telefono)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.contacto?.score||0)}">${sitio.contacto?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Botón clic para contactar</td><td class="pdf-var-estado">${chip(sitio.cta?.tel||sitio.cta?.email)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.cta?.score||0)}">${sitio.cta?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Preguntas frecuentes (FAQ)</td><td class="pdf-var-estado">${sitio.faq?.schema?`<span class="chip chip-ok">Con schema</span>`:sitio.faq?.encontrado?`<span class="chip chip-med">Sin schema</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.faq?.score||0)}">${sitio.faq?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Encabezados H1/H2</td><td class="pdf-var-estado"><span class="chip ${(sitio.headings?.problemas||[]).length===0?'chip-ok':'chip-mal'}">${(sitio.headings?.problemas||[]).length===0?'Correcto':(sitio.headings?.problemas||[]).join(', ')}</span></td><td class="pdf-var-score" style="color:${scoreColor(sitio.headings?.score||0)}">${sitio.headings?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Blog / contenidos</td><td class="pdf-var-estado">${chip(sitio.blog?.encontrado)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.blog?.score||0)}">${sitio.blog?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Favicon</td><td class="pdf-var-estado">${chip(sitio.favicon?.encontrado)}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.favicon?.score||0)}">${sitio.favicon?.score||0}</td></tr>
-      </table>
-    </div>
-
-    <!-- PÁGINA 5: AISO + PUBLICIDAD -->
-    <div class="pdf-page">
-      <div class="pdf-page-header">
-        <div class="pdf-page-titulo">AISO · Publicidad</div>
-        <div class="pdf-page-empresa">${empresa}</div>
-        <div class="pdf-page-num">5</div>
-      </div>
-      <div class="pdf-seccion-h">🤖 AISO (Presencia en IA) — Puntaje: ${bloques.aiso||0}/100</div>
-      <table class="pdf-vars">
-        <tr><td class="pdf-var-nombre">Preparación para IA</td><td class="pdf-var-estado">${scoreChip(aiso.preparacion_ia?.score||0)}</td><td class="pdf-var-score" style="color:${scoreColor(aiso.preparacion_ia?.score||0)}">${aiso.preparacion_ia?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Schema LocalBusiness</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.local_business_schema)}</td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Schema FAQ</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.faq_schema)}</td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Rastreadores IA permitidos</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.ia_crawlers_permitidos)}</td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Sitemap referenciado</td><td class="pdf-var-estado">${chip(aiso.preparacion_ia?.sitemap)}</td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">ChatGPT</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Google Gemini</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
-      </table>
-      <div class="pdf-seccion-h">📢 Publicidad — Puntaje: ${bloques.publicidad||0}/100</div>
-      <table class="pdf-vars">
-        <tr><td class="pdf-var-nombre">Google Ads (búsqueda)</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Anuncios display Google</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
-        <tr><td class="pdf-var-nombre">Anuncios Facebook/Meta</td><td class="pdf-var-estado"><span class="chip chip-nd">Próximamente</span></td><td class="pdf-var-score"></td></tr>
-      </table>
-    </div>
-
-    <!-- PÁGINA 6: CONVERSIÓN + REDES -->
-    <div class="pdf-page">
-      <div class="pdf-page-header">
-        <div class="pdf-page-titulo">Conversión · Redes sociales</div>
-        <div class="pdf-page-empresa">${empresa}</div>
-        <div class="pdf-page-num">6</div>
-      </div>
-      <div class="pdf-seccion-h">💰 Conversión — Puntaje: ${bloques.conversion||0}/100</div>
-      <table class="pdf-vars">
-        <tr><td class="pdf-var-nombre">Chat en vivo</td><td class="pdf-var-estado">${sitio.chat?.herramienta?`<span class="chip chip-ok">${sitio.chat.herramienta}</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.chat?.score||0)}">${sitio.chat?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Comercio electrónico</td><td class="pdf-var-estado">${sitio.ecommerce?.plataforma?`<span class="chip chip-ok">${sitio.ecommerce.plataforma}</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(sitio.ecommerce?.score||0)}">${sitio.ecommerce?.score||0}</td></tr>
-      </table>
-      <div class="pdf-seccion-h">📱 Redes sociales — Puntaje: ${bloques.redes_sociales||0}/100</div>
-      <table class="pdf-vars">
-        <tr><td class="pdf-var-nombre">Facebook</td><td class="pdf-var-estado">${redes.facebook?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.facebook?.score||0)}">${redes.facebook?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">Instagram</td><td class="pdf-var-estado">${redes.instagram?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.instagram?.score||0)}">${redes.instagram?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">TikTok</td><td class="pdf-var-estado">${redes.tiktok?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.tiktok?.score||0)}">${redes.tiktok?.score||0}</td></tr>
-        <tr><td class="pdf-var-nombre">LinkedIn</td><td class="pdf-var-estado">${redes.linkedin?.url?`<span class="chip chip-ok">Encontrado</span>`:`<span class="chip chip-mal">No detectado</span>`}</td><td class="pdf-var-score" style="color:${scoreColor(redes.linkedin?.score||0)}">${redes.linkedin?.score||0}</td></tr>
-      </table>
-    </div>
-
-    <!-- PÁGINA 7: OPORTUNIDADES -->
-    <div class="pdf-page">
-      <div class="pdf-page-header">
-        <div class="pdf-page-titulo">Oportunidades para Guru</div>
-        <div class="pdf-page-empresa">${empresa}</div>
-        <div class="pdf-page-num">7</div>
-      </div>
-      <p style="font-size:13px;color:#6B7A99;margin-bottom:20px">Basado en el análisis, estas son las áreas con mayor potencial de mejora y los servicios de Guru Soluciones que pueden ayudar:</p>
-      ${opps.length>0?opps.map(op=>`
-        <div class="pdf-opp">
-          <div class="pdf-opp-area">${op.bloque}</div>
-          <div class="pdf-opp-txt">${op.oportunidad}</div>
-          <span class="pdf-opp-prod">${op.producto}</span>
-        </div>`).join(''):'<p style="color:#6B7A99;font-size:13px">No se detectaron oportunidades críticas en este análisis.</p>'}
-    </div>
-
-    <!-- PÁGINA 8: CONTRAPORTADA -->
-    <div class="pdf-page pdf-contraportada">
-      <div class="pdf-contra-top">
-        <div style="font-size:36px;margin-bottom:16px">🎯</div>
-        <h2>¿Listo para mejorar tu presencia digital?</h2>
-        <p>Guru Soluciones tiene los servicios exactos para llevar cada área de este diagnóstico al nivel que tu negocio merece.</p>
-      </div>
-      <div class="pdf-contra-vendedor">
-        <h3>Tu asesor digital</h3>
-        <p>📧 ${emailVendedor}</p>
-        <p style="margin-top:8px;font-size:13px;color:#6B7A99">Guru Soluciones · gurusoluciones.com</p>
-      </div>
-      <div class="pdf-contra-bot">
-        <p>Diagnóstico generado el ${fecha} · Guru Diagnóstico Digital v1</p>
-      </div>
-    </div>
-
-    </div>`;
+</div>`;
 
     const container=document.getElementById('pdfTemplate');
     container.innerHTML=html;
@@ -745,32 +803,25 @@ async function generarPDF(){
     await new Promise(r=>setTimeout(r,800));
 
     const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const pages=container.querySelectorAll('.pdf-page');
+    const pages=container.querySelectorAll('div[style*="min-height:1123px"]');
     const A4_W=210, A4_H=297;
 
     for(let i=0;i<pages.length;i++){
       if(i>0) pdf.addPage();
-      // Forzar que cada página tenga exactamente 794px de ancho antes de capturar
       pages[i].style.width='794px';
       pages[i].style.minHeight='1123px';
       const canvas=await html2canvas(pages[i],{
-        scale:2,
-        useCORS:true,
-        backgroundColor:'#ffffff',
-        logging:false,
-        width:794,
-        height:1123,
-        windowWidth:794
+        scale:2, useCORS:true, backgroundColor:'#ffffff',
+        logging:false, width:794, height:1123, windowWidth:794
       });
       const imgData=canvas.toDataURL('image/jpeg',0.95);
-      // Llenar la página A4 completa sin márgenes
       pdf.addImage(imgData,'JPEG',0,0,A4_W,A4_H);
     }
 
     container.innerHTML='';
     const nombre=`guru-diagnostico-${empresa.toLowerCase().replace(/\s+/g,'-')}.pdf`;
     pdf.save(nombre);
-    showToast('PDF descargado correctamente');
+    showToast('✅ PDF descargado correctamente');
   } catch(err){
     console.error(err);
     showToast('Error generando PDF: '+err.message);
@@ -778,6 +829,7 @@ async function generarPDF(){
     btn.disabled=false; btn.textContent='↓ Descargar PDF';
   }
 }
+
 
 function copiarJSON(){
   if(!ultimoResultado) return;
