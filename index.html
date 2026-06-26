@@ -533,6 +533,36 @@ async function generarPDF(){
     const nivelTexto={bueno:'Presencia digital sólida',mejorable:'Puede mejorar',critico:'Requiere atención urgente'}[nivel]||nivel;
     const nivelBg={bueno:'#E6F6EE',mejorable:'#FEF3E8',critico:'#FDECEA'}[nivel]||'#FDECEA';
 
+    // ── CONVERTIR IMAGEN URL A BASE64 ──
+    const imgToBase64 = async (url) => {
+      if(!url) return null;
+      try {
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+        const res = await fetch(proxyUrl);
+        if(!res.ok) return null;
+        const blob = await res.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blob);
+        });
+      } catch(e) { return null; }
+    };
+
+    // ── CARGAR IMÁGENES GBP EN PARALELO ──
+    showToast('Cargando imágenes del negocio…');
+    const [fotoGBP, logoGBP, fotoPost] = await Promise.all([
+      imgToBase64(gbp.datos?.foto_principal),
+      imgToBase64(gbp.datos?.logo),
+      imgToBase64(gbp.datos?.ultimo_post?.image),
+    ]);
+
+    const imgTag = (b64, w, h, radius='6px', alt='') =>
+      b64
+        ? `<img src="${b64}" style="width:${w};height:${h};object-fit:cover;border-radius:${radius};display:block" alt="${alt}"/>`
+        : `<div style="width:${w};height:${h};background:#EBF1FA;border-radius:${radius};display:flex;align-items:center;justify-content:center;font-size:11px;color:#6B7A99">Sin imagen</div>`;
+
     // ── HELPERS ──
     const chip=(v,etiq)=>{
       if(v===null||v===undefined) return `<span style="background:#F5F7FB;color:#6B7A99;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase">No detectado</span>`;
@@ -613,12 +643,13 @@ async function generarPDF(){
     const html=`<div style="font-family:'Inter',Arial,sans-serif;background:white;color:#111827">
 
 <!-- PÁG 1: PORTADA -->
-<div style="width:794px;min-height:1123px;background:#1B3A6B;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative">
-  <div style="display:flex;align-items:center;gap:12px">
+<div style="width:794px;min-height:1123px;background:#1B3A6B;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
+  ${fotoGBP?`<div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.12;background-image:url(${fotoGBP});background-size:cover;background-position:center;pointer-events:none"></div>`:''}
+  <div style="position:relative;display:flex;align-items:center;gap:12px">
     <div style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#1B3A6B">G</div>
     <span style="color:white;font-size:16px;font-weight:700">Guru <span style="font-weight:400;opacity:0.7">Diagnóstico Digital</span></span>
   </div>
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0">
+  <div style="position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0">
     <div style="font-size:13px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px">INFORME PARA</div>
     <div style="font-size:44px;font-weight:700;color:white;letter-spacing:-1.5px;line-height:1.1;margin-bottom:10px">${empresa}</div>
     <div style="font-size:15px;color:#8AADD4;margin-bottom:40px">${url} · ${ciudad}, ${pais}</div>
@@ -630,7 +661,7 @@ async function generarPDF(){
       </div>
     </div>
   </div>
-  <div style="border-top:1px solid rgba(255,255,255,0.15);padding-top:20px;display:flex;justify-content:space-between;align-items:flex-end">
+  <div style="position:relative;border-top:1px solid rgba(255,255,255,0.15);padding-top:20px;display:flex;justify-content:space-between;align-items:flex-end">
     <div style="font-size:12px;color:#8AADD4;line-height:2">Generado el ${fecha}<br>Guru Diagnóstico Digital v2</div>
     <div style="font-size:12px;color:#8AADD4;text-align:right;line-height:2">Elaborado por:<br>${emailVendedor}</div>
   </div>
@@ -659,26 +690,62 @@ async function generarPDF(){
 
 <!-- PÁG 3: SEO LOCAL -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('SEO Local','3')}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">El SEO Local determina qué tan fácil es encontrar su negocio cuando alguien busca en Google Maps o escribe "cerca de mí". Es la primera puerta de entrada de clientes nuevos.</p>
-  ${seccion('📍','Google Business Profile',gbp.score||0)}
+  ${pageHeader('SEO Local · Google Business Profile','3')}
+
+  <!-- CABECERA GBP CON LOGO Y FOTO -->
+  <div style="display:flex;gap:16px;margin-bottom:20px;background:#F5F7FB;border-radius:10px;padding:16px;align-items:center">
+    <div style="flex-shrink:0">
+      ${imgTag(logoGBP,'64px','64px','50%','Logo')}
+    </div>
+    <div style="flex:1">
+      <div style="font-size:16px;font-weight:700;color:#1B3A6B">${gbp.datos?.nombre||empresa}</div>
+      <div style="font-size:12px;color:#6B7A99;margin-top:2px">${gbp.datos?.categorias||''}</div>
+      <div style="font-size:12px;color:#6B7A99;margin-top:2px">📍 ${gbp.datos?.direccion||''}</div>
+      <div style="font-size:12px;color:#6B7A99;margin-top:2px">📞 ${gbp.datos?.telefono||''}</div>
+    </div>
+    <div style="text-align:center;flex-shrink:0">
+      <div style="font-size:28px;font-weight:700;color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}</div>
+      <div style="font-size:11px;color:#6B7A99">⭐ de 5</div>
+      <div style="font-size:11px;color:#6B7A99;margin-top:2px">${gbp.datos?.total_resenas||0} reseñas</div>
+    </div>
+  </div>
+
+  <!-- FOTO PRINCIPAL DEL GBP -->
+  ${fotoGBP ? `
+  <div style="margin-bottom:16px;border-radius:10px;overflow:hidden">
+    ${imgTag(fotoGBP,'100%','200px','10px','Foto principal del negocio')}
+    <div style="font-size:10px;color:#6B7A99;margin-top:4px;text-align:right">📷 Foto del perfil de Google Business · ${gbp.datos?.fotos||0} fotos totales cargadas</div>
+  </div>` : ''}
+
+  ${seccion('📍','Detalle del Perfil Google Business',gbp.score||0)}
   ${tabla([
-    fila('Perfil encontrado', chip(gbp.encontrado,'Encontrado'), gbp.score||0),
-    fila('Perfil reclamado', chip(gbp.reclamado), null, false),
+    fila('Perfil encontrado y verificado', chip(gbp.encontrado&&gbp.reclamado,'Verificado'), gbp.score||0),
     fila('Reseñas totales', gbp.datos?.total_resenas?`<span style="color:#1B3A6B;font-weight:600">${gbp.datos.total_resenas} reseñas</span>`:'No verificado', null, false),
     fila('Calificación promedio', gbp.datos?.calificacion?`<span style="color:${gbp.datos.calificacion>=4?'#1A9E5C':'#E07B2A'};font-weight:600">${gbp.datos.calificacion}/5 ⭐</span>`:'No verificado', null, false),
-    fila('Fotos cargadas', gbp.datos?.fotos?`<span style="color:#1B3A6B;font-weight:600">${gbp.datos.fotos} fotos</span>`:'Sin fotos', null, false),
+    fila('Fotos cargadas', gbp.datos?.fotos?`<span style="color:#1A9E5C;font-weight:600">${gbp.datos.fotos} fotos ✓</span>`:chip(false,'Sin fotos'), null, false),
     fila('Horario publicado', chip(gbp.datos?.tiene_horario), null, false),
-    fila('Publicaciones recientes', gbp.datos?.tiene_posts?`<span style="color:#1A9E5C;font-weight:600">Última hace ${gbp.dias_desde_ultimo_post||'?'} días</span>`:chip(false), null, false),
+    fila('Publicaciones recientes', gbp.datos?.tiene_posts?`<span style="color:#1A9E5C;font-weight:600">Última hace ${gbp.dias_desde_ultimo_post||'?'} días ✓</span>`:chip(false,'Sin posts'), null, false),
     fila('Website en GBP coincide', chip(gbp.website_coincide,'Coincide'), null, false),
   ].join(''))}
-  ${gbp.datos?.calificacion<4?impacto(`Calificación de ${gbp.datos.calificacion}/5: Una calificación por debajo de 4 estrellas hace que muchos clientes elijan a la competencia. Con una estrategia de respuesta a reseñas y solicitud activa de valoraciones, se puede mejorar significativamente en 90 días.`):''}
+
+  ${gbp.datos?.calificacion<4?impacto(`Calificación de ${gbp.datos.calificacion}/5: Una calificación por debajo de 4 estrellas hace que muchos clientes elijan a la competencia. Con una estrategia de respuesta a reseñas y solicitud activa de valoraciones, se puede mejorar en 90 días.`):''}
+
+  <!-- ÚLTIMO POST -->
+  ${fotoPost&&gbp.datos?.ultimo_post ? `
+  <div style="margin-top:14px;background:#F5F7FB;border-radius:8px;padding:12px;display:flex;gap:12px;align-items:flex-start">
+    <div style="flex-shrink:0">${imgTag(fotoPost,'80px','80px','6px','Último post')}</div>
+    <div style="flex:1">
+      <div style="font-size:10px;font-weight:700;color:#2556A0;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">📝 Última publicación en Google</div>
+      <div style="font-size:11px;color:#374151;line-height:1.5">${(gbp.datos.ultimo_post.body||'').substring(0,180)}${(gbp.datos.ultimo_post.body||'').length>180?'…':''}</div>
+    </div>
+  </div>` : ''}
+
   ${seccion('📋','Directorios Locales (Yext)',dirs.score||0)}
   ${tabla([
     fila('Directorios encontrados', dirs.encontrados>0?`<span style="color:#1A9E5C;font-weight:600">${dirs.encontrados} de ${dirs.total_revisados||'?'} revisados</span>`:`<span style="color:#C8302A;font-weight:600">0 encontrados</span>`, dirs.score||0),
     fila('Inconsistencias NAP', dirs.inconsistentes>0?`<span style="color:#E07B2A;font-weight:600">${dirs.inconsistentes} inconsistencias</span>`:chip(true,'Sin inconsistencias'), null, false),
   ].join(''))}
-  ${impacto('Los directorios locales (Google, Bing, Facebook, Infobel, etc.) son como las "páginas amarillas" digitales. Estar presente y con información coherente mejora la confianza de Google y hace que su negocio aparezca más veces en búsquedas locales.')}
+  ${impacto('Los directorios locales son las "páginas amarillas" digitales. Estar presente con información coherente en Bing, Facebook, Infobel y otros mejora la confianza de Google y hace que su negocio aparezca más veces en búsquedas locales.')}
 </div>
 
 <!-- PÁG 4: POSICIONAMIENTO ORGÁNICO -->
