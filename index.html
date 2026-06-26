@@ -269,6 +269,10 @@
           <input id="pais" type="text" placeholder="CO" maxlength="2" style="text-transform:uppercase">
         </div>
       </div>
+      <div class="field">
+        <label for="direccion">Dirección <span style="font-weight:400;color:var(--gris-texto);text-transform:none">(opcional — mejora la búsqueda)</span></label>
+        <input id="direccion" type="text" placeholder="Ej: Calle 5 # 23-45, Cali">
+      </div>
       <div class="divider-label">Envío del informe</div>
       <div class="field">
         <label for="email_cliente">Email del cliente</label>
@@ -411,6 +415,7 @@ document.getElementById('diagForm').addEventListener('submit',async e=>{
   const url=document.getElementById('url').value.trim();
   const ciudad=document.getElementById('ciudad').value.trim();
   const pais=document.getElementById('pais').value.trim().toUpperCase()||'CO';
+  const direccion=document.getElementById('direccion').value.trim();
   const emailCliente=document.getElementById('email_cliente').value.trim();
   const emailVendedor=document.getElementById('email_vendedor').value.trim();
   const webhookUrl=document.getElementById('webhook_url').value.trim()||localStorage.getItem('guru_wh')||'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
@@ -426,14 +431,14 @@ document.getElementById('diagForm').addEventListener('submit',async e=>{
   iniciarPasos(empresa);
 
   try {
-    const res=await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empresa,url,ciudad,pais,email_cliente:emailCliente,email_vendedor:emailVendedor})});
+    const res=await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empresa,url,ciudad,pais,direccion,email_cliente:emailCliente,email_vendedor:emailVendedor})});
     const text=await res.text();
     if(!text||!text.trim()) throw new Error('El workflow no devolvió datos. Verifica que esté activo en n8n.');
     const data=JSON.parse(text);
     if(!res.ok||data.success===false) throw new Error(data.error||data.message||'Error en el diagnóstico.');
     completarPasos();
     await new Promise(r=>setTimeout(r,400));
-    ultimoData={empresa,url,ciudad,pais,emailCliente,emailVendedor,fecha:new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})};
+    ultimoData={empresa,url,ciudad,pais,direccion,emailCliente,emailVendedor,fecha:new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})};
     mostrarResultados(data,empresa,url);
     ultimoResultado=data;
   } catch(err){
