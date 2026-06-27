@@ -459,22 +459,20 @@ function scoreColor(s){ return s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A'; }
 function mostrarResultados(data,empresa,url){
   document.getElementById('estadoLoading').classList.remove('v');
   document.getElementById('estadoResultados').classList.add('v');
-  // ── Mapear estructura v4 de n8n ──
-  const score=(data.scores?.global||data.score_global||0);
-  const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
-  const bloques={
-    seo_local:       data.scores?.seoLocal        || data.bloques?.seo_local        || 0,
-    posicionamiento: data.scores?.posicionamiento  || data.bloques?.posicionamiento  || 0,
-    construccion:    data.scores?.construccion     || data.bloques?.construccion     || 0,
-    publicidad:      data.scores?.publicidad       || data.bloques?.publicidad       || 0,
-    aiso:            data.scores?.aiso             || data.bloques?.aiso             || 0,
-    conversion:      data.scores?.conversion       || data.bloques?.conversion       || 0,
-    redes_sociales:  data.scores?.redes            || data.bloques?.redes_sociales   || 0,
+  // ── v4: mapear nueva estructura ──
+  const score = data.scores?.global || data.score_global || 0;
+  const nivel = score>=70?'bueno':score>=45?'mejorable':'critico';
+  const bloques = {
+    seo_local:       data.scores?.seoLocal        || 0,
+    posicionamiento: data.scores?.posicionamiento  || 0,
+    construccion:    data.scores?.construccion     || 0,
+    publicidad:      data.scores?.publicidad       || 0,
+    aiso:            data.scores?.aiso             || 0,
+    conversion:      data.scores?.conversion       || 0,
+    redes_sociales:  data.scores?.redes            || 0,
   };
-  const opps=(data.oportunidades||[]).map(op=>({
-    bloque:     op.area      || op.bloque     || '',
-    oportunidad:op.desc      || op.oportunidad|| '',
-    producto:   op.producto  || ''
+  const opps = (data.oportunidades||[]).map(op=>({
+    bloque: op.area||op.bloque||'', oportunidad: op.desc||op.oportunidad||'', producto: op.producto||''
   }));
   const circ=251;
   const arc=document.getElementById('scoreArc');
@@ -512,12 +510,7 @@ function mostrarResultados(data,empresa,url){
   oppsList.innerHTML='';
   if(opps.length>0){
     oppsLabel.style.display='block';
-    opps.forEach(op=>{
-      const area = op.area || op.bloque || '';
-      const desc = op.desc || op.oportunidad || '';
-      const prod = op.producto || '';
-      oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${area}</div><div class="opp-texto">${desc}</div><span class="opp-prod">${prod}</span></div>`;
-    });
+    opps.forEach(op=>{oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${op.area||op.bloque||''}</div><div class="opp-texto">${op.desc||op.oportunidad||''}</div><span class="opp-prod">${op.producto||''}</span></div>`;});
   }
   document.getElementById('panelRes').scrollTo({top:0,behavior:'smooth'});
 }
@@ -531,10 +524,11 @@ async function generarPDF(){
 
   try {
     const data=ultimoResultado;
-    // ── Mapear estructura v4 ──
-    const score=(data.scores?.global||data.score_global||0);
-    const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
-    const bloques={
+
+    // ══ MAPEO ESTRUCTURA v4 → formato PDF ══
+    const score  = data.scores?.global || 0;
+    const nivel  = score>=70?'bueno':score>=45?'mejorable':'critico';
+    const bloques= {
       seo_local:       data.scores?.seoLocal        || 0,
       posicionamiento: data.scores?.posicionamiento  || 0,
       construccion:    data.scores?.construccion     || 0,
@@ -543,119 +537,90 @@ async function generarPDF(){
       conversion:      data.scores?.conversion       || 0,
       redes_sociales:  data.scores?.redes            || 0,
     };
-    const opps=(data.oportunidades||[]).map(op=>({
-      bloque:     op.area      || op.bloque     || '',
-      oportunidad:op.desc      || op.oportunidad|| '',
-      producto:   op.producto  || ''
+    const opps = (data.oportunidades||[]).map(op=>({
+      bloque: op.area||op.bloque||'', oportunidad: op.desc||op.oportunidad||'', producto: op.producto||''
     }));
-    // Mapear objetos internos desde estructura v4
-    const gbpRaw    = data.seoLocal?.gbp       || {};
-    const dirsRaw   = data.seoLocal?.directorios || {};
-    const posRaw    = data.posicionamiento      || {};
-    const consRaw   = data.construccion         || {};
-    const aisoRaw   = data.aiso                 || {};
-    const pubRaw    = data.publicidad           || {};
-    const convRaw   = data.conversion           || {};
-    const redesRaw  = data.redes                || {};
 
-    // Adaptar a la estructura que espera el HTML
+    // ── Objetos internos desde estructura v4 ──
+    const gbpRaw   = data.seoLocal?.gbp           || {};
+    const dirsRaw  = data.seoLocal?.directorios   || {};
+    const posRaw   = data.posicionamiento          || {};
+    const consRaw  = data.construccion             || {};
+    const aisoRaw  = data.aiso                     || {};
+    const pubRaw   = data.publicidad               || {};
+    const convRaw  = data.conversion               || {};
+    const redesRaw = data.redes                    || {};
+
+    // ── GBP adaptado ──
     const gbp = {
-      encontrado:       gbpRaw.encontrado   || false,
-      reclamado:        gbpRaw.reclamado    || false,
-      score:            gbpRaw.scoreGBP     || 0,
-      website_coincide: !!(gbpRaw.website),
-      dias_desde_ultimo_post: gbpRaw.ultimaPublicacion ? 5 : null,
-      datos: {
-        nombre:         gbpRaw.nombre       || empresa,
-        direccion:      gbpRaw.direccion    || '',
-        telefono:       gbpRaw.telefono     || '',
-        calificacion:   gbpRaw.rating       || 0,
-        total_resenas:  gbpRaw.resenas      || 0,
-        fotos:          gbpRaw.fotosCount   || 0,
-        categorias:     (gbpRaw.categorias  || []).join(', '),
-        tiene_horario:  gbpRaw.horario      || false,
-        tiene_posts:    !!(gbpRaw.ultimaPublicacion),
-        foto_principal: gbpRaw.urlFoto      || null,
-        logo:           gbpRaw.urlLogo      || null,
-        ultimo_post:    gbpRaw.urlPost ? { image: gbpRaw.urlPost, body: '' } : null,
+      encontrado: gbpRaw.encontrado||false, reclamado: gbpRaw.reclamado||false,
+      score: gbpRaw.scoreGBP||0, website_coincide: !!(gbpRaw.website),
+      dias_desde_ultimo_post: gbpRaw.ultimaPublicacion?5:null,
+      datos:{
+        nombre: gbpRaw.nombre||ultimoData.empresa,
+        direccion: gbpRaw.direccion||'', telefono: gbpRaw.telefono||'',
+        calificacion: gbpRaw.rating||0, total_resenas: gbpRaw.resenas||0,
+        fotos: gbpRaw.fotosCount||0,
+        categorias: (gbpRaw.categorias||[]).join(', '),
+        tiene_horario: gbpRaw.horario||false,
+        tiene_posts: !!(gbpRaw.ultimaPublicacion),
+        foto_principal: gbpRaw.urlFoto||null, logo: gbpRaw.urlLogo||null,
+        ultimo_post: gbpRaw.urlPost?{image:gbpRaw.urlPost,body:''}:null,
       }
     };
     const dirs = {
-      score:          dirsRaw.scoreYext    || 0,
-      encontrados:    dirsRaw.encontrados  || 0,
-      inconsistentes: dirsRaw.inconsistentes || 0,
-      total_revisados:dirsRaw.total        || 17,
+      score: dirsRaw.scoreYext||0,
+      encontrados: dirsRaw.encontrados||0,
+      inconsistentes: dirsRaw.inconsistentes||0,
+      total_revisados: dirsRaw.total||17,
     };
     const sitio = {
-      analytics: {
-        google_analytics:    posRaw.analyticsDetectado || false,
-        google_tag_manager:  posRaw.analyticsDetectado || false,
-        facebook_pixel:      !!(posRaw.herramientas?.includes('Meta Pixel')),
-        score:               posRaw.scoreAnalytics || 0,
+      analytics:{
+        google_analytics: posRaw.analyticsDetectado||false,
+        google_tag_manager: posRaw.analyticsDetectado||false,
+        facebook_pixel: !!(posRaw.herramientas?.includes?.('Meta Pixel')),
+        score: posRaw.scoreAnalytics||0,
       },
-      contenido: {
-        palabras: posRaw.palabras || 0,
-        score:    posRaw.scoreContenido || 0,
+      contenido:{ palabras: posRaw.palabras||0, score: posRaw.scoreContenido||0 },
+      titulo_pagina:{ valor: (posRaw.titles||[]).length>0, score: posRaw.scoreTitulos||0 },
+      meta_descripcion:{ valor: (posRaw.descs||[]).length>0, score: posRaw.scoreTitulos||0 },
+      ultima_actualizacion:{
+        fecha: posRaw.anioReciente?'Reciente':`Año ${posRaw.anioDetectado||'?'}`,
+        score: posRaw.scoreUltimaActu||0,
       },
-      titulo_pagina: {
-        valor:  (posRaw.titles||[]).length > 0,
-        score:  posRaw.scoreTitulos || 0,
-      },
-      meta_descripcion: {
-        valor:  (posRaw.descs||[]).length > 0,
-        score:  posRaw.scoreTitulos || 0,
-      },
-      ultima_actualizacion: {
-        fecha:  posRaw.anioReciente ? 'Reciente' : `Año ${posRaw.anioDetectado||'?'}`,
-        score:  posRaw.scoreUltimaActu || 0,
-      },
-      blog:    { encontrado: consRaw.blogDetectado  || false, score: consRaw.scoreBlog    || 0 },
-      favicon: { encontrado: consRaw.faviconDetectado||false, score: consRaw.scoreFavicon || 0 },
-      contacto:{ email: consRaw.tieneEmail||false, telefono: consRaw.tieneTel||false, score: 100 },
-      cta:     { tel: consRaw.tieneTel||false, email: consRaw.tieneEmail||false, score: consRaw.scoreCTA||0 },
-      faq:     { encontrado: consRaw.faqDetectada||false, schema: consRaw.schemaFAQ||false, score: consRaw.scoreFAQ||0 },
+      blog:{ encontrado: consRaw.blogDetectado||false, score: consRaw.scoreBlog||0 },
+      favicon:{ encontrado: consRaw.faviconDetectado||false, score: consRaw.scoreFavicon||0 },
+      contacto:{ email: consRaw.tieneEmail||false, telefono: consRaw.tieneTel||false, score:100 },
+      cta:{ tel: consRaw.tieneTel||false, email: consRaw.tieneEmail||false, score: consRaw.scoreCTA||0 },
+      faq:{ encontrado: consRaw.faqDetectada||false, schema: consRaw.schemaFAQ||false, score: consRaw.scoreFAQ||0 },
       headings:{ problemas: consRaw.multipleH1?['Múltiples H1']:consRaw.sinH1?['Sin H1']:[], score: consRaw.scoreEnc||0 },
-      chat:    { herramienta: convRaw.chatTipo||null,   score: convRaw.scoreChat||0 },
+      chat:{ herramienta: convRaw.chatTipo||null, score: convRaw.scoreChat||0 },
       ecommerce:{ plataforma: convRaw.ecommerceDetectado?'Detectado':null, score: convRaw.scoreEcom||0 },
     };
-    const ssl = {
-      estado: consRaw.ssl ? 'ssl_completo' : 'sin_ssl',
-      score:  consRaw.scoreSSL || 0,
-    };
+    const ssl = { estado: consRaw.ssl?'ssl_completo':'sin_ssl', score: consRaw.scoreSSL||0 };
     const aiso = {
-      preparacion_ia: {
-        score:                  aisoRaw.scoreAISOPrep || 0,
-        local_business_schema:  aisoRaw.schemaLocalBusiness || false,
-        faq_schema:             aisoRaw.schemaFAQ     || false,
-        ia_crawlers_permitidos: aisoRaw.iasPermitidas || false,
-        sitemap:                aisoRaw.sitemapRef    || false,
+      preparacion_ia:{
+        score: aisoRaw.scoreAISOPrep||0,
+        local_business_schema: aisoRaw.schemaLocalBusiness||false,
+        faq_schema: aisoRaw.schemaFAQ||false,
+        ia_crawlers_permitidos: aisoRaw.iasPermitidas||false,
+        sitemap: aisoRaw.sitemapRef||false,
       },
-      chatgpt: {
-        aparece:   aisoRaw.chatgpt_aparece  || false,
-        posicion:  aisoRaw.chatgpt_posicion || null,
-        score:     aisoRaw.score_chatgpt    || 0,
-      },
-      gemini: {
-        aparece:   aisoRaw.gemini_aparece   || false,
-        posicion:  aisoRaw.gemini_posicion  || null,
-        score:     aisoRaw.score_gemini     || 0,
-      },
-      motivo:         aisoRaw.motivo           || '',
-      recomendaciones:aisoRaw.recomendaciones  || [],
+      chatgpt:{ aparece: aisoRaw.chatgpt_aparece||false, posicion: aisoRaw.chatgpt_posicion||null, score: aisoRaw.score_chatgpt||0 },
+      gemini:{ aparece: aisoRaw.gemini_aparece||false, posicion: aisoRaw.gemini_posicion||null, score: aisoRaw.score_gemini||0 },
+      motivo: aisoRaw.motivo||'', recomendaciones: aisoRaw.recomendaciones||[],
     };
     const pub = {
-      google_ads:   pubRaw.googleAds    || false,
-      display_ads:  pubRaw.displayAds   || false,
-      meta_ads:     pubRaw.metaAds      || false,
-      url_google:   pubRaw.urlGoogleAds || '',
-      url_meta:     pubRaw.urlMetaAds   || '',
+      google_ads: pubRaw.googleAds||false, display_ads: pubRaw.displayAds||false, meta_ads: pubRaw.metaAds||false,
+      url_google: pubRaw.urlGoogleAds||'', url_meta: pubRaw.urlMetaAds||'',
+      scoreGoogle: pubRaw.scoreGoogleAds||0, scoreDisplay: pubRaw.scoreDisplayAds||0, scoreMeta: pubRaw.scoreMetaAds||0,
     };
     const redes = {
-      facebook:  redesRaw.facebook  ? { url: redesRaw.facebook,  score: redesRaw.fbScore||0, seguidores: redesRaw.fbSeguidores||0 } : null,
-      instagram: redesRaw.instagram ? { url: redesRaw.instagram, score: redesRaw.igScore||0 } : null,
-      tiktok:    redesRaw.tiktok    ? { url: redesRaw.tiktok,    score: redesRaw.ttScore||0 } : null,
-      linkedin:  redesRaw.linkedin  ? { url: redesRaw.linkedin,  score: redesRaw.liScore||0 } : null,
-      twitter:   redesRaw.twitter   ? { url: redesRaw.twitter,   score: redesRaw.twScore||0 } : null,
+      facebook:  redesRaw.facebook  ?{url:redesRaw.facebook, score:redesRaw.fbScore||0, seguidores:redesRaw.fbSeguidores||0}:null,
+      instagram: redesRaw.instagram ?{url:redesRaw.instagram,score:redesRaw.igScore||0}:null,
+      tiktok:    redesRaw.tiktok    ?{url:redesRaw.tiktok,   score:redesRaw.ttScore||0}:null,
+      linkedin:  redesRaw.linkedin  ?{url:redesRaw.linkedin, score:redesRaw.liScore||0}:null,
+      twitter:   redesRaw.twitter   ?{url:redesRaw.twitter,  score:redesRaw.twScore||0}:null,
     };
     const empresa=ultimoData.empresa;
     const url=ultimoData.url;
@@ -687,9 +652,13 @@ async function generarPDF(){
 
     // ── CARGAR IMÁGENES GBP EN PARALELO ──
     showToast('Cargando imágenes del negocio…');
-    const [fotoGBP, logoGBP, fotoPost] = await Promise.all([
+    // Cargar logo de Guru + logo cliente + fotos GBP
+    const logoGuruUrl = data.meta?.logoGuruUrl || 'https://guru-diagnostico.vercel.app/logo-guru.png';
+    const logoClienteUrl = data.meta?.logoClienteUrl || gbp.datos?.foto_principal || null;
+    const [logoGuru, fotoGBP, logoGBP, fotoPost] = await Promise.all([
+      imgToBase64(logoGuruUrl),
       imgToBase64(gbp.datos?.foto_principal),
-      imgToBase64(gbp.datos?.logo),
+      imgToBase64(gbp.datos?.logo || logoClienteUrl),
       imgToBase64(gbp.datos?.ultimo_post?.image),
     ]);
 
@@ -719,6 +688,7 @@ async function generarPDF(){
         <div style="display:flex;align-items:center;gap:16px">
           <span style="font-size:12px;color:#6B7A99">${empresa}</span>
           <span style="font-size:11px;color:#B0BAD0">Pág. ${num}/10</span>
+          ${logoGuru?`<img src="${logoGuru}" style="height:24px;width:auto;opacity:0.85" alt="Guru"/>`:''}
         </div>
       </div>`;
     const seccion=(emoji,titulo,puntaje)=>`
@@ -781,12 +751,17 @@ async function generarPDF(){
 <div style="width:794px;min-height:1123px;background:#1B3A6B;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
   ${fotoGBP?`<div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.12;background-image:url(${fotoGBP});background-size:cover;background-position:center;pointer-events:none"></div>`:''}
   <div style="position:relative;display:flex;align-items:center;gap:12px">
-    <div style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#1B3A6B">G</div>
+    ${logoGuru?`<img src="${logoGuru}" style="height:36px;width:auto;border-radius:8px;background:white;padding:4px" alt="Guru"/>`:`<div style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#1B3A6B">G</div>`}
     <span style="color:white;font-size:16px;font-weight:700">Guru <span style="font-weight:400;opacity:0.7">Diagnóstico Digital</span></span>
   </div>
   <div style="position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0">
-    <div style="font-size:13px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px">INFORME PARA</div>
-    <div style="font-size:44px;font-weight:700;color:white;letter-spacing:-1.5px;line-height:1.1;margin-bottom:10px">${empresa}</div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      ${logoGBP?`<img src="${logoGBP}" style="height:56px;width:auto;border-radius:10px;background:white;padding:6px;object-fit:contain" alt="${empresa}"/>`:fotoGBP?`<img src="${fotoGBP}" style="height:56px;width:56px;border-radius:10px;object-fit:cover" alt="${empresa}"/>`:''}
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px">INFORME PARA</div>
+        <div style="font-size:38px;font-weight:700;color:white;letter-spacing:-1.5px;line-height:1.1">${empresa}</div>
+      </div>
+    </div>
     <div style="font-size:15px;color:#8AADD4;margin-bottom:40px">${url} · ${ciudad}, ${pais}</div>
     <div style="display:flex;align-items:flex-end;gap:16px">
       <div style="font-size:96px;font-weight:700;line-height:1;color:${colorScore};letter-spacing:-4px">${score}</div>
@@ -937,9 +912,9 @@ async function generarPDF(){
   ${impacto('Para 2026, el 30% de las búsquedas de negocios locales ya pasan por IAs. Si su sitio no tiene los marcadores técnicos correctos (Schema.org), las IAs simplemente no lo recomendarán, independientemente de qué tan bueno sea su servicio.')}
   ${seccion('📢','Publicidad Digital Activa',bloques.publicidad||0)}
   ${tabla([
-    fila('Google Ads (búsqueda paga)', chip(pub.google_ads,'Encontrado'), pubRaw.scoreGoogleAds||0),
-    fila('Anuncios display Google', chip(pub.display_ads,'Encontrado'), pubRaw.scoreDisplayAds||0),
-    fila('Anuncios Facebook/Meta', chip(pub.meta_ads,'Encontrado'), pubRaw.scoreMetaAds||0),
+    fila('Google Ads (búsqueda paga)', chip(pub.google_ads,'Encontrado'), pub.scoreGoogle||0),
+    fila('Anuncios display Google', chip(pub.display_ads,'Encontrado'), pub.scoreDisplay||0),
+    fila('Anuncios Facebook/Meta', chip(pub.meta_ads,'Encontrado'), pub.scoreMeta||0),
   ].join(''))}
   ${impacto('La publicidad digital bien administrada retorna entre $3 y $8 por cada $1 invertido. Saber si su competencia está pautando (y usted no) es información estratégica que puede cambiar su posición en el mercado.')}
 </div>
