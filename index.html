@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v4 -->
+<!-- v5 — Semrush-style PDF + data fixes -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -11,228 +11,108 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
-    --azul:       #1B3A6B;
-    --azul-med:   #2556A0;
-    --azul-light: #EBF1FA;
-    --verde:      #1A9E5C;
-    --verde-light:#E6F6EE;
-    --naranja:    #E07B2A;
-    --naranja-lt: #FEF3E8;
-    --rojo:       #C8302A;
-    --rojo-light: #FDECEA;
-    --gris-borde: #DDE3EE;
-    --gris-bg:    #F5F7FB;
-    --gris-texto: #6B7A99;
-    --negro:      #111827;
-    --blanco:     #FFFFFF;
-    --font: 'Inter', system-ui, sans-serif;
-    --sombra: 0 1px 3px rgba(27,58,107,0.08), 0 4px 16px rgba(27,58,107,0.06);
+    --azul:#1B3A6B; --azul-med:#2556A0; --azul-light:#EBF1FA;
+    --verde:#1A9E5C; --verde-light:#E6F6EE;
+    --naranja:#E07B2A; --naranja-lt:#FEF3E8;
+    --rojo:#C8302A; --rojo-light:#FDECEA;
+    --gris-borde:#DDE3EE; --gris-bg:#F5F7FB; --gris-texto:#6B7A99;
+    --negro:#111827; --blanco:#FFFFFF;
+    --font:'Inter',system-ui,sans-serif;
+    --sombra:0 1px 3px rgba(27,58,107,0.08),0 4px 16px rgba(27,58,107,0.06);
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body { background: var(--gris-bg); font-family: var(--font); color: var(--negro); font-size: 14px; line-height: 1.6; min-height: 100vh; }
-
-  .header {
-    background: var(--blanco); border-bottom: 1px solid var(--gris-borde);
-    padding: 0 32px; height: 56px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 10;
-  }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-mark { width: 32px; height: 32px; background: var(--azul); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
-  .logo-text { font-size: 15px; font-weight: 700; color: var(--azul); letter-spacing: -0.3px; }
-  .logo-text span { color: var(--azul-med); font-weight: 400; }
-  .header-badge { font-size: 11px; font-weight: 600; background: var(--azul-light); color: var(--azul-med); padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
-
-  .layout { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 56px); max-width: 1400px; margin: 0 auto; }
-  @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
-
-  .panel-form { background: var(--blanco); border-right: 1px solid var(--gris-borde); padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; }
-  .form-header h1 { font-size: 20px; font-weight: 700; color: var(--azul); letter-spacing: -0.4px; line-height: 1.3; }
-  .form-header p { font-size: 13px; color: var(--gris-texto); margin-top: 6px; line-height: 1.55; }
-
-  .form { display: flex; flex-direction: column; gap: 14px; }
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field-row { display: grid; grid-template-columns: 1fr 80px; gap: 10px; }
-  label { font-size: 11px; font-weight: 600; color: var(--azul); text-transform: uppercase; letter-spacing: 0.5px; }
-  input { background: var(--blanco); border: 1.5px solid var(--gris-borde); border-radius: 8px; padding: 10px 13px; font-family: var(--font); font-size: 14px; color: var(--negro); outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
-  input::placeholder { color: #B0BAD0; }
-  input:focus { border-color: var(--azul-med); box-shadow: 0 0 0 3px rgba(37,86,160,0.1); }
-  input.err { border-color: var(--rojo); }
-  .ferr { font-size: 11px; color: var(--rojo); display: none; }
-  .ferr.v { display: block; }
-  .divider-label { display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.5px; }
-  .divider-label::before, .divider-label::after { content: ''; flex: 1; height: 1px; background: var(--gris-borde); }
-  .webhook-toggle { font-size: 12px; color: var(--azul-med); cursor: pointer; background: none; border: none; font-family: var(--font); padding: 0; text-decoration: underline; text-underline-offset: 2px; }
-  .webhook-field { display: none; }
-  .webhook-field.open { display: flex; flex-direction: column; gap: 5px; }
-
-  .btn-run { background: var(--azul); color: white; border: none; border-radius: 8px; padding: 13px 20px; font-family: var(--font); font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; margin-top: 4px; }
-  .btn-run:hover { background: var(--azul-med); }
-  .btn-run:disabled { background: #B0BAD0; cursor: not-allowed; }
-  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-  .btn-run.loading .spinner { display: block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .costo-nota { text-align: center; font-size: 11px; color: #B0BAD0; padding-top: 4px; }
-  .err-banner { background: var(--rojo-light); border: 1px solid rgba(200,48,42,0.2); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--rojo); display: none; gap: 8px; align-items: flex-start; }
-  .err-banner.v { display: flex; }
-
-  .panel-results { padding: 32px 36px; overflow-y: auto; }
-  .estado-vacio { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 480px; gap: 16px; text-align: center; }
-  .vacio-icono { width: 72px; height: 72px; background: var(--azul-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; }
-  .estado-vacio h2 { font-size: 16px; font-weight: 600; color: var(--azul); }
-  .estado-vacio p { font-size: 13px; color: var(--gris-texto); max-width: 280px; }
-
-  .estado-loading { display: none; flex-direction: column; gap: 0; }
-  .estado-loading.v { display: flex; }
-  .loading-header { font-size: 15px; font-weight: 600; color: var(--azul); margin-bottom: 20px; }
-  .loading-header span { color: var(--azul-med); }
-  .paso { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--gris-borde); }
-  .paso:last-child { border-bottom: none; }
-  .paso-icono { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--gris-borde); background: var(--blanco); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; transition: all 0.25s; }
-  .paso-icono.activo { border-color: var(--azul-med); box-shadow: 0 0 0 3px rgba(37,86,160,0.1); }
-  .paso-icono.hecho { background: var(--verde-light); border-color: var(--verde); font-size: 13px; }
-  .paso-info .paso-nombre { font-size: 14px; font-weight: 500; }
-  .paso-info .paso-desc { font-size: 12px; color: var(--gris-texto); }
-
-  .estado-resultados { display: none; }
-  .estado-resultados.v { display: block; }
-
-  .res-header { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 12px; padding: 24px 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 20px; box-shadow: var(--sombra); }
-  .score-wrap { position: relative; width: 96px; height: 96px; flex-shrink: 0; }
-  .score-wrap svg { transform: rotate(-90deg); }
-  .score-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: var(--azul); letter-spacing: -1px; }
-  .res-info { flex: 1; }
-  .res-empresa { font-size: 20px; font-weight: 700; color: var(--azul); letter-spacing: -0.4px; }
-  .res-url { font-size: 12px; color: var(--gris-texto); margin-top: 2px; }
-  .res-fecha { font-size: 12px; color: var(--gris-texto); margin-top: 2px; }
-  .nivel-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; margin-top: 10px; border: 1px solid; }
-  .nivel-badge.bueno    { background: var(--verde-light);  color: var(--verde);   border-color: rgba(26,158,92,0.25); }
-  .nivel-badge.mejorable{ background: var(--naranja-lt);   color: var(--naranja); border-color: rgba(224,123,42,0.25); }
-  .nivel-badge.critico  { background: var(--rojo-light);   color: var(--rojo);    border-color: rgba(200,48,42,0.25); }
-
-  .seccion-titulo { font-size: 11px; font-weight: 700; color: var(--gris-texto); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; margin-top: 24px; }
-  .bloques-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 1100px) { .bloques-grid { grid-template-columns: 1fr; } }
-  .bloque { background: var(--blanco); border: 1px solid var(--gris-borde); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; box-shadow: var(--sombra); }
-  .bloque-emoji { font-size: 20px; line-height: 1; }
-  .bloque-body { flex: 1; min-width: 0; }
-  .bloque-nombre { font-size: 13px; font-weight: 600; }
-  .barra-wrap { margin-top: 6px; background: var(--gris-bg); border-radius: 4px; height: 5px; }
-  .barra { height: 5px; border-radius: 4px; transition: width 0.8s cubic-bezier(0.22,0.8,0.4,1); }
-  .bloque-score { font-size: 18px; font-weight: 700; min-width: 40px; text-align: right; }
-
-  .opps-lista { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-  .opp { background: var(--blanco); border: 1px solid var(--gris-borde); border-left: 4px solid var(--naranja); border-radius: 0 10px 10px 0; padding: 12px 16px; box-shadow: var(--sombra); }
-  .opp-area { font-size: 10px; font-weight: 700; color: var(--naranja); text-transform: uppercase; letter-spacing: 0.5px; }
-  .opp-texto { font-size: 13px; color: var(--negro); margin-top: 2px; font-weight: 500; }
-  .opp-prod { display: inline-block; margin-top: 5px; font-size: 11px; font-weight: 600; background: var(--azul-light); color: var(--azul-med); padding: 2px 9px; border-radius: 20px; }
-
-  .acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .btn-sec { flex: 1; min-width: 130px; background: var(--blanco); color: var(--azul); border: 1.5px solid var(--gris-borde); border-radius: 8px; padding: 10px 16px; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: border-color 0.15s, background 0.15s; }
-  .btn-sec:hover { border-color: var(--azul-med); background: var(--azul-light); }
-  .btn-prim { flex: 1; min-width: 130px; background: var(--azul); color: white; border: none; border-radius: 8px; padding: 10px 16px; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s; }
-  .btn-prim:hover { background: var(--azul-med); }
-  .btn-prim:disabled { background: #B0BAD0; cursor: not-allowed; }
-
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--azul); color: white; border-radius: 8px; padding: 11px 18px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(60px); opacity: 0; transition: all 0.3s cubic-bezier(0.22,0.8,0.4,1); z-index: 100; pointer-events: none; box-shadow: 0 4px 24px rgba(27,58,107,0.2); }
-  .toast.show { transform: translateY(0); opacity: 1; }
-
-  /* ── PDF TEMPLATE (oculto, solo para render) ── */
-  #pdfTemplate {
-    position: fixed; left: -9999px; top: 0;
-    width: 794px; background: white;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px; color: #111827;
-    z-index: -1; pointer-events: none;
-  }
-
-  /* Página PDF */
-  .pdf-page {
-    width: 794px; min-height: 1123px;
-    padding: 48px 52px;
-    position: relative;
-    page-break-after: always;
-    background: white;
-    display: flex; flex-direction: column;
-  }
-
-  /* Portada */
-  .pdf-portada { background: #1B3A6B !important; color: white; justify-content: space-between; }
-  .pdf-portada-top { display: flex; align-items: center; gap: 12px; }
-  .pdf-logo-mark { width: 40px; height: 40px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #1B3A6B; font-weight: 700; font-size: 18px; }
-  .pdf-logo-txt { color: white; font-size: 16px; font-weight: 700; }
-  .pdf-logo-txt span { font-weight: 400; opacity: 0.7; }
-  .pdf-portada-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; }
-  .pdf-label-empresa { font-size: 12px; font-weight: 600; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-  .pdf-nombre-empresa { font-size: 38px; font-weight: 700; line-height: 1.2; letter-spacing: -1px; margin-bottom: 8px; }
-  .pdf-url-empresa { font-size: 14px; opacity: 0.6; }
-  .pdf-score-grande { margin-top: 32px; display: flex; align-items: flex-end; gap: 12px; }
-  .pdf-score-num-big { font-size: 80px; font-weight: 700; line-height: 1; letter-spacing: -3px; }
-  .pdf-score-label { font-size: 14px; opacity: 0.6; padding-bottom: 14px; }
-  .pdf-portada-bot { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-  .pdf-portada-bot-info { font-size: 12px; opacity: 0.6; line-height: 1.8; }
-  .pdf-portada-bot-fecha { font-size: 12px; opacity: 0.6; text-align: right; }
-
-  /* Header páginas internas */
-  .pdf-page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid #1B3A6B; }
-  .pdf-page-titulo { font-size: 20px; font-weight: 700; color: #1B3A6B; }
-  .pdf-page-empresa { font-size: 12px; color: #6B7A99; }
-  .pdf-page-num { font-size: 11px; color: #B0BAD0; }
-
-  /* Score resumen */
-  .pdf-score-fila { display: flex; align-items: center; gap: 32px; margin-bottom: 28px; padding: 20px 24px; background: #EBF1FA; border-radius: 10px; }
-  .pdf-score-circ { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: white; flex-shrink: 0; }
-  .pdf-score-info h2 { font-size: 22px; font-weight: 700; color: #1B3A6B; }
-  .pdf-score-info p { font-size: 13px; color: #6B7A99; margin-top: 3px; }
-  .pdf-nivel { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
-
-  /* Tabla de bloques */
-  .pdf-tabla { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-  .pdf-tabla th { background: #1B3A6B; color: white; padding: 10px 14px; font-size: 11px; font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: 0.5px; }
-  .pdf-tabla th:last-child { text-align: center; width: 80px; }
-  .pdf-tabla td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #DDE3EE; vertical-align: middle; }
-  .pdf-tabla tr:last-child td { border-bottom: none; }
-  .pdf-tabla tr:nth-child(even) td { background: #F5F7FB; }
-  .pdf-score-td { text-align: center; font-weight: 700; font-size: 15px; }
-  .pdf-barra-cont { background: #DDE3EE; border-radius: 3px; height: 6px; width: 120px; }
-  .pdf-barra-fill { height: 6px; border-radius: 3px; }
-
-  /* Variables detalle */
-  .pdf-seccion-h { font-size: 14px; font-weight: 700; color: #1B3A6B; margin-bottom: 10px; margin-top: 20px; padding-bottom: 6px; border-bottom: 1px solid #DDE3EE; display: flex; align-items: center; gap: 8px; }
-  .pdf-vars { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-  .pdf-vars td { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #F0F2F8; }
-  .pdf-vars tr:last-child td { border-bottom: none; }
-  .pdf-var-nombre { color: #374151; font-weight: 500; width: 55%; }
-  .pdf-var-estado { width: 25%; }
-  .pdf-var-score  { width: 20%; text-align: right; font-weight: 600; }
-  .chip { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .chip-ok  { background: #E6F6EE; color: #1A9E5C; }
-  .chip-mal { background: #FDECEA; color: #C8302A; }
-  .chip-med { background: #FEF3E8; color: #E07B2A; }
-  .chip-nd  { background: #F5F7FB; color: #6B7A99; }
-
-  /* Oportunidades */
-  .pdf-opp { margin-bottom: 10px; padding: 12px 16px; background: #FEF3E8; border-left: 4px solid #E07B2A; border-radius: 0 8px 8px 0; }
-  .pdf-opp-area { font-size: 10px; font-weight: 700; color: #E07B2A; text-transform: uppercase; letter-spacing: 0.5px; }
-  .pdf-opp-txt { font-size: 13px; color: #111827; font-weight: 500; margin-top: 2px; }
-  .pdf-opp-prod { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; background: #EBF1FA; color: #2556A0; padding: 2px 8px; border-radius: 20px; }
-
-  /* Contraportada */
-  .pdf-contraportada { background: #F5F7FB !important; justify-content: space-between; }
-  .pdf-contra-top { text-align: center; padding-top: 60px; }
-  .pdf-contra-top h2 { font-size: 24px; font-weight: 700; color: #1B3A6B; }
-  .pdf-contra-top p { font-size: 14px; color: #6B7A99; margin-top: 8px; max-width: 400px; margin-left: auto; margin-right: auto; }
-  .pdf-contra-vendedor { background: white; border-radius: 12px; padding: 24px; margin: 32px 0; box-shadow: 0 2px 12px rgba(27,58,107,0.08); }
-  .pdf-contra-vendedor h3 { font-size: 12px; font-weight: 600; color: #6B7A99; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-  .pdf-contra-vendedor p { font-size: 14px; color: #1B3A6B; font-weight: 500; margin-bottom: 4px; }
-  .pdf-contra-bot { text-align: center; padding-bottom: 20px; }
-  .pdf-contra-bot p { font-size: 11px; color: #B0BAD0; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--gris-bg);font-family:var(--font);color:var(--negro);font-size:14px;line-height:1.6;min-height:100vh}
+  .header{background:var(--blanco);border-bottom:1px solid var(--gris-borde);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-mark{width:32px;height:32px;background:var(--azul);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
+  .logo-text{font-size:15px;font-weight:700;color:var(--azul);letter-spacing:-0.3px}
+  .logo-text span{color:var(--azul-med);font-weight:400}
+  .header-badge{font-size:11px;font-weight:600;background:var(--azul-light);color:var(--azul-med);padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.3px}
+  .layout{display:grid;grid-template-columns:400px 1fr;min-height:calc(100vh - 56px);max-width:1400px;margin:0 auto}
+  @media(max-width:960px){.layout{grid-template-columns:1fr}}
+  .panel-form{background:var(--blanco);border-right:1px solid var(--gris-borde);padding:32px 28px;display:flex;flex-direction:column;gap:24px}
+  .form-header h1{font-size:20px;font-weight:700;color:var(--azul);letter-spacing:-0.4px;line-height:1.3}
+  .form-header p{font-size:13px;color:var(--gris-texto);margin-top:6px;line-height:1.55}
+  .form{display:flex;flex-direction:column;gap:14px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field-row{display:grid;grid-template-columns:1fr 80px;gap:10px}
+  label{font-size:11px;font-weight:600;color:var(--azul);text-transform:uppercase;letter-spacing:0.5px}
+  input{background:var(--blanco);border:1.5px solid var(--gris-borde);border-radius:8px;padding:10px 13px;font-family:var(--font);font-size:14px;color:var(--negro);outline:none;transition:border-color 0.15s,box-shadow 0.15s;width:100%}
+  input::placeholder{color:#B0BAD0}
+  input:focus{border-color:var(--azul-med);box-shadow:0 0 0 3px rgba(37,86,160,0.1)}
+  input.err{border-color:var(--rojo)}
+  .ferr{font-size:11px;color:var(--rojo);display:none}
+  .ferr.v{display:block}
+  .divider-label{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px}
+  .divider-label::before,.divider-label::after{content:'';flex:1;height:1px;background:var(--gris-borde)}
+  .webhook-toggle{font-size:12px;color:var(--azul-med);cursor:pointer;background:none;border:none;font-family:var(--font);padding:0;text-decoration:underline;text-underline-offset:2px}
+  .webhook-field{display:none}
+  .webhook-field.open{display:flex;flex-direction:column;gap:5px}
+  .btn-run{background:var(--azul);color:white;border:none;border-radius:8px;padding:13px 20px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s;margin-top:4px}
+  .btn-run:hover{background:var(--azul-med)}
+  .btn-run:disabled{background:#B0BAD0;cursor:not-allowed}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none}
+  .btn-run.loading .spinner{display:block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .costo-nota{text-align:center;font-size:11px;color:#B0BAD0;padding-top:4px}
+  .err-banner{background:var(--rojo-light);border:1px solid rgba(200,48,42,0.2);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--rojo);display:none;gap:8px;align-items:flex-start}
+  .err-banner.v{display:flex}
+  .panel-results{padding:32px 36px;overflow-y:auto}
+  .estado-vacio{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:480px;gap:16px;text-align:center}
+  .vacio-icono{width:72px;height:72px;background:var(--azul-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px}
+  .estado-vacio h2{font-size:16px;font-weight:600;color:var(--azul)}
+  .estado-vacio p{font-size:13px;color:var(--gris-texto);max-width:280px}
+  .estado-loading{display:none;flex-direction:column;gap:0}
+  .estado-loading.v{display:flex}
+  .loading-header{font-size:15px;font-weight:600;color:var(--azul);margin-bottom:20px}
+  .loading-header span{color:var(--azul-med)}
+  .paso{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--gris-borde)}
+  .paso:last-child{border-bottom:none}
+  .paso-icono{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--gris-borde);background:var(--blanco);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:all 0.25s}
+  .paso-icono.activo{border-color:var(--azul-med);box-shadow:0 0 0 3px rgba(37,86,160,0.1)}
+  .paso-icono.hecho{background:var(--verde-light);border-color:var(--verde);font-size:13px}
+  .paso-info .paso-nombre{font-size:14px;font-weight:500}
+  .paso-info .paso-desc{font-size:12px;color:var(--gris-texto)}
+  .estado-resultados{display:none}
+  .estado-resultados.v{display:block}
+  .res-header{background:var(--blanco);border:1px solid var(--gris-borde);border-radius:12px;padding:24px 28px;display:flex;align-items:center;gap:24px;margin-bottom:20px;box-shadow:var(--sombra)}
+  .score-wrap{position:relative;width:96px;height:96px;flex-shrink:0}
+  .score-wrap svg{transform:rotate(-90deg)}
+  .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--azul);letter-spacing:-1px}
+  .res-info{flex:1}
+  .res-empresa{font-size:20px;font-weight:700;color:var(--azul);letter-spacing:-0.4px}
+  .res-url{font-size:12px;color:var(--gris-texto);margin-top:2px}
+  .nivel-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;margin-top:10px;border:1px solid}
+  .nivel-badge.bueno{background:var(--verde-light);color:var(--verde);border-color:rgba(26,158,92,0.25)}
+  .nivel-badge.mejorable{background:var(--naranja-lt);color:var(--naranja);border-color:rgba(224,123,42,0.25)}
+  .nivel-badge.critico{background:var(--rojo-light);color:var(--rojo);border-color:rgba(200,48,42,0.25)}
+  .seccion-titulo{font-size:11px;font-weight:700;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;margin-top:24px}
+  .bloques-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:1100px){.bloques-grid{grid-template-columns:1fr}}
+  .bloque{background:var(--blanco);border:1px solid var(--gris-borde);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--sombra)}
+  .bloque-emoji{font-size:20px;line-height:1}
+  .bloque-body{flex:1;min-width:0}
+  .bloque-nombre{font-size:13px;font-weight:600}
+  .barra-wrap{margin-top:6px;background:var(--gris-bg);border-radius:4px;height:5px}
+  .barra{height:5px;border-radius:4px;transition:width 0.8s cubic-bezier(0.22,0.8,0.4,1)}
+  .bloque-score{font-size:18px;font-weight:700;min-width:40px;text-align:right}
+  .opps-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+  .opp{background:var(--blanco);border:1px solid var(--gris-borde);border-left:4px solid var(--naranja);border-radius:0 10px 10px 0;padding:12px 16px;box-shadow:var(--sombra)}
+  .opp-area{font-size:10px;font-weight:700;color:var(--naranja);text-transform:uppercase;letter-spacing:0.5px}
+  .opp-texto{font-size:13px;color:var(--negro);margin-top:2px;font-weight:500}
+  .opp-prod{display:inline-block;margin-top:5px;font-size:11px;font-weight:600;background:var(--azul-light);color:var(--azul-med);padding:2px 9px;border-radius:20px}
+  .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .btn-sec{flex:1;min-width:130px;background:var(--blanco);color:var(--azul);border:1.5px solid var(--gris-borde);border-radius:8px;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:border-color 0.15s,background 0.15s}
+  .btn-sec:hover{border-color:var(--azul-med);background:var(--azul-light)}
+  .btn-prim{flex:1;min-width:130px;background:var(--azul);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s}
+  .btn-prim:hover{background:var(--azul-med)}
+  .btn-prim:disabled{background:#B0BAD0;cursor:not-allowed}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--azul);color:white;border-radius:8px;padding:11px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;transform:translateY(60px);opacity:0;transition:all 0.3s cubic-bezier(0.22,0.8,0.4,1);z-index:100;pointer-events:none;box-shadow:0 4px 24px rgba(27,58,107,0.2)}
+  .toast.show{transform:translateY(0);opacity:1}
+  #pdfTemplate{position:fixed;left:-9999px;top:0;width:794px;background:white;font-family:'Inter',sans-serif;font-size:13px;color:#111827;z-index:-1;pointer-events:none}
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <header class="header">
   <div class="logo">
     <div class="logo-mark">G</div>
@@ -240,10 +120,7 @@
   </div>
   <span class="header-badge">Herramienta interna</span>
 </header>
-
 <div class="layout">
-
-  <!-- FORMULARIO -->
   <aside class="panel-form">
     <div class="form-header">
       <h1>Diagnóstico digital del cliente</h1>
@@ -271,8 +148,8 @@
         </div>
       </div>
       <div class="field">
-        <label for="direccion">Dirección <span style="font-weight:400;color:var(--gris-texto);text-transform:none">(opcional — mejora la búsqueda)</span></label>
-        <input id="direccion" type="text" placeholder="Ej: Calle 5 # 23-45, Cali">
+        <label for="direccion">Dirección <span style="font-weight:400;color:var(--gris-texto);text-transform:none">(opcional)</span></label>
+        <input id="direccion" type="text" placeholder="Ej: Calle 5 # 23-45">
       </div>
       <div class="divider-label">Envío del informe</div>
       <div class="field">
@@ -301,8 +178,6 @@
       <p class="costo-nota">Costo estimado por análisis: ~$0.01 USD</p>
     </form>
   </aside>
-
-  <!-- RESULTADOS -->
   <section class="panel-results" id="panelRes">
     <div class="estado-vacio" id="estadoVacio">
       <div class="vacio-icono">🔍</div>
@@ -316,7 +191,7 @@
         <div class="paso"><div class="paso-icono" id="pi1">🌐</div><div class="paso-info"><div class="paso-nombre">Descargando sitio web</div><div class="paso-desc">SSL, redirecciones y HTML</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi2">🧪</div><div class="paso-info"><div class="paso-nombre">Escaneando estructura</div><div class="paso-desc">Meta tags, headings, contenido, analytics</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi3">📍</div><div class="paso-info"><div class="paso-nombre">Consultando Google Business</div><div class="paso-desc">Reseñas, fotos, horario, categoría</div></div></div>
-        <div class="paso"><div class="paso-icono" id="pi4">📋</div><div class="paso-info"><div class="paso-nombre">Verificando directorios (Yext)</div><div class="paso-desc">Facebook, Bing, directorios locales</div></div></div>
+        <div class="paso"><div class="paso-icono" id="pi4">📋</div><div class="paso-info"><div class="paso-nombre">Verificando directorios</div><div class="paso-desc">Facebook, Bing, directorios locales</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi5">🤖</div><div class="paso-info"><div class="paso-nombre">Evaluando presencia en IA</div><div class="paso-desc">Schema, robots.txt, rastreadores de IA</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi6">🏆</div><div class="paso-info"><div class="paso-nombre">Calculando puntajes</div><div class="paso-desc">Scoring ponderado por área</div></div></div>
       </div>
@@ -333,7 +208,6 @@
         <div class="res-info">
           <div class="res-empresa" id="resEmpresa">—</div>
           <div class="res-url" id="resUrl">—</div>
-          <div class="res-fecha" id="resFecha">—</div>
           <div class="nivel-badge" id="resNivel">—</div>
         </div>
       </div>
@@ -349,10 +223,7 @@
     </div>
   </section>
 </div>
-
-<!-- PDF TEMPLATE OCULTO -->
 <div id="pdfTemplate"></div>
-
 <div class="toast" id="toast">✓ <span id="toastMsg">Copiado</span></div>
 
 <script>
@@ -362,30 +233,15 @@ let ultimoData = {};
 let stepTimers = [];
 const DELAYS = [400,1400,2600,4000,5600,7200,9000];
 
-function toggleWebhook() {
-  document.getElementById('webhookField').classList.toggle('open');
-}
+function toggleWebhook(){ document.getElementById('webhookField').classList.toggle('open'); }
 
-function iniciarPasos(nombre) {
+function iniciarPasos(nombre){
   document.getElementById('loadNombre').textContent = nombre;
-  for (let i=0;i<7;i++){
-    const el=document.getElementById('pi'+i);
-    el.className='paso-icono';
-    el.textContent=['🔍','🌐','🧪','📍','📋','🤖','🏆'][i];
-  }
+  for(let i=0;i<7;i++){const el=document.getElementById('pi'+i);el.className='paso-icono';el.textContent=['🔍','🌐','🧪','📍','📋','🤖','🏆'][i];}
   document.getElementById('pi0').classList.add('activo');
-  DELAYS.forEach((d,i)=>{
-    const t=setTimeout(()=>{
-      if(i>0){const p=document.getElementById('pi'+(i-1));p.className='paso-icono hecho';p.textContent='✓';}
-      if(i<7) document.getElementById('pi'+i).classList.add('activo');
-    },d);
-    stepTimers.push(t);
-  });
+  DELAYS.forEach((d,i)=>{const t=setTimeout(()=>{if(i>0){const p=document.getElementById('pi'+(i-1));p.className='paso-icono hecho';p.textContent='✓';}if(i<7)document.getElementById('pi'+i).classList.add('activo');},d);stepTimers.push(t);});
 }
-function completarPasos(){
-  stepTimers.forEach(t=>clearTimeout(t));
-  for(let i=0;i<7;i++){const el=document.getElementById('pi'+i);el.className='paso-icono hecho';el.textContent='✓';}
-}
+function completarPasos(){stepTimers.forEach(t=>clearTimeout(t));for(let i=0;i<7;i++){const el=document.getElementById('pi'+i);el.className='paso-icono hecho';el.textContent='✓';}}
 
 const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validar(){
@@ -398,14 +254,7 @@ function validar(){
     {id:'email_vendedor',err:'fe-even',fn:v=>emailRe.test(v)},
     ...(wh?[{id:'webhook_url',err:'fe-wh',fn:v=>v.startsWith('http')}]:[]),
   ];
-  checks.forEach(c=>{
-    const inp=document.getElementById(c.id);
-    const errEl=document.getElementById(c.err);
-    const val=c.fn(inp.value);
-    inp.classList.toggle('err',!val);
-    errEl.classList.toggle('v',!val);
-    if(!val) ok=false;
-  });
+  checks.forEach(c=>{const inp=document.getElementById(c.id);const errEl=document.getElementById(c.err);const val=c.fn(inp.value);inp.classList.toggle('err',!val);errEl.classList.toggle('v',!val);if(!val)ok=false;});
   return ok;
 }
 
@@ -421,7 +270,6 @@ document.getElementById('diagForm').addEventListener('submit',async e=>{
   const emailVendedor=document.getElementById('email_vendedor').value.trim();
   const webhookUrl=document.getElementById('webhook_url').value.trim()||localStorage.getItem('guru_wh')||'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
   if(document.getElementById('webhook_url').value.trim()) localStorage.setItem('guru_wh',webhookUrl);
-
   document.getElementById('estadoVacio').style.display='none';
   document.getElementById('estadoResultados').classList.remove('v');
   document.getElementById('estadoLoading').classList.add('v');
@@ -430,7 +278,6 @@ document.getElementById('diagForm').addEventListener('submit',async e=>{
   btn.disabled=true; btn.classList.add('loading');
   document.getElementById('btnLabel').textContent='Analizando…';
   iniciarPasos(empresa);
-
   try {
     const res=await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empresa,url,ciudad,pais,direccion,email_cliente:emailCliente,email_vendedor:emailVendedor})});
     const text=await res.text();
@@ -454,25 +301,23 @@ document.getElementById('diagForm').addEventListener('submit',async e=>{
   }
 });
 
-function scoreColor(s){ return s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A'; }
+function scoreColor(s){return s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A';}
 
 function mostrarResultados(data,empresa,url){
   document.getElementById('estadoLoading').classList.remove('v');
   document.getElementById('estadoResultados').classList.add('v');
-  const score = data.scores?.global || data.score_global || 0;
-  const nivel = score>=70?'bueno':score>=45?'mejorable':'critico';
-  const bloques = {
-    seo_local:       data.scores?.seoLocal        || 0,
-    posicionamiento: data.scores?.posicionamiento  || 0,
-    construccion:    data.scores?.construccion     || 0,
-    publicidad:      data.scores?.publicidad       || 0,
-    aiso:            data.scores?.aiso             || 0,
-    conversion:      data.scores?.conversion       || 0,
-    redes_sociales:  data.scores?.redes            || 0,
+  const score=data.scores?.global||0;
+  const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
+  const bloques={
+    seo_local:data.scores?.seoLocal||0,
+    posicionamiento:data.scores?.posicionamiento||0,
+    construccion:data.scores?.construccion||0,
+    publicidad:data.scores?.publicidad||0,
+    aiso:data.scores?.aiso||0,
+    conversion:data.scores?.conversion||0,
+    redes_sociales:data.scores?.redes||0,
   };
-  const opps = (data.oportunidades||[]).map(op=>({
-    bloque: op.area||op.bloque||'', oportunidad: op.desc||op.oportunidad||'', producto: op.producto||''
-  }));
+  const opps=(data.oportunidades||[]).map(op=>({bloque:op.area||op.bloque||'',oportunidad:op.desc||op.oportunidad||'',producto:op.producto||''}));
   const circ=251;
   const arc=document.getElementById('scoreArc');
   const color=scoreColor(score);
@@ -484,7 +329,6 @@ function mostrarResultados(data,empresa,url){
   const iv=setInterval(()=>{cur=Math.min(cur+Math.ceil(score/25),score);numEl.textContent=cur;if(cur>=score)clearInterval(iv);},40);
   document.getElementById('resEmpresa').textContent=empresa;
   document.getElementById('resUrl').textContent=url;
-  document.getElementById('resFecha').textContent='Generado el '+ultimoData.fecha;
   const nivelEl=document.getElementById('resNivel');
   nivelEl.className='nivel-badge '+nivel;
   nivelEl.textContent={bueno:'● Presencia digital sólida',mejorable:'● Puede mejorar',critico:'● Requiere atención urgente'}[nivel]||nivel;
@@ -499,78 +343,81 @@ function mostrarResultados(data,empresa,url){
   ];
   const grid=document.getElementById('bloquesGrid');
   grid.innerHTML='';
-  conf.forEach(b=>{
-    const s=typeof bloques[b.key]==='number'?bloques[b.key]:0;
-    const c=scoreColor(s);
-    grid.innerHTML+=`<div class="bloque"><span class="bloque-emoji">${b.emoji}</span><div class="bloque-body"><div class="bloque-nombre">${b.nombre}</div><div class="barra-wrap"><div class="barra" style="width:${s}%;background:${c}"></div></div></div><span class="bloque-score" style="color:${c}">${s}</span></div>`;
-  });
+  conf.forEach(b=>{const s=typeof bloques[b.key]==='number'?bloques[b.key]:0;const c=scoreColor(s);grid.innerHTML+=`<div class="bloque"><span class="bloque-emoji">${b.emoji}</span><div class="bloque-body"><div class="bloque-nombre">${b.nombre}</div><div class="barra-wrap"><div class="barra" style="width:${s}%;background:${c}"></div></div></div><span class="bloque-score" style="color:${c}">${s}</span></div>`;});
   const oppsList=document.getElementById('oppsList');
   const oppsLabel=document.getElementById('oppsLabel');
   oppsList.innerHTML='';
-  if(opps.length>0){
-    oppsLabel.style.display='block';
-    opps.forEach(op=>{oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${op.area||op.bloque||''}</div><div class="opp-texto">${op.desc||op.oportunidad||''}</div><span class="opp-prod">${op.producto||''}</span></div>`;});
-  }
+  if(opps.length>0){oppsLabel.style.display='block';opps.forEach(op=>{oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${op.area||op.bloque||''}</div><div class="opp-texto">${op.desc||op.oportunidad||''}</div><span class="opp-prod">${op.producto||''}</span></div>`;});}
   document.getElementById('panelRes').scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── GENERADOR DE PDF ──
+// ── GENERADOR DE PDF ESTILO SEMRUSH ──
 async function generarPDF(){
-  if(!ultimoResultado){ showToast('Primero ejecuta un diagnóstico'); return; }
+  if(!ultimoResultado){showToast('Primero ejecuta un diagnóstico');return;}
   const btn=document.getElementById('btnPDF');
   btn.disabled=true; btn.textContent='⏳ Generando PDF…';
   showToast('Generando PDF… puede tardar unos segundos');
 
   try {
     const data=ultimoResultado;
-    // ══ MAPEO ESTRUCTURA v4/v6 ══
-    const score  = data.scores?.global || 0;
-    const nivel  = score>=70?'bueno':score>=45?'mejorable':'critico';
-    const bloques = {
-      seo_local:       data.scores?.seoLocal        || 0,
-      posicionamiento: data.scores?.posicionamiento  || 0,
-      construccion:    data.scores?.construccion     || 0,
-      publicidad:      data.scores?.publicidad       || 0,
-      aiso:            data.scores?.aiso             || 0,
-      conversion:      data.scores?.conversion       || 0,
-      redes_sociales:  data.scores?.redes            || 0,
+    const score=data.scores?.global||0;
+    const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
+    const bloques={
+      seo_local:data.scores?.seoLocal||0,
+      posicionamiento:data.scores?.posicionamiento||0,
+      construccion:data.scores?.construccion||0,
+      publicidad:data.scores?.publicidad||0,
+      aiso:data.scores?.aiso||0,
+      conversion:data.scores?.conversion||0,
+      redes_sociales:data.scores?.redes||0,
     };
-    const opps = (data.oportunidades||[]).map(op=>({
-      bloque: op.area||op.bloque||'', oportunidad: op.desc||op.oportunidad||'', producto: op.producto||''
-    }));
-    const gbpRaw   = data.seoLocal?.gbp           || {};
-    const dirsRaw  = data.seoLocal?.directorios   || {};
-    const posRaw   = data.posicionamiento          || {};
-    const consRaw  = data.construccion             || {};
-    const aisoRaw  = data.aiso                     || {};
-    const pubRaw   = data.publicidad               || {};
-    const convRaw  = data.conversion               || {};
-    const redesRaw = data.redes                    || {};
+    const opps=(data.oportunidades||[]).map(op=>({bloque:op.area||op.bloque||'',oportunidad:op.desc||op.oportunidad||'',producto:op.producto||''}));
 
-    // GBP
+    // ══ FIX CRÍTICO: leer datos desde rutas correctas del payload ══
+    // N16 devuelve: data.gbp, data.directorios, data.construccion, data.conversion, data.redes
+    // NO desde data.seoLocal.gbp (esa era la ruta vieja)
+    const gbpRaw   = data.gbp             || data.seoLocal?.gbp        || {};
+    const dirsRaw  = data.directorios     || data.seoLocal?.directorios || {};
+    const posRaw   = data.posicionamiento  || {};
+    const consRaw  = data.construccion     || {};
+    const aisoRaw  = data.aiso             || {};
+    const pubRaw   = data.publicidad       || {};
+    const convRaw  = data.conversion       || {};
+    const redesRaw = data.redes            || {};
+
+    // GBP — rutas directas del payload de N4
     const gbp = {
-      encontrado: gbpRaw.encontrado||false, reclamado: gbpRaw.reclamado||false,
-      score: gbpRaw.scoreGBP||0, website_coincide: !!(gbpRaw.website),
+      encontrado:  gbpRaw.encontrado||false,
+      reclamado:   gbpRaw.reclamado||false,
+      score:       gbpRaw.scoreGBP||0,
+      website_coincide: !!(gbpRaw.website),
       dias_desde_ultimo_post: gbpRaw.ultimaPublicacion ? 5 : null,
       datos:{
-        nombre: gbpRaw.nombre||ultimoData.empresa,
-        direccion: gbpRaw.direccion||'', telefono: gbpRaw.telefono||'',
-        calificacion: gbpRaw.rating||0, total_resenas: gbpRaw.resenas||0,
-        fotos: gbpRaw.fotosCount||0,
-        categorias: (gbpRaw.categorias||[]).join(', '),
-        tiene_horario: gbpRaw.horario||false,
-        tiene_posts: !!(gbpRaw.ultimaPublicacion),
-        foto_principal: gbpRaw.urlFoto||null, logo: gbpRaw.urlLogo||null,
-        ultimo_post: gbpRaw.urlPost?{image:gbpRaw.urlPost,body:''}:null,
+        nombre:       gbpRaw.nombre||ultimoData.empresa,
+        direccion:    gbpRaw.direccion||'',
+        telefono:     gbpRaw.telefono||'',
+        calificacion: gbpRaw.rating||0,
+        total_resenas:gbpRaw.resenas||0,
+        fotos:        gbpRaw.fotosCount||0,
+        categorias:   (gbpRaw.categorias||[]).join(', '),
+        tiene_horario:gbpRaw.horario||false,
+        tiene_posts:  !!(gbpRaw.ultimaPublicacion),
+        foto_principal: gbpRaw.urlFoto||null,
+        logo:           gbpRaw.urlLogo||null,
+        ultimo_post:    gbpRaw.urlPost?{image:gbpRaw.urlPost,body:gbpRaw.urlPostBody||''}:null,
       }
     };
+
+    // Directorios — desde data.directorios (N16 v8)
     const dirs = {
-      score: dirsRaw.scoreYext||0,
-      encontrados: dirsRaw.encontrados||0,
-      inconsistentes: dirsRaw.inconsistentes||0,
-      total_revisados: dirsRaw.total||17,
+      score:         dirsRaw.score||dirsRaw.scoreYext||0,
+      encontrados:   dirsRaw.encontrados||0,
+      lista:         dirsRaw.lista||[],
+      inconsistentes:dirsRaw.inconsistentes||0,
+      total_revisados:dirsRaw.total||17,
     };
-    // ── sitio: leer scores CORREGIDOS desde consRaw (N16 v6 los actualiza) ──
+
+    // Sitio / construcción
     const sitio = {
       analytics:{
         google_analytics: posRaw.analyticsDetectado||false,
@@ -578,59 +425,62 @@ async function generarPDF(){
         facebook_pixel: !!(posRaw.herramientas?.includes?.('Meta Pixel')),
         score: posRaw.scoreAnalytics||0,
       },
-      contenido:{ palabras: posRaw.palabras||0, score: posRaw.scoreContenido||0 },
-      titulo_pagina:{ valor: (posRaw.titles||[]).length>0||(posRaw.esJSHeavy||false), score: posRaw.scoreTitulos||0 },
-      meta_descripcion:{ valor: (posRaw.descs||[]).length>0, score: posRaw.scoreTitulos||0 },
+      contenido:{ palabras:posRaw.palabras||0, score:posRaw.scoreContenido||0 },
+      titulo_pagina:{ valor:(posRaw.titles||[]).length>0||(posRaw.esJSHeavy||false), score:posRaw.scoreTitulos||0 },
+      meta_descripcion:{ valor:(posRaw.descs||[]).length>0, score:posRaw.scoreTitulos||0 },
       ultima_actualizacion:{
-        fecha: posRaw.anioReciente?'Reciente':`Año ${posRaw.anioDetectado||'?'}`,
-        score: posRaw.scoreUltimaActu||0,
+        fecha:posRaw.anioReciente?'Reciente':`Año ${posRaw.anioDetectado||'?'}`,
+        score:posRaw.scoreUltimaActu||0,
       },
-      blog:    { encontrado: consRaw.blogDetectado||false, score: consRaw.scoreBlog||0 },
-      favicon: { encontrado: consRaw.faviconDetectado||false, score: consRaw.scoreFavicon||0 },
-      contacto:{ email: consRaw.tieneEmail||false, telefono: consRaw.tieneTel||!!(gbpRaw.telefono), score: consRaw.datosContacto?100:0 },
-      // ── FIX CTA: leer scoreCTA corregido desde N16 v6 ──
-      cta: { tel: consRaw.tieneTel||!!(gbpRaw.telefono), email: consRaw.tieneEmail||false,
-             score: consRaw.scoreCTA||(consRaw.ctaDetectado?100:0) },
-      faq:     { encontrado: consRaw.faqDetectada||false, schema: consRaw.schemaFAQ||false, score: consRaw.scoreFAQ||0 },
-      headings:{ problemas: consRaw.multipleH1?['Múltiples H1']:consRaw.sinH1?['Sin H1']:[], score: consRaw.scoreEnc||0 },
-      chat:    { herramienta: convRaw.chatTipo||null, score: convRaw.scoreChat||0 },
-      ecommerce:{ plataforma: convRaw.ecommerceDetectado?'Detectado':null, score: convRaw.scoreEcom||0 },
+      blog:    { encontrado:consRaw.blogDetectado||false, score:consRaw.scoreBlog||0 },
+      favicon: { encontrado:consRaw.faviconDetectado||false, score:consRaw.scoreFavicon||0 },
+      contacto:{ email:consRaw.tieneEmail||false, telefono:consRaw.tieneTel||!!(gbpRaw.telefono), score:consRaw.datosContacto?100:0 },
+      cta:     { tel:consRaw.tieneTel||!!(gbpRaw.telefono), email:consRaw.tieneEmail||false, score:consRaw.scoreCTA||(consRaw.ctaDetectado?100:0) },
+      faq:     { encontrado:consRaw.faqDetectada||false, schema:consRaw.schemaFAQ||false, score:consRaw.scoreFAQ||0 },
+      headings:{ problemas:consRaw.multipleH1?['Múltiples H1']:consRaw.sinH1?['Sin H1']:[], score:consRaw.scoreEnc||0 },
+      // ── FIX CHAT: leer desde convRaw (chatDetectado y chatTipo ya vienen de N16 v8) ──
+      chat:     { herramienta:convRaw.chatTipo||null, score:convRaw.scoreChat||0 },
+      ecommerce:{ plataforma:convRaw.ecommerceDetectado?'Detectado':null, score:convRaw.scoreEcom||0 },
     };
-    // ── FIX SSL: leer desde consRaw.scoreSSL corregido en N16 v6 ──
     const ssl = {
-      estado: consRaw.ssl?'ssl_completo':(consRaw.scoreSSL>0?'ssl_completo':'sin_ssl'),
-      score:  consRaw.scoreSSL||0,
+      estado:consRaw.ssl?'ssl_completo':(consRaw.scoreSSL>0?'ssl_completo':'sin_ssl'),
+      score:consRaw.scoreSSL||0,
     };
     const aiso = {
       preparacion_ia:{
-        score: aisoRaw.scoreAISOPrep||0,
-        local_business_schema: aisoRaw.schemaLocalBusiness||false,
-        faq_schema: aisoRaw.schemaFAQ||false,
-        ia_crawlers_permitidos: aisoRaw.iasPermitidas||false,
-        sitemap: aisoRaw.sitemapRef||false,
+        score:aisoRaw.scoreAISOPrep||0,
+        local_business_schema:aisoRaw.schemaLocalBusiness||false,
+        faq_schema:aisoRaw.schemaFAQ||false,
+        ia_crawlers_permitidos:aisoRaw.iasPermitidas||false,
+        sitemap:aisoRaw.sitemapRef||false,
       },
-      chatgpt:{ aparece: aisoRaw.chatgpt_aparece||false, posicion: aisoRaw.chatgpt_posicion||null, score: aisoRaw.score_chatgpt||0 },
-      gemini: { aparece: aisoRaw.gemini_aparece||false,  posicion: aisoRaw.gemini_posicion||null,  score: aisoRaw.score_gemini||0  },
-      motivo: aisoRaw.motivo||'', recomendaciones: aisoRaw.recomendaciones||[],
+      chatgpt:{ aparece:aisoRaw.chatgpt_aparece||false, posicion:aisoRaw.chatgpt_posicion||null, score:aisoRaw.score_chatgpt||0 },
+      gemini:  { aparece:aisoRaw.gemini_aparece||false,  posicion:aisoRaw.gemini_posicion||null,  score:aisoRaw.score_gemini||0  },
     };
-    // ── FIX PUBLICIDAD: leer scores desde pubRaw ──
     const pub = {
-      google_ads:   pubRaw.googleAdsDetectado||pubRaw.googleAds||false,
-      display_ads:  pubRaw.displayDetectado  ||pubRaw.displayAds||false,
-      meta_ads:     pubRaw.metaAdsDetectado  ||pubRaw.metaAds||false,
-      url_google:   pubRaw.urlGoogleAds||'', url_meta: pubRaw.urlMetaAds||'',
+      google_ads:   pubRaw.googleAdsDetectado||false,
+      display_ads:  pubRaw.displayDetectado||false,
+      meta_ads:     pubRaw.metaAdsDetectado||false,
       scoreGoogle:  pubRaw.scoreGoogleAds||0,
       scoreDisplay: pubRaw.scoreDisplayAds||0,
       scoreMeta:    pubRaw.scoreMetaAds||0,
     };
-    // ── FIX REDES: leer desde redesRaw (propagado por N16 v6) ──
-    const redes = {
-      facebook:  redesRaw.facebook  ?{url:redesRaw.facebook, score:redesRaw.fbScore||0, seguidores:redesRaw.fbSeguidores||0}:null,
-      instagram: redesRaw.instagram ?{url:redesRaw.instagram,score:redesRaw.igScore||0}:null,
-      tiktok:    redesRaw.tiktok    ?{url:redesRaw.tiktok,   score:redesRaw.ttScore||0}:null,
-      linkedin:  redesRaw.linkedin  ?{url:redesRaw.linkedin, score:redesRaw.liScore||0}:null,
-      twitter:   redesRaw.twitter   ?{url:redesRaw.twitter,  score:redesRaw.twScore||0}:null,
+
+    // ══ FIX REDES: combinar URL + scores heurísticos ══
+    // Si no hay URL pero el score heurístico es >0, mostrar como "Activo (inferido)"
+    const redEntry = (urlVal, scoreVal) => {
+      if(urlVal) return { url:urlVal, score:scoreVal||0, label: urlVal.replace('https://','').substring(0,40)+'...' };
+      if(scoreVal>0) return { url:null, score:scoreVal, label:'Activo (estimado)' };
+      return null;
     };
+    const redes = {
+      facebook:  redEntry(redesRaw.facebook,  redesRaw.fbScore),
+      instagram: redEntry(redesRaw.instagram, redesRaw.igScore),
+      tiktok:    redEntry(redesRaw.tiktok,    redesRaw.ttScore),
+      linkedin:  redEntry(redesRaw.linkedin,  redesRaw.liScore),
+      twitter:   redEntry(redesRaw.twitter,   redesRaw.twScore),
+    };
+
     const empresa=ultimoData.empresa;
     const url=ultimoData.url;
     const fecha=ultimoData.fecha;
@@ -640,75 +490,116 @@ async function generarPDF(){
     const cScore=s=>s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A';
     const colorScore=cScore(score);
     const nivelTexto={bueno:'Presencia digital sólida',mejorable:'Puede mejorar',critico:'Requiere atención urgente'}[nivel]||nivel;
-    const nivelBg={bueno:'#E6F6EE',mejorable:'#FEF3E8',critico:'#FDECEA'}[nivel]||'#FDECEA';
+    const nivelBg={bueno:'#E6F6EE',mejorable:'#FEF3E8',critico:'#FDECEA'}[nivel];
+    const nivelColor=colorScore;
 
-    // ── CONVERTIR IMAGEN URL A BASE64 ──
-    const imgToBase64 = async (url) => {
-      if(!url) return null;
-      try {
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-        const res = await fetch(proxyUrl);
-        if(!res.ok) return null;
-        const blob = await res.blob();
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = () => resolve(null);
-          reader.readAsDataURL(blob);
-        });
-      } catch(e) { return null; }
+    // Cargar imágenes
+    showToast('Cargando imágenes…');
+    const imgToBase64=async(u)=>{
+      if(!u) return null;
+      try{
+        const r=await fetch('https://corsproxy.io/?'+encodeURIComponent(u));
+        if(!r.ok) return null;
+        const blob=await r.blob();
+        return new Promise(resolve=>{const fr=new FileReader();fr.onloadend=()=>resolve(fr.result);fr.onerror=()=>resolve(null);fr.readAsDataURL(blob);});
+      }catch(e){return null;}
     };
-
-    // ── CARGAR IMÁGENES GBP EN PARALELO ──
-    showToast('Cargando imágenes del negocio…');
-    const logoGuruUrl    = data.meta?.logoGuruUrl || 'https://guru-diagnostico.vercel.app/logo-guru.png';
-    const logoClienteUrl = data.meta?.logoClienteUrl || gbp.datos?.foto_principal || null;
-    const [logoGuru, fotoGBP, logoGBP, fotoPost] = await Promise.all([
+    const logoGuruUrl='https://guru-diagnostico.vercel.app/logo-guru.png';
+    const [logoGuru,fotoGBP,logoGBP,fotoPost]=await Promise.all([
       imgToBase64(logoGuruUrl),
-      imgToBase64(gbp.datos?.foto_principal || logoClienteUrl),
-      imgToBase64(gbp.datos?.logo           || logoClienteUrl),
+      imgToBase64(gbp.datos?.foto_principal),
+      imgToBase64(gbp.datos?.logo),
       imgToBase64(gbp.datos?.ultimo_post?.image),
     ]);
 
-    const imgTag = (b64, w, h, radius='6px', alt='') =>
-      b64
-        ? `<img src="${b64}" style="width:${w};height:${h};object-fit:cover;border-radius:${radius};display:block" alt="${alt}"/>`
-        : `<div style="width:${w};height:${h};background:#EBF1FA;border-radius:${radius};display:flex;align-items:center;justify-content:center;font-size:11px;color:#6B7A99">Sin imagen</div>`;
+    const imgTag=(b64,w,h,radius='6px',alt='')=>b64
+      ?`<img src="${b64}" style="width:${w};height:${h};object-fit:cover;border-radius:${radius};display:block" alt="${alt}"/>`
+      :`<div style="width:${w};height:${h};background:#EBF1FA;border-radius:${radius};display:flex;align-items:center;justify-content:center;font-size:11px;color:#6B7A99">Sin imagen</div>`;
 
-    // ── HELPERS ──
+    // ── HELPERS SEMRUSH-STYLE ──
     const chip=(v,etiq)=>{
-      if(v===null||v===undefined) return `<span style="background:#F5F7FB;color:#6B7A99;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;text-transform:uppercase">No detectado</span>`;
-      if(v===true||v==='ssl_completo'||v==='https_activo'||v==='encontrado'||v==='con_schema') return `<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'Sí'}</span>`;
-      if(v===false||v==='no_encontrado'||v==='sin_ssl') return `<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'No'}</span>`;
+      if(v===null||v===undefined||v===false||v==='no_encontrado'||v==='sin_ssl')
+        return `<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'No'}</span>`;
+      if(v===true||v==='ssl_completo'||v==='encontrado'||v==='con_schema')
+        return `<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'Sí'}</span>`;
       return `<span style="background:#FEF3E8;color:#E07B2A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${v}</span>`;
     };
     const sc=(s)=>`<span style="font-weight:700;color:${cScore(s||0)}">${s||0}</span>`;
-    const barra=(s,w=120)=>`<div style="background:#DDE3EE;border-radius:3px;height:5px;width:${w}px;display:inline-block;vertical-align:middle"><div style="width:${Math.min(s||0,100)}%;height:5px;border-radius:3px;background:${cScore(s||0)}"></div></div>`;
+
+    // Barra Semrush-style con label
+    const barraConScore=(s,w=140)=>`
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="background:#EEF0F5;border-radius:4px;height:6px;width:${w}px;flex-shrink:0">
+          <div style="width:${Math.min(s||0,100)}%;height:6px;border-radius:4px;background:${cScore(s||0)}"></div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${cScore(s||0)}">${s||0}</span>
+      </div>`;
+
     const fila=(nombre,estado,score,mostrarScore=true)=>`
       <tr>
-        <td style="padding:9px 14px;font-size:12px;color:#374151;font-weight:500;border-bottom:1px solid #F0F2F8;width:42%">${nombre}</td>
+        <td style="padding:9px 14px;font-size:12px;color:#374151;font-weight:500;border-bottom:1px solid #F0F2F8;width:40%">${nombre}</td>
         <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:35%">${estado}</td>
-        <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:23%;text-align:right">${mostrarScore?sc(score):''}</td>
+        <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:25%;text-align:right">${mostrarScore?sc(score):''}</td>
       </tr>`;
-    const pageHeader=(titulo,num)=>`
+
+    // Header de página con logo Guru
+    const pageHeader=(titulo,subtitulo,num)=>`
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:14px;border-bottom:2.5px solid #1B3A6B">
-        <div style="font-size:20px;font-weight:700;color:#1B3A6B">${titulo}</div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:#1B3A6B">${titulo}</div>
+          ${subtitulo?`<div style="font-size:12px;color:#6B7A99;margin-top:2px">${subtitulo}</div>`:''}
+        </div>
         <div style="display:flex;align-items:center;gap:14px">
           <span style="font-size:12px;color:#6B7A99">${empresa}</span>
-          <span style="font-size:11px;color:#B0BAD0">Pág. ${num}/10</span>
-          ${logoGuru?`<img src="${logoGuru}" style="height:22px;width:auto;opacity:0.9;object-fit:contain" alt="Guru"/>`:``}
+          <span style="font-size:11px;color:#B0BAD0">Pág. ${num}</span>
+          ${logoGuru?`<img src="${logoGuru}" style="height:24px;width:auto;object-fit:contain" alt="Guru"/>`:``}
         </div>
       </div>`;
-    const seccion=(emoji,titulo,puntaje)=>`
-      <div style="display:flex;align-items:center;gap:8px;margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid #DDE3EE">
-        <span style="font-size:16px">${emoji}</span>
-        <span style="font-size:14px;font-weight:700;color:#1B3A6B">${titulo}</span>
-        <span style="margin-left:auto;font-size:13px;font-weight:700;color:${cScore(puntaje)}">${puntaje}/100</span>
-      </div>`;
-    const tabla=(filas)=>`<table style="width:100%;border-collapse:collapse">${filas}</table>`;
-    const impacto=(texto)=>`<div style="background:#EBF1FA;border-left:3px solid #2556A0;border-radius:0 6px 6px 0;padding:8px 12px;margin:10px 0;font-size:11px;color:#1B3A6B;line-height:1.5">💡 ${texto}</div>`;
 
-    // ── BLOQUES config ──
+    // Sección con badge de score Semrush-style
+    const seccion=(emoji,titulo,puntaje)=>`
+      <div style="display:flex;align-items:center;gap:10px;margin:22px 0 12px;padding:12px 16px;background:#F5F7FB;border-radius:8px;border-left:3px solid ${cScore(puntaje)}">
+        <span style="font-size:18px">${emoji}</span>
+        <span style="font-size:14px;font-weight:700;color:#1B3A6B;flex:1">${titulo}</span>
+        <div style="text-align:center;background:${cScore(puntaje)};border-radius:8px;padding:4px 12px;min-width:60px">
+          <span style="font-size:16px;font-weight:700;color:white">${puntaje}</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.8)">/100</span>
+        </div>
+      </div>`;
+
+    const impacto=(texto)=>`<div style="background:#EBF1FA;border-left:3px solid #2556A0;border-radius:0 6px 6px 0;padding:8px 12px;margin:10px 0;font-size:11px;color:#1B3A6B;line-height:1.6">💡 ${texto}</div>`;
+
+    const tabla=(filas)=>`<table style="width:100%;border-collapse:collapse">${filas}</table>`;
+
+    // Gauge SVG para portada
+    const gaugeArc=(score,size=180)=>{
+      const r=size*0.38; const cx=size/2; const cy=size/2;
+      const pct=Math.min(score,100)/100;
+      const startAngle=-Math.PI*0.75; const endAngle=Math.PI*0.75;
+      const totalAngle=endAngle-startAngle;
+      const fillAngle=startAngle+totalAngle*pct;
+      const x1=cx+r*Math.cos(startAngle); const y1=cy+r*Math.sin(startAngle);
+      const x2=cx+r*Math.cos(endAngle); const y2=cy+r*Math.sin(endAngle);
+      const fx=cx+r*Math.cos(fillAngle); const fy=cy+r*Math.sin(fillAngle);
+      const la=totalAngle*pct>Math.PI?1:0;
+      const laFill=totalAngle*pct>Math.PI?1:0;
+      const col=cScore(score);
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <path d="M ${x1} ${y1} A ${r} ${r} 0 1 1 ${x2} ${y2}" fill="none" stroke="#DDE3EE" stroke-width="${size*0.08}" stroke-linecap="round"/>
+        ${score>0?`<path d="M ${x1} ${y1} A ${r} ${r} 0 ${laFill} 1 ${fx} ${fy}" fill="none" stroke="${col}" stroke-width="${size*0.08}" stroke-linecap="round"/>`:''}
+        <text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="Inter,Arial" font-size="${size*0.22}" font-weight="700" fill="${col}">${score}</text>
+        <text x="${cx}" y="${cy+size*0.13}" text-anchor="middle" font-family="Inter,Arial" font-size="${size*0.09}" fill="#6B7A99">de 100</text>
+      </svg>`;
+    };
+
+    // Radial chart para resumen ejecutivo (simulado con tabla visual)
+    const bloqueResumen=(b,s)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F0F2F8">
+        <div style="width:28px;text-align:center;font-size:14px">${b.emoji}</div>
+        <div style="flex:1;font-size:12px;font-weight:500;color:#374151">${b.nombre}</div>
+        <div style="width:120px">${barraConScore(s,110)}</div>
+      </div>`;
+
     const confBloques=[
       {key:'seo_local',nombre:'SEO Local',emoji:'📍'},
       {key:'posicionamiento',nombre:'Posicionamiento orgánico',emoji:'📈'},
@@ -719,154 +610,169 @@ async function generarPDF(){
       {key:'redes_sociales',nombre:'Redes sociales',emoji:'📱'},
     ];
 
-    // ── OPORTUNIDADES agrupadas por área (máx 3 por página) ──
-    const oppsGrupos=[];
     const oppsChunk=3;
+    const oppsGrupos=[];
     for(let i=0;i<opps.length;i+=oppsChunk) oppsGrupos.push(opps.slice(i,i+oppsChunk));
 
-    // Mensajes de impacto por tipo de oportunidad
-    const impactos={
-      'Sin presencia en directorios locales':'Sus clientes buscan negocios como el suyo en Google Maps, Bing y directorios locales. Sin presencia ahí, está perdiendo clientes que ya están buscando sus productos o servicios.',
-      'El website en GBP no coincide con el analizado':'Google puede mostrar el sitio incorrecto a sus clientes, generando confusión y pérdida de visitas.',
-      'Contenido insuficiente en el sitio web':'Google premia los sitios con contenido útil. Con pocas palabras, su página difícilmente aparecerá en los primeros resultados de búsqueda.',
-      'Sin blog de contenidos':'Las empresas con blog generan hasta 3x más visitas orgánicas. Es la herramienta más económica para atraer clientes sin pagar publicidad.',
-      'Sin analítica web instalada (GA4/GTM)':'Sin analítica, usted está manejando su negocio digital a ciegas. No sabe cuántas personas visitan su web, de dónde vienen ni qué les interesa.',
-      'Sin título de página optimizado':'El título es lo primero que ve un cliente en Google. Sin un título optimizado, su negocio pierde clics frente a la competencia.',
-      'Sin meta descripción':'La descripción debajo del enlace en Google convence al cliente de hacer clic. Sin ella, Google genera una automática que puede no ser atractiva.',
-      'Problemas de SSL / HTTPS':'Un sitio sin HTTPS muestra "No seguro" en el navegador. Esto hace que sus clientes desconfíen y abandonen la página antes de contactarlo.',
-      'Sin datos de contacto visibles':'Si un cliente potencial no encuentra rápidamente cómo contactarlo, simplemente se va a buscar a la competencia.',
-      'Sin botón de contacto directo (tel/email)':'Un botón de llamada directa puede duplicar las consultas desde móviles, donde la mayoría de sus clientes lo buscan.',
-      'Sin sección de preguntas frecuentes':'Las FAQ responden las dudas de sus clientes antes de que tengan que llamar, acelerando la decisión de compra.',
-      'Sitio no optimizado para motores de IA':'ChatGPT, Gemini y otras IAs ya son fuente de referencia de negocios. Si su sitio no está preparado, no aparecerá cuando alguien le pregunte a una IA por su categoría.',
-      'Sin Schema.org LocalBusiness':'Este código invisible ayuda a Google y a las IAs a entender exactamente qué hace su negocio, mejorando su visibilidad en búsquedas locales.',
-      'Sin chat en vivo ni WhatsApp detectado':'El 67% de los clientes prefiere chatear antes que llamar. Sin chat, está perdiendo consultas de clientes que no quieren esperar.',
-      'Sin tienda en línea detectada':'El comercio electrónico le permite vender las 24 horas, los 7 días de la semana, sin costo de local adicional.',
-      'Sin página de Facebook detectada':'Facebook sigue siendo la red social más usada en Latinoamérica. Sin presencia, pierde visibilidad ante millones de clientes potenciales.',
-      'Sin cuenta de Instagram detectada':'Instagram es el escaparate visual de su negocio. Es donde sus clientes deciden si confían en usted antes de contactarlo.',
-    };
-
     const oppCard=(op)=>`
-      <div style="margin-bottom:12px;padding:14px 16px;background:#FEF9F0;border-left:4px solid #E07B2A;border-radius:0 8px 8px 0">
-        <div style="font-size:10px;font-weight:700;color:#E07B2A;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${op.bloque}</div>
-        <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:6px">${op.oportunidad}</div>
-        ${impactos[op.oportunidad]?`<div style="font-size:12px;color:#4B5563;line-height:1.5;margin-bottom:6px">${impactos[op.oportunidad]}</div>`:''}
-        <span style="display:inline-block;background:#EBF1FA;color:#2556A0;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px">🎯 Solución Guru: ${op.producto}</span>
+      <div style="margin-bottom:14px;border-radius:10px;overflow:hidden;border:1px solid #DDE3EE">
+        <div style="background:#1B3A6B;padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:11px;font-weight:700;color:#8AADD4;text-transform:uppercase;letter-spacing:0.5px">${op.bloque}</span>
+          <span style="background:#E07B2A;color:white;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Oportunidad</span>
+        </div>
+        <div style="padding:14px 16px;background:white">
+          <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:8px">${op.oportunidad}</div>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:#EBF1FA;color:#2556A0;font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px">🎯 Solución Guru: ${op.producto}</span>
+        </div>
       </div>`;
 
-    const html=`<div style="font-family:'Inter',Arial,sans-serif;background:white;color:#111827">
+    // ── CONSTRUIR HTML DEL PDF ──
+    const pdfHtml=`<div style="font-family:'Inter',Arial,sans-serif;background:white;color:#111827">
 
-<!-- PÁG 1: PORTADA -->
-<div style="width:794px;min-height:1123px;background:#1B3A6B;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
-  ${fotoGBP?`<div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.12;background-image:url(${fotoGBP});background-size:cover;background-position:center;pointer-events:none"></div>`:''}
-  <div style="position:relative;display:flex;align-items:center;gap:12px">
-    ${logoGuru?`<img src="${logoGuru}" style="height:32px;width:auto;border-radius:6px;background:white;padding:4px;object-fit:contain" alt="Guru"/>`:`<div style="width:36px;height:36px;background:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#1B3A6B">G</div>`}
-    <span style="color:white;font-size:15px;font-weight:700">Guru <span style="font-weight:400;opacity:0.7">Diagnóstico Digital</span></span>
-  </div>
-  <div style="position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 0">
-    <div style="font-size:12px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">INFORME PARA</div>
-    <div style="display:flex;align-items:center;gap:18px;margin-bottom:12px">
-      ${(logoGBP||fotoGBP)?`<div style="width:64px;height:64px;border-radius:12px;overflow:hidden;background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center"><img src="${logoGBP||fotoGBP}" style="width:100%;height:100%;object-fit:contain;padding:6px" alt="${empresa}"/></div>`:``}
-      <div style="font-size:40px;font-weight:700;color:white;letter-spacing:-1.5px;line-height:1.1">${empresa}</div>
-    </div>
-    <div style="font-size:14px;color:#8AADD4;margin-bottom:40px">${url} · ${ciudad}, ${pais}</div>
-    <div style="display:flex;align-items:flex-end;gap:16px">
-      <div style="font-size:96px;font-weight:700;line-height:1;color:${colorScore};letter-spacing:-4px">${score}</div>
-      <div style="padding-bottom:12px">
-        <div style="font-size:15px;color:white;opacity:0.7">de 100 · puntaje global</div>
-        <div style="margin-top:8px;background:${nivelBg};color:${colorScore};font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;display:inline-block">${nivelTexto}</div>
+<!-- PÁG 1: PORTADA SEMRUSH-STYLE -->
+<div style="width:794px;min-height:1123px;background:#0F2447;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;box-sizing:border-box">
+  <!-- Patrón decorativo fondo -->
+  <div style="position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(37,86,160,0.4) 0%,transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(26,158,92,0.15) 0%,transparent 70%);pointer-events:none"></div>
+
+  <!-- Header portada -->
+  <div style="position:relative;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:12px">
+      ${logoGuru?`<img src="${logoGuru}" style="height:36px;width:auto;border-radius:8px;padding:5px;background:white;object-fit:contain" alt="Guru"/>`:
+      `<div style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#0F2447">G</div>`}
+      <div>
+        <div style="color:white;font-size:15px;font-weight:700">Guru <span style="font-weight:400;opacity:0.6">Diagnóstico Digital</span></div>
+        <div style="color:#8AADD4;font-size:11px;margin-top:1px">Informe de Presencia Digital</div>
       </div>
     </div>
+    <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 14px;font-size:11px;color:rgba(255,255,255,0.7)">Confidencial</div>
   </div>
-  <div style="position:relative;border-top:1px solid rgba(255,255,255,0.15);padding-top:20px;display:flex;justify-content:space-between;align-items:flex-end">
-    <div style="font-size:12px;color:#8AADD4;line-height:2">Generado el ${fecha}<br>Guru Diagnóstico Digital v2</div>
-    <div style="font-size:12px;color:#8AADD4;text-align:right;line-height:2">Elaborado por:<br>${emailVendedor}</div>
+
+  <!-- Centro portada -->
+  <div style="position:relative;flex:1;display:flex;align-items:center;gap:52px;padding:40px 0">
+    <!-- Info empresa -->
+    <div style="flex:1">
+      <div style="font-size:11px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px">INFORME PARA</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        ${(logoGBP||fotoGBP)?`<div style="width:56px;height:56px;border-radius:10px;overflow:hidden;background:white;flex-shrink:0;padding:5px">
+          <img src="${logoGBP||fotoGBP}" style="width:100%;height:100%;object-fit:contain" alt="${empresa}"/>
+        </div>`:``}
+        <div style="font-size:36px;font-weight:700;color:white;letter-spacing:-1px;line-height:1.1">${empresa}</div>
+      </div>
+      <div style="font-size:14px;color:#8AADD4;margin-bottom:10px">${url} · ${ciudad}${pais?', '+pais:''}</div>
+      <div style="display:inline-block;background:${nivelBg};color:${nivelColor};font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px">${nivelTexto}</div>
+
+      <!-- Mini stats -->
+      <div style="display:flex;gap:24px;margin-top:32px">
+        ${[
+          {label:'Reseñas Google',val:gbpRaw.resenas||'—'},
+          {label:'Calificación',val:gbpRaw.rating?(gbpRaw.rating+' ⭐'):'—'},
+          {label:'Fotos GBP',val:gbpRaw.fotosCount||'—'},
+        ].map(s=>`<div><div style="font-size:22px;font-weight:700;color:white">${s.val}</div><div style="font-size:11px;color:#8AADD4;margin-top:2px">${s.label}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Gauge score -->
+    <div style="flex-shrink:0;text-align:center">
+      <div style="font-size:11px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Puntaje Global</div>
+      ${gaugeArc(score,180)}
+    </div>
+  </div>
+
+  <!-- Footer portada -->
+  <div style="position:relative;border-top:1px solid rgba(255,255,255,0.12);padding-top:20px;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:12px;color:#8AADD4;line-height:1.8">
+      Generado el ${fecha}<br>Guru Diagnóstico Digital v5
+    </div>
+    <div style="font-size:12px;color:#8AADD4;text-align:right;line-height:1.8">
+      Elaborado por:<br><span style="color:white;font-weight:500">${emailVendedor}</span>
+    </div>
   </div>
 </div>
 
 <!-- PÁG 2: RESUMEN EJECUTIVO -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Resumen ejecutivo','2')}
-  <div style="background:#EBF1FA;border-radius:12px;padding:24px;margin-bottom:28px;display:flex;align-items:center;gap:24px">
-    <div style="width:80px;height:80px;border-radius:50%;background:${colorScore};display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;flex-shrink:0">${score}</div>
-    <div>
-      <div style="font-size:20px;font-weight:700;color:#1B3A6B">${empresa}</div>
-      <div style="font-size:13px;color:#6B7A99;margin-top:2px">${url} · ${ciudad}, ${pais}</div>
-      <div style="margin-top:8px;background:${nivelBg};color:${colorScore};font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;display:inline-block">${nivelTexto}</div>
+  ${pageHeader('Resumen ejecutivo','Diagnóstico completo de presencia digital','2')}
+
+  <!-- Score card principal -->
+  <div style="display:flex;gap:24px;margin-bottom:28px">
+    <div style="flex-shrink:0;background:#F5F7FB;border-radius:12px;padding:20px;text-align:center;min-width:160px">
+      ${gaugeArc(score,140)}
+      <div style="font-size:13px;font-weight:600;color:#1B3A6B;margin-top:4px">${empresa}</div>
+      <div style="font-size:11px;color:#6B7A99">${url}</div>
+      <div style="margin-top:8px;display:inline-block;background:${nivelBg};color:${nivelColor};font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">${nivelTexto}</div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600;color:#1B3A6B;margin-bottom:14px">Resultados por área</div>
+      ${confBloques.map(b=>bloqueResumen(b,bloques[b.key]||0)).join('')}
     </div>
   </div>
-  <table style="width:100%;border-collapse:collapse">
-    <tr style="background:#1B3A6B"><th style="padding:10px 14px;font-size:11px;font-weight:600;color:white;text-align:left;text-transform:uppercase;letter-spacing:0.5px">Área</th><th style="padding:10px 14px;font-size:11px;font-weight:600;color:white;text-align:left;text-transform:uppercase">Progreso</th><th style="padding:10px 14px;font-size:11px;font-weight:600;color:white;text-align:center;text-transform:uppercase">Puntaje</th></tr>
-    ${confBloques.map((b,i)=>{const s=bloques[b.key]||0;return`<tr style="background:${i%2===0?'white':'#F5F7FB'}"><td style="padding:11px 14px;font-size:13px;font-weight:600">${b.emoji} ${b.nombre}</td><td style="padding:11px 14px">${barra(s,160)}</td><td style="padding:11px 14px;text-align:center;font-size:15px;font-weight:700;color:${cScore(s)}">${s}</td></tr>`}).join('')}
-  </table>
-  <div style="margin-top:24px;padding:16px 20px;background:#F5F7FB;border-radius:10px;font-size:12px;color:#4B5563;line-height:1.7">
-    <strong style="color:#1B3A6B;font-size:13px">¿Qué significa este diagnóstico?</strong><br>
-    Este informe analiza la presencia digital de <strong>${empresa}</strong> en 7 áreas clave. Un puntaje alto significa que su negocio es fácil de encontrar en Google, en mapas, en redes sociales y en inteligencias artificiales como ChatGPT. Un puntaje bajo indica oportunidades concretas para atraer más clientes sin aumentar el presupuesto publicitario.
+
+  <div style="padding:16px 20px;background:#F5F7FB;border-radius:10px;font-size:12px;color:#4B5563;line-height:1.7;border-left:3px solid #1B3A6B">
+    <strong style="color:#1B3A6B">¿Qué significa este diagnóstico?</strong><br>
+    Este informe analiza la presencia digital de <strong>${empresa}</strong> en 7 áreas clave. Un puntaje alto significa que su negocio es fácil de encontrar en Google, en mapas, en redes sociales y en IAs como ChatGPT. Un puntaje bajo indica oportunidades concretas para atraer más clientes.
   </div>
 </div>
 
 <!-- PÁG 3: SEO LOCAL -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('SEO Local · Google Business Profile','3')}
+  ${pageHeader('SEO Local · Google Business Profile','','3')}
 
-  <!-- CABECERA GBP CON LOGO Y FOTO -->
-  <div style="display:flex;gap:16px;margin-bottom:20px;background:#F5F7FB;border-radius:10px;padding:16px;align-items:center">
-    <div style="flex-shrink:0">
-      ${imgTag(logoGBP,'64px','64px','50%','Logo')}
-    </div>
-    <div style="flex:1">
-      <div style="font-size:16px;font-weight:700;color:#1B3A6B">${gbp.datos?.nombre||empresa}</div>
-      <div style="font-size:12px;color:#6B7A99;margin-top:2px">${gbp.datos?.categorias||''}</div>
-      <div style="font-size:12px;color:#6B7A99;margin-top:2px">📍 ${gbp.datos?.direccion||''}</div>
-      <div style="font-size:12px;color:#6B7A99;margin-top:2px">📞 ${gbp.datos?.telefono||''}</div>
-    </div>
-    <div style="text-align:center;flex-shrink:0">
-      <div style="font-size:28px;font-weight:700;color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}</div>
-      <div style="font-size:11px;color:#6B7A99">⭐ de 5</div>
-      <div style="font-size:11px;color:#6B7A99;margin-top:2px">${gbp.datos?.total_resenas||0} reseñas</div>
+  <!-- Card GBP con foto -->
+  <div style="display:flex;gap:16px;margin-bottom:20px;border-radius:10px;overflow:hidden;border:1px solid #DDE3EE">
+    ${fotoGBP?`<div style="width:180px;flex-shrink:0">${imgTag(fotoGBP,'180px','160px','0','Foto negocio')}</div>`:''}
+    <div style="flex:1;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:6px">
+      <div style="display:flex;align-items:center;gap:12px">
+        ${imgTag(logoGBP,'44px','44px','8px','Logo')}
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#1B3A6B">${gbp.datos?.nombre||empresa}</div>
+          <div style="font-size:11px;color:#6B7A99">${gbp.datos?.categorias||''}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#374151">📍 ${gbp.datos?.direccion||''}</div>
+      <div style="font-size:12px;color:#374151">📞 ${gbp.datos?.telefono||''}</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:4px">
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:700;color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}</div>
+          <div style="font-size:10px;color:#6B7A99">⭐ Calificación</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:700;color:#1B3A6B">${gbp.datos?.total_resenas||0}</div>
+          <div style="font-size:10px;color:#6B7A99">Reseñas</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:22px;font-weight:700;color:#1B3A6B">${gbp.datos?.fotos||0}</div>
+          <div style="font-size:10px;color:#6B7A99">Fotos</div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <!-- FOTO PRINCIPAL DEL GBP -->
-  ${fotoGBP ? `
-  <div style="margin-bottom:16px;border-radius:10px;overflow:hidden">
-    ${imgTag(fotoGBP,'100%','200px','10px','Foto principal del negocio')}
-    <div style="font-size:10px;color:#6B7A99;margin-top:4px;text-align:right">📷 Foto del perfil de Google Business · ${gbp.datos?.fotos||0} fotos totales cargadas</div>
-  </div>` : ''}
 
   ${seccion('📍','Detalle del Perfil Google Business',gbp.score||0)}
   ${tabla([
     fila('Perfil encontrado y verificado', chip(gbp.encontrado&&gbp.reclamado,'Verificado'), gbp.score||0),
-    fila('Reseñas totales', gbp.datos?.total_resenas?`<span style="color:#1B3A6B;font-weight:600">${gbp.datos.total_resenas} reseñas</span>`:'No verificado', null, false),
-    fila('Calificación promedio', gbp.datos?.calificacion?`<span style="color:${gbp.datos.calificacion>=4?'#1A9E5C':'#E07B2A'};font-weight:600">${gbp.datos.calificacion}/5 ⭐</span>`:'No verificado', null, false),
-    fila('Fotos cargadas', gbp.datos?.fotos?`<span style="color:#1A9E5C;font-weight:600">${gbp.datos.fotos} fotos ✓</span>`:chip(false,'Sin fotos'), null, false),
+    fila('Reseñas totales', `<strong style="color:#1B3A6B">${gbp.datos?.total_resenas||0} reseñas</strong>`, null, false),
+    fila('Calificación promedio', `<strong style="color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}/5 ⭐</strong>`, null, false),
+    fila('Fotos cargadas', gbp.datos?.fotos?`<strong style="color:#1A9E5C">${gbp.datos.fotos} fotos ✓</strong>`:chip(false,'Sin fotos'), null, false),
     fila('Horario publicado', chip(gbp.datos?.tiene_horario), null, false),
-    fila('Publicaciones recientes', gbp.datos?.tiene_posts?`<span style="color:#1A9E5C;font-weight:600">Última hace ${gbp.dias_desde_ultimo_post||'?'} días ✓</span>`:chip(false,'Sin posts'), null, false),
+    fila('Publicaciones recientes', gbp.datos?.tiene_posts?chip(true,`Última hace ${gbp.dias_desde_ultimo_post||'?'} días`):chip(false,'Sin posts'), null, false),
     fila('Website en GBP coincide', chip(gbp.website_coincide,'Coincide'), null, false),
   ].join(''))}
+  ${(gbp.datos?.calificacion||0)<4&&(gbp.datos?.calificacion||0)>0?impacto(`Calificación de ${gbp.datos.calificacion}/5: Una calificación por debajo de 4 estrellas hace que muchos clientes elijan a la competencia. Con una estrategia de respuesta a reseñas, se puede mejorar en 90 días.`):''}
 
-  ${gbp.datos?.calificacion<4?impacto(`Calificación de ${gbp.datos.calificacion}/5: Una calificación por debajo de 4 estrellas hace que muchos clientes elijan a la competencia. Con una estrategia de respuesta a reseñas y solicitud activa de valoraciones, se puede mejorar en 90 días.`):''}
-
-  <!-- ÚLTIMO POST -->
-  ${fotoPost&&gbp.datos?.ultimo_post ? `
-  <div style="margin-top:14px;background:#F5F7FB;border-radius:8px;padding:12px;display:flex;gap:12px;align-items:flex-start">
-    <div style="flex-shrink:0">${imgTag(fotoPost,'80px','80px','6px','Último post')}</div>
-    <div style="flex:1">
-      <div style="font-size:10px;font-weight:700;color:#2556A0;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">📝 Última publicación en Google</div>
-      <div style="font-size:11px;color:#374151;line-height:1.5">${(gbp.datos.ultimo_post.body||'').substring(0,180)}${(gbp.datos.ultimo_post.body||'').length>180?'…':''}</div>
-    </div>
-  </div>` : ''}
-
-  ${seccion('📋','Directorios Locales (Yext)',dirs.score||0)}
+  ${seccion('📋','Directorios Locales',dirs.score||0)}
   ${tabla([
-    fila('Directorios encontrados', dirs.encontrados>0?`<span style="color:#1A9E5C;font-weight:600">${dirs.encontrados} de ${dirs.total_revisados||'?'} revisados</span>`:`<span style="color:#C8302A;font-weight:600">0 encontrados</span>`, dirs.score||0),
-    fila('Inconsistencias NAP', dirs.inconsistentes>0?`<span style="color:#E07B2A;font-weight:600">${dirs.inconsistentes} inconsistencias</span>`:chip(true,'Sin inconsistencias'), null, false),
+    fila('Directorios encontrados', dirs.encontrados>0
+      ?`<strong style="color:#1A9E5C">${dirs.encontrados} encontrados: ${(dirs.lista||[]).slice(0,4).join(', ')}</strong>`
+      :`<strong style="color:#C8302A">0 encontrados</strong>`, dirs.score||0),
+    fila('Inconsistencias NAP', dirs.inconsistentes>0?`<span style="color:#E07B2A">${dirs.inconsistentes} inconsistencias</span>`:chip(true,'Sin inconsistencias'), null, false),
   ].join(''))}
-  ${impacto('Los directorios locales son las "páginas amarillas" digitales. Estar presente con información coherente en Bing, Facebook, Infobel y otros mejora la confianza de Google y hace que su negocio aparezca más veces en búsquedas locales.')}
+  ${impacto('Los directorios locales son las "páginas amarillas" digitales. Estar presente en Google Business, Facebook, Infobel y otros mejora la confianza de Google y multiplica su visibilidad en búsquedas locales.')}
 </div>
 
 <!-- PÁG 4: POSICIONAMIENTO ORGÁNICO -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Posicionamiento Orgánico','4')}
+  ${pageHeader('Posicionamiento Orgánico','','4')}
   <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">El posicionamiento orgánico mide qué tan bien estructurado está su sitio web para aparecer en Google sin pagar publicidad. Un buen posicionamiento atrae clientes de manera constante y gratuita.</p>
   ${seccion('📈','Análisis del sitio web',bloques.posicionamiento||0)}
   ${tabla([
@@ -878,17 +784,17 @@ async function generarPDF(){
     fila('Blog / contenidos', chip(sitio.blog?.encontrado), sitio.blog?.score||0),
     fila('Facebook Pixel', chip(sitio.analytics?.facebook_pixel,'Detectado'), null, false),
   ].join(''))}
-  ${impacto('Las empresas que actualizan su sitio web regularmente y tienen un blog reciben 3 veces más visitas orgánicas. Cada artículo es una nueva puerta de entrada para clientes que buscan soluciones que usted ofrece.')}
-  ${(sitio.contenido?.palabras||0)<300?impacto(`Su sitio tiene solo ${sitio.contenido?.palabras||0} palabras visibles. Google recomienda al menos 300 palabras por página para considerarla relevante. Esto afecta directamente su posición en los resultados de búsqueda.`):''}
+  ${impacto('Las empresas que actualizan su sitio web regularmente y tienen un blog reciben 3 veces más visitas orgánicas. Cada artículo es una nueva puerta de entrada para clientes.')}
+  ${(sitio.contenido?.palabras||0)<300?impacto(`Su sitio tiene solo ${sitio.contenido?.palabras||0} palabras visibles. Google recomienda al menos 300 palabras por página para considerarla relevante.`):''}
 </div>
 
 <!-- PÁG 5: CONSTRUCCIÓN DEL SITIO -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Construcción del Sitio','5')}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">La construcción del sitio evalúa si su página web tiene los elementos técnicos que generan confianza y facilitan que los clientes la encuentren y contacten. Un sitio bien construido convierte más visitantes en clientes.</p>
+  ${pageHeader('Construcción del Sitio','','5')}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">La construcción del sitio evalúa si su página web tiene los elementos técnicos que generan confianza y facilitan que los clientes la encuentren y contacten.</p>
   ${seccion('🏗️','Elementos técnicos del sitio',bloques.construccion||0)}
   ${tabla([
-    fila('Encriptación SSL (HTTPS)', chip(ssl.estado==='ssl_completo'||ssl.estado==='https_activo','Activo'), ssl.score||0),
+    fila('Encriptación SSL (HTTPS)', chip(ssl.estado==='ssl_completo','Activo'), ssl.score||0),
     fila('Datos de contacto visibles', chip(sitio.contacto?.email||sitio.contacto?.telefono,'Visible'), sitio.contacto?.score||0),
     fila('Botón clic para contactar', chip(sitio.cta?.tel||sitio.cta?.email,'Disponible'), sitio.cta?.score||0),
     fila('Preguntas frecuentes (FAQ)', sitio.faq?.schema?chip(true,'Con Schema'):sitio.faq?.encontrado?chip(null,'Sin Schema'):chip(false,'No detectado'), sitio.faq?.score||0),
@@ -896,114 +802,155 @@ async function generarPDF(){
     fila('Blog de contenidos', chip(sitio.blog?.encontrado), sitio.blog?.score||0),
     fila('Favicon (ícono del sitio)', chip(sitio.favicon?.encontrado), sitio.favicon?.score||0),
   ].join(''))}
-  ${ssl.score<80?impacto('URGENTE: Un sitio sin HTTPS muestra "No seguro" en Chrome y Safari. El 85% de los usuarios abandona inmediatamente un sitio marcado como inseguro. Esto afecta directamente sus ventas.'):''}
-  ${!sitio.cta?.tel&&!sitio.cta?.email?impacto('Sin un botón de llamada o email directo, sus visitantes móviles tienen que buscar el número manualmente. Agregar href="tel:+..." puede aumentar las consultas telefónicas hasta un 40%.'):''}
-  ${!sitio.faq?.encontrado?impacto('Una sección de preguntas frecuentes reduce la carga de su equipo de ventas y ayuda a Google a entender mejor su negocio. Las páginas con FAQ tienen hasta 2x más clics en búsquedas.'):''}
+  ${!sitio.faq?.encontrado?impacto('Una sección de preguntas frecuentes reduce la carga de su equipo de ventas y ayuda a Google a entender mejor su negocio. Las páginas con FAQ tienen hasta 2x más clics.'):''}
 </div>
 
 <!-- PÁG 6: AISO + PUBLICIDAD -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('AISO · Publicidad Digital','6')}
+  ${pageHeader('AISO · Publicidad Digital','','6')}
+
   ${seccion('🤖','Presencia en Inteligencia Artificial (AISO)',bloques.aiso||0)}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:16px;line-height:1.6">AISO mide qué tan preparado está su negocio para aparecer cuando alguien le pregunta a ChatGPT, Google Gemini u otras IAs: "¿Cuál es el mejor [su categoría] en [su ciudad]?"</p>
+  <p style="font-size:12px;color:#6B7A99;margin-bottom:12px;line-height:1.6">AISO mide qué tan preparado está su negocio para aparecer cuando alguien le pregunta a ChatGPT, Gemini u otras IAs.</p>
+
+  <!-- Cards IA estilo Semrush -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+    ${[
+      {nombre:'ChatGPT',aparece:aiso.chatgpt?.aparece,pos:aiso.chatgpt?.posicion,score:aiso.chatgpt?.score,color:'#10A37F'},
+      {nombre:'Google Gemini',aparece:aiso.gemini?.aparece,pos:aiso.gemini?.posicion,score:aiso.gemini?.score,color:'#4285F4'},
+      {nombre:'Preparación IA',aparece:aiso.preparacion_ia?.score>=50,pos:null,score:aiso.preparacion_ia?.score,color:'#2556A0'},
+    ].map(ia=>`
+      <div style="border:1px solid #DDE3EE;border-radius:10px;padding:14px;text-align:center;background:${ia.aparece?'#F0FFF8':'white'}">
+        <div style="font-size:11px;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${ia.nombre}</div>
+        <div style="font-size:22px;font-weight:700;color:${cScore(ia.score||0)};margin-bottom:4px">${ia.score||0}</div>
+        ${ia.aparece&&ia.pos?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">Pos. ${ia.pos}</div>`:
+        ia.aparece?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">Encontrado</div>`:
+        `<div style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">No encontrado</div>`}
+      </div>`).join('')}
+  </div>
+
   ${tabla([
-    fila('Preparación para IA', `${aiso.preparacion_ia?.score||0}/100`, aiso.preparacion_ia?.score||0),
     fila('Schema.org LocalBusiness', chip(aiso.preparacion_ia?.local_business_schema), null, false),
     fila('Schema FAQ', chip(aiso.preparacion_ia?.faq_schema), null, false),
     fila('Rastreadores IA permitidos', chip(aiso.preparacion_ia?.ia_crawlers_permitidos,'Permitidos'), null, false),
     fila('Sitemap referenciado', chip(aiso.preparacion_ia?.sitemap), null, false),
-    fila('ChatGPT', aiso.chatgpt?.aparece?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Aparece · Pos. ${aiso.chatgpt.posicion||'—'}</span>`:`<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">No se encontró</span>`, aiso.chatgpt?.score||0),
-    fila('Google Gemini', aiso.gemini?.aparece?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Aparece · Pos. ${aiso.gemini.posicion||'—'}</span>`:`<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">No se encontró</span>`, aiso.gemini?.score||0),
   ].join(''))}
-  ${impacto('Para 2026, el 30% de las búsquedas de negocios locales ya pasan por IAs. Si su sitio no tiene los marcadores técnicos correctos (Schema.org), las IAs simplemente no lo recomendarán, independientemente de qué tan bueno sea su servicio.')}
+  ${impacto('Para 2026, el 30% de las búsquedas de negocios locales ya pasan por IAs. Sin los marcadores técnicos correctos, las IAs no recomendarán su negocio.')}
+
   ${seccion('📢','Publicidad Digital Activa',bloques.publicidad||0)}
-  ${tabla([
-    fila('Google Ads (búsqueda paga)', chip(pub.google_ads,'Encontrado'), pub.scoreGoogle||0),
-    fila('Anuncios display Google',    chip(pub.display_ads,'Encontrado'), pub.scoreDisplay||0),
-    fila('Anuncios Facebook/Meta',     chip(pub.meta_ads,'Encontrado'),    pub.scoreMeta||0),
-  ].join(''))}
-  ${impacto('La publicidad digital bien administrada retorna entre $3 y $8 por cada $1 invertido. Saber si su competencia está pautando (y usted no) es información estratégica que puede cambiar su posición en el mercado.')}
+  <!-- Cards publicidad -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+    ${[
+      {nombre:'Google Ads',detectado:pub.google_ads,score:pub.scoreGoogle,icon:'🔍'},
+      {nombre:'Google Display',detectado:pub.display_ads,score:pub.scoreDisplay,icon:'🖼️'},
+      {nombre:'Meta / Facebook',detectado:pub.meta_ads,score:pub.scoreMeta,icon:'📘'},
+    ].map(p=>`
+      <div style="border:1px solid #DDE3EE;border-radius:10px;padding:14px;text-align:center;background:${p.detectado?'#F0FFF8':'#FFF'}">
+        <div style="font-size:22px;margin-bottom:6px">${p.icon}</div>
+        <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px">${p.nombre}</div>
+        ${p.detectado
+          ?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">✓ Encontrado</div>`
+          :`<div style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">No activo</div>`}
+      </div>`).join('')}
+  </div>
+  ${impacto('La publicidad digital bien administrada retorna entre $3 y $8 por cada $1 invertido. Saber si su competencia está pautando es información estratégica que puede cambiar su posición en el mercado.')}
 </div>
 
 <!-- PÁG 7: CONVERSIÓN + REDES -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Conversión · Redes Sociales','7')}
+  ${pageHeader('Conversión · Redes Sociales','','7')}
+
   ${seccion('💰','Elementos de Conversión',bloques.conversion||0)}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:16px;line-height:1.6">La conversión mide si su sitio web está equipado para transformar visitantes en clientes reales. Sin herramientas de conversión, el tráfico que llega a su sitio se pierde.</p>
-  ${tabla([
-    fila('Chat en vivo / WhatsApp', sitio.chat?.herramienta?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${sitio.chat.herramienta}</span>`:chip(false,'No detectado'), sitio.chat?.score||0),
-    fila('Tienda en línea (ecommerce)', sitio.ecommerce?.plataforma?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${sitio.ecommerce.plataforma}</span>`:chip(false,'No detectado'), sitio.ecommerce?.score||0),
-  ].join(''))}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    ${[
+      {nombre:'Chat en vivo / WhatsApp',val:sitio.chat?.herramienta,score:sitio.chat?.score,icon:'💬'},
+      {nombre:'Tienda en línea (ecommerce)',val:sitio.ecommerce?.plataforma,score:sitio.ecommerce?.score,icon:'🛒'},
+    ].map(c=>`
+      <div style="border:1px solid #DDE3EE;border-radius:10px;padding:16px;background:${c.val?'#F0FFF8':'white'}">
+        <div style="font-size:22px;margin-bottom:8px">${c.icon}</div>
+        <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px">${c.nombre}</div>
+        ${c.val
+          ?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block">${c.val}</div>`
+          :`<div style="background:#FDECEA;color:#C8302A;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block">No detectado</div>`}
+        <div style="font-size:18px;font-weight:700;color:${cScore(c.score||0)};margin-top:8px">${c.score||0}<span style="font-size:11px;color:#6B7A99;font-weight:400">/100</span></div>
+      </div>`).join('')}
+  </div>
   ${!sitio.chat?.herramienta?impacto('El 67% de los clientes en Latinoamérica prefiere contactar un negocio por WhatsApp antes de llamar. Sin un botón de chat visible, está perdiendo la mayoría de las consultas de clientes móviles.'):''}
+
   ${seccion('📱','Presencia en Redes Sociales',bloques.redes_sociales||0)}
-  ${tabla([
-    fila('Facebook', redes.facebook?.url?`<a style="color:#2556A0;font-size:11px" href="${redes.facebook.url}">${redes.facebook.url.replace('https://','').substring(0,45)}...</a>`:chip(false,'No detectado'), redes.facebook?.score||0),
-    fila('Instagram', redes.instagram?.url?`<a style="color:#2556A0;font-size:11px" href="${redes.instagram.url}">${redes.instagram.url.replace('https://','').substring(0,45)}...</a>`:chip(false,'No detectado'), redes.instagram?.score||0),
-    fila('TikTok', redes.tiktok?.url?chip(true,'Encontrado'):chip(false,'No detectado'), redes.tiktok?.score||0),
-    fila('LinkedIn', redes.linkedin?.url?chip(true,'Encontrado'):chip(false,'No detectado'), redes.linkedin?.score||0),
-    fila('Twitter / X', redes.twitter?.url?chip(true,'Encontrado'):chip(false,'No detectado'), redes.twitter?.score||0),
-  ].join(''))}
+  <!-- Cards redes con scores -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+    ${[
+      {nombre:'Facebook',key:'facebook',icon:'📘'},
+      {nombre:'Instagram',key:'instagram',icon:'📸'},
+      {nombre:'TikTok',key:'tiktok',icon:'🎵'},
+      {nombre:'LinkedIn',key:'linkedin',icon:'💼'},
+      {nombre:'Twitter / X',key:'twitter',icon:'🐦'},
+    ].map(r=>{
+      const rd=redes[r.key];
+      return `<div style="border:1px solid #DDE3EE;border-radius:10px;padding:12px;text-align:center;background:${rd?'#F5F7FF':'white'}">
+        <div style="font-size:18px;margin-bottom:4px">${r.icon}</div>
+        <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px">${r.nombre}</div>
+        ${rd
+          ?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:4px">${rd.url?'Encontrado':'Estimado'}</div>
+            <div style="font-size:16px;font-weight:700;color:${cScore(rd.score||0)}">${rd.score||0}</div>`
+          :`<div style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:4px">No detectado</div>
+            <div style="font-size:16px;font-weight:700;color:#C8302A">0</div>`}
+      </div>`;
+    }).join('')}
+  </div>
   ${impacto('En Latinoamérica, el 78% de los consumidores revisa las redes sociales de un negocio antes de comprar. Una presencia activa en redes es hoy tan importante como tener un aviso en la puerta del local.')}
 </div>
 
-<!-- PÁGINAS 8-9+: OPORTUNIDADES (una por grupo de 3) -->
+<!-- PÁGINAS DE OPORTUNIDADES -->
 ${oppsGrupos.map((grupo,gi)=>`
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Oportunidades para Guru Soluciones',String(8+gi))}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">Basado en el análisis de <strong>${empresa}</strong>, estas son las áreas con mayor potencial de mejora y cómo Guru Soluciones puede ayudarle a resolverlas:</p>
+  ${pageHeader('Oportunidades para Guru Soluciones','',String(8+gi))}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:24px;line-height:1.6">Basado en el análisis de <strong>${empresa}</strong>, estas son las áreas con mayor potencial de mejora y cómo Guru Soluciones puede ayudarle a resolverlas:</p>
   ${grupo.map(op=>oppCard(op)).join('')}
 </div>`).join('')}
 
 <!-- PÁG FINAL: CONTRAPORTADA -->
-<div style="width:794px;min-height:1123px;background:#F5F7FB;padding:52px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between">
-  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 0">
-    <div style="font-size:48px;margin-bottom:24px">🎯</div>
-    <div style="font-size:26px;font-weight:700;color:#1B3A6B;letter-spacing:-0.5px;margin-bottom:14px">¿Listo para crecer<br>en el mundo digital?</div>
-    <div style="font-size:14px;color:#6B7A99;max-width:440px;line-height:1.7;margin-bottom:32px">Guru Soluciones tiene los servicios exactos para llevar cada área de este diagnóstico al nivel que su negocio merece. Sin tecnicismos, sin complicaciones — nosotros nos encargamos de todo.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:500px;margin-bottom:32px">
-      ${['📍 SEO Local & GBP','📈 Posicionamiento Web','🤖 Webs AISO','📢 Publicidad Digital','💬 Luna Chat IA','📱 Gestión de Redes'].map(s=>`<div style="background:white;border:1px solid #DDE3EE;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:500;color:#1B3A6B">${s}</div>`).join('')}
+<div style="width:794px;min-height:1123px;background:#0F2447;padding:52px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between">
+  <div style="position:relative;display:flex;align-items:center;gap:12px">
+    ${logoGuru?`<img src="${logoGuru}" style="height:32px;width:auto;border-radius:6px;padding:4px;background:white;object-fit:contain" alt="Guru"/>`:``}
+    <span style="color:white;font-size:14px;font-weight:700">Guru <span style="font-weight:400;opacity:0.6">Diagnóstico Digital</span></span>
+  </div>
+  <div style="text-align:center;padding:40px 0">
+    <div style="font-size:48px;margin-bottom:20px">🎯</div>
+    <div style="font-size:28px;font-weight:700;color:white;letter-spacing:-0.5px;margin-bottom:14px;line-height:1.3">¿Listo para crecer<br>en el mundo digital?</div>
+    <div style="font-size:14px;color:#8AADD4;max-width:400px;line-height:1.7;margin:0 auto 32px">Guru Soluciones tiene los servicios exactos para llevar cada área de este diagnóstico al nivel que su negocio merece.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto">
+      ${['📍 SEO Local & GBP','📈 Posicionamiento Web','🤖 Webs AISO','📢 Publicidad Digital','💬 Luna Chat IA','📱 Gestión de Redes'].map(s=>`<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 14px;font-size:12px;font-weight:500;color:white">${s}</div>`).join('')}
     </div>
   </div>
-  <div style="background:white;border-radius:12px;padding:24px;margin-bottom:24px;border:1px solid #DDE3EE">
-    <div style="font-size:11px;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Tu asesor digital</div>
-    <div style="font-size:15px;font-weight:600;color:#1B3A6B;margin-bottom:4px">📧 ${emailVendedor}</div>
-    <div style="font-size:13px;color:#6B7A99">Guru Soluciones · gurusoluciones.com</div>
+  <div>
+    <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:20px;margin-bottom:20px">
+      <div style="font-size:11px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Tu asesor digital</div>
+      <div style="font-size:15px;font-weight:600;color:white;margin-bottom:3px">📧 ${emailVendedor}</div>
+      <div style="font-size:13px;color:#8AADD4">Guru Soluciones · gurusoluciones.com</div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.3)">
+      Diagnóstico generado el ${fecha} · Guru Diagnóstico Digital v5 · Información basada en datos públicos
+    </div>
   </div>
-  <div style="text-align:center;font-size:11px;color:#B0BAD0;display:flex;align-items:center;justify-content:center;gap:8px">${logoGuru?`<img src="${logoGuru}" style="height:16px;width:auto;opacity:0.5" alt="Guru"/>`:``}<span>Diagnóstico generado el ${fecha} · Guru Diagnóstico Digital v4 · Información basada en datos públicos</span></div>
 </div>
 
 </div>`;
 
     const container=document.getElementById('pdfTemplate');
-    container.innerHTML=html;
-    container.style.position='fixed';
-    container.style.left='-9999px';
-    container.style.top='0';
-    container.style.width='794px';
-    container.style.zIndex='9999';
-    container.style.visibility='visible';
-    container.style.background='white';
-    await new Promise(r=>setTimeout(r,800));
+    container.innerHTML=pdfHtml;
+    container.style.cssText='position:fixed;left:-9999px;top:0;width:794px;z-index:9999;visibility:visible;background:white';
+    await new Promise(r=>setTimeout(r,900));
 
     const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const pages=container.querySelectorAll('div[style*="min-height:1123px"]');
-    const A4_W=210, A4_H=297;
-
     for(let i=0;i<pages.length;i++){
       if(i>0) pdf.addPage();
-      pages[i].style.width='794px';
-      pages[i].style.minHeight='1123px';
-      const canvas=await html2canvas(pages[i],{
-        scale:2, useCORS:true, backgroundColor:'#ffffff',
-        logging:false, width:794, height:1123, windowWidth:794
-      });
-      const imgData=canvas.toDataURL('image/jpeg',0.95);
-      pdf.addImage(imgData,'JPEG',0,0,A4_W,A4_H);
+      const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:794,height:1123,windowWidth:794});
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297);
     }
-
     container.innerHTML='';
-    const nombre=`guru-diagnostico-${empresa.toLowerCase().replace(/\s+/g,'-')}.pdf`;
-    pdf.save(nombre);
+    pdf.save(`guru-diagnostico-${empresa.toLowerCase().replace(/\s+/g,'-')}.pdf`);
     showToast('✅ PDF descargado correctamente');
   } catch(err){
     console.error(err);
@@ -1013,11 +960,7 @@ ${oppsGrupos.map((grupo,gi)=>`
   }
 }
 
-
-function copiarJSON(){
-  if(!ultimoResultado) return;
-  navigator.clipboard.writeText(JSON.stringify(ultimoResultado,null,2)).then(()=>showToast('JSON copiado'));
-}
+function copiarJSON(){if(!ultimoResultado)return;navigator.clipboard.writeText(JSON.stringify(ultimoResultado,null,2)).then(()=>showToast('JSON copiado'));}
 function nuevoDiagnostico(){
   ultimoResultado=null; ultimoData={};
   document.getElementById('estadoResultados').classList.remove('v');
@@ -1027,12 +970,7 @@ function nuevoDiagnostico(){
   document.getElementById('webhookField').classList.remove('open');
   document.getElementById('errBanner').classList.remove('v');
 }
-function showToast(msg){
-  document.getElementById('toastMsg').textContent=msg;
-  const t=document.getElementById('toast');
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2800);
-}
+function showToast(msg){document.getElementById('toastMsg').textContent=msg;const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 ['empresa','url','email_cliente','email_vendedor','webhook_url'].forEach(id=>{
   document.getElementById(id)?.addEventListener('input',()=>{
     document.getElementById(id).classList.remove('err');
@@ -1042,10 +980,7 @@ function showToast(msg){
   });
 });
 document.getElementById('pais').addEventListener('input',function(){this.value=this.value.toUpperCase();});
-window.addEventListener('load',()=>{
-  const saved=localStorage.getItem('guru_wh');
-  if(saved) document.getElementById('webhook_url').value=saved;
-});
+window.addEventListener('load',()=>{const saved=localStorage.getItem('guru_wh');if(saved)document.getElementById('webhook_url').value=saved;});
 </script>
 </body>
 </html>
