@@ -375,10 +375,26 @@ async function generarPDF(){
       }
       return null;
     };
-    const [fotoGBP,logoGBP,fotoPost]=await Promise.all([
+    // Validar que la imagen base64 sea válida y tenga dimensiones reales
+    const validarImg=async(b64)=>{
+      if(!b64) return null;
+      return new Promise(resolve=>{
+        const img=new Image();
+        img.onload=()=>resolve((img.width>0&&img.height>0)?b64:null);
+        img.onerror=()=>resolve(null);
+        img.src=b64;
+      });
+    };
+    const [fotoGBP_raw,logoGBP_raw,fotoPost_raw]=await Promise.all([
       imgToBase64(gbp.datos?.foto_principal),
       imgToBase64(gbp.datos?.logo),
       imgToBase64(gbp.datos?.ultimo_post?.image),
+    ]);
+    // Validar dimensiones — elimina imágenes con 0x0 que rompen html2canvas
+    const [fotoGBP,logoGBP,fotoPost]=await Promise.all([
+      validarImg(fotoGBP_raw),
+      validarImg(logoGBP_raw),
+      validarImg(fotoPost_raw),
     ]);
     // Logo Guru siempre disponible (embebido en base64)
     const logoGuru=LOGO_GURU_B64;
@@ -523,7 +539,7 @@ async function generarPDF(){
       <!-- Logo + nombre empresa -->
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
         ${(logoGBP||fotoGBP)?`<div style="width:60px;height:60px;border-radius:12px;overflow:hidden;background:white;flex-shrink:0;padding:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3)">
-          <img src="${logoGBP||fotoGBP}" style="width:100%;height:100%;object-fit:contain" alt="${empresa}"/>
+          ${imgTag(logoGBP||fotoGBP,'100%','100%','0',empresa)}
         </div>`:``}
         <div>
           <div style="font-size:34px;font-weight:800;color:white;letter-spacing:-1.5px;line-height:1.1">${empresa}</div>
@@ -844,8 +860,30 @@ ${oppsGrupos.map((grupo,gi)=>`
     showToast(`Renderizando ${pages.length} páginas…`);
     for(let i=0;i<pages.length;i++){
       if(i>0) pdf.addPage();
-      const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:794,height:1123,windowWidth:794});
-      pdf.addImage(canvas.toDataURL('image/jpeg',0.93),'JPEG',0,0,210,297);
+      // Remover imágenes rotas antes de renderizar — evita error createPattern 0x0
+      pages[i].querySelectorAll('img').forEach(img=>{
+        if(!img.complete||img.naturalWidth===0||img.naturalHeight===0){
+          const ph=document.createElement('div');
+          ph.style.cssText=`width:${img.style.width||img.width+'px'};height:${img.style.height||img.height+'px'};background:#EBF1FA;border-radius:${img.style.borderRadius||'6px'};display:flex;align-items:center;justify-content:center;font-size:11px;color:#6B7A99`;
+          ph.textContent='Sin imagen';
+          img.parentNode?.replaceChild(ph,img);
+        }
+      });
+      try{
+        const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false,width:794,height:1123,windowWidth:794,imageTimeout:0,onclone:(doc)=>{
+          // En el clon también limpiar imágenes rotas
+          doc.querySelectorAll('img').forEach(img=>{
+            if(!img.src||img.src==='about:blank'||img.naturalWidth===0){
+              img.style.display='none';
+            }
+          });
+        }});
+        pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297);
+      }catch(pageErr){
+        console.warn(`Error en página ${i+1}:`,pageErr);
+        // Crear página en blanco si falla
+        pdf.setFillColor(255,255,255);pdf.rect(0,0,210,297,'F');
+      }
     }
     container.innerHTML='';
     pdf.save(`guru-diagnostico-${empresa.toLowerCase().replace(/\s+/g,'-')}.pdf`);
