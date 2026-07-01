@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<!-- v5 — Semrush-style PDF + data fixes -->
+<!-- v6 — WOW Design: anillos SVG, logo embebido, AISO fix, proxy mejorado -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guru — Diagnóstico Digital</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-  :root {
-    --azul:#1B3A6B; --azul-med:#2556A0; --azul-light:#EBF1FA;
-    --verde:#1A9E5C; --verde-light:#E6F6EE;
-    --naranja:#E07B2A; --naranja-lt:#FEF3E8;
-    --rojo:#C8302A; --rojo-light:#FDECEA;
-    --gris-borde:#DDE3EE; --gris-bg:#F5F7FB; --gris-texto:#6B7A99;
-    --negro:#111827; --blanco:#FFFFFF;
+  :root{
+    --azul:#1B3A6B;--azul-med:#2556A0;--azul-light:#EBF1FA;
+    --verde:#1A9E5C;--verde-light:#E6F6EE;
+    --naranja:#E07B2A;--naranja-lt:#FEF3E8;
+    --rojo:#C8302A;--rojo-light:#FDECEA;
+    --gris-borde:#DDE3EE;--gris-bg:#F5F7FB;--gris-texto:#6B7A99;
+    --negro:#111827;--blanco:#FFFFFF;
     --font:'Inter',system-ui,sans-serif;
     --sombra:0 1px 3px rgba(27,58,107,0.08),0 4px 16px rgba(27,58,107,0.06);
   }
@@ -25,27 +25,25 @@
   .header{background:var(--blanco);border-bottom:1px solid var(--gris-borde);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
   .logo{display:flex;align-items:center;gap:10px}
   .logo-mark{width:32px;height:32px;background:var(--azul);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px}
-  .logo-text{font-size:15px;font-weight:700;color:var(--azul);letter-spacing:-0.3px}
+  .logo-text{font-size:15px;font-weight:700;color:var(--azul)}
   .logo-text span{color:var(--azul-med);font-weight:400}
-  .header-badge{font-size:11px;font-weight:600;background:var(--azul-light);color:var(--azul-med);padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.3px}
+  .header-badge{font-size:11px;font-weight:600;background:var(--azul-light);color:var(--azul-med);padding:3px 10px;border-radius:20px;text-transform:uppercase}
   .layout{display:grid;grid-template-columns:400px 1fr;min-height:calc(100vh - 56px);max-width:1400px;margin:0 auto}
-  @media(max-width:960px){.layout{grid-template-columns:1fr}}
   .panel-form{background:var(--blanco);border-right:1px solid var(--gris-borde);padding:32px 28px;display:flex;flex-direction:column;gap:24px}
-  .form-header h1{font-size:20px;font-weight:700;color:var(--azul);letter-spacing:-0.4px;line-height:1.3}
-  .form-header p{font-size:13px;color:var(--gris-texto);margin-top:6px;line-height:1.55}
+  .form-header h1{font-size:20px;font-weight:700;color:var(--azul);letter-spacing:-0.4px}
+  .form-header p{font-size:13px;color:var(--gris-texto);margin-top:6px}
   .form{display:flex;flex-direction:column;gap:14px}
   .field{display:flex;flex-direction:column;gap:5px}
   .field-row{display:grid;grid-template-columns:1fr 80px;gap:10px}
   label{font-size:11px;font-weight:600;color:var(--azul);text-transform:uppercase;letter-spacing:0.5px}
-  input{background:var(--blanco);border:1.5px solid var(--gris-borde);border-radius:8px;padding:10px 13px;font-family:var(--font);font-size:14px;color:var(--negro);outline:none;transition:border-color 0.15s,box-shadow 0.15s;width:100%}
-  input::placeholder{color:#B0BAD0}
+  input{background:var(--blanco);border:1.5px solid var(--gris-borde);border-radius:8px;padding:10px 13px;font-family:var(--font);font-size:14px;color:var(--negro);outline:none;width:100%;transition:border-color 0.15s}
   input:focus{border-color:var(--azul-med);box-shadow:0 0 0 3px rgba(37,86,160,0.1)}
   input.err{border-color:var(--rojo)}
   .ferr{font-size:11px;color:var(--rojo);display:none}
   .ferr.v{display:block}
-  .divider-label{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.5px}
+  .divider-label{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;color:var(--gris-texto);text-transform:uppercase}
   .divider-label::before,.divider-label::after{content:'';flex:1;height:1px;background:var(--gris-borde)}
-  .webhook-toggle{font-size:12px;color:var(--azul-med);cursor:pointer;background:none;border:none;font-family:var(--font);padding:0;text-decoration:underline;text-underline-offset:2px}
+  .webhook-toggle{font-size:12px;color:var(--azul-med);cursor:pointer;background:none;border:none;font-family:var(--font);padding:0;text-decoration:underline}
   .webhook-field{display:none}
   .webhook-field.open{display:flex;flex-direction:column;gap:5px}
   .btn-run{background:var(--azul);color:white;border:none;border-radius:8px;padding:13px 20px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s;margin-top:4px}
@@ -65,12 +63,11 @@
   .estado-loading{display:none;flex-direction:column;gap:0}
   .estado-loading.v{display:flex}
   .loading-header{font-size:15px;font-weight:600;color:var(--azul);margin-bottom:20px}
-  .loading-header span{color:var(--azul-med)}
   .paso{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--gris-borde)}
   .paso:last-child{border-bottom:none}
   .paso-icono{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--gris-borde);background:var(--blanco);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:all 0.25s}
   .paso-icono.activo{border-color:var(--azul-med);box-shadow:0 0 0 3px rgba(37,86,160,0.1)}
-  .paso-icono.hecho{background:var(--verde-light);border-color:var(--verde);font-size:13px}
+  .paso-icono.hecho{background:var(--verde-light);border-color:var(--verde)}
   .paso-info .paso-nombre{font-size:14px;font-weight:500}
   .paso-info .paso-desc{font-size:12px;color:var(--gris-texto)}
   .estado-resultados{display:none}
@@ -78,9 +75,9 @@
   .res-header{background:var(--blanco);border:1px solid var(--gris-borde);border-radius:12px;padding:24px 28px;display:flex;align-items:center;gap:24px;margin-bottom:20px;box-shadow:var(--sombra)}
   .score-wrap{position:relative;width:96px;height:96px;flex-shrink:0}
   .score-wrap svg{transform:rotate(-90deg)}
-  .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--azul);letter-spacing:-1px}
+  .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;letter-spacing:-1px}
   .res-info{flex:1}
-  .res-empresa{font-size:20px;font-weight:700;color:var(--azul);letter-spacing:-0.4px}
+  .res-empresa{font-size:20px;font-weight:700;color:var(--azul)}
   .res-url{font-size:12px;color:var(--gris-texto);margin-top:2px}
   .nivel-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;margin-top:10px;border:1px solid}
   .nivel-badge.bueno{background:var(--verde-light);color:var(--verde);border-color:rgba(26,158,92,0.25)}
@@ -88,9 +85,8 @@
   .nivel-badge.critico{background:var(--rojo-light);color:var(--rojo);border-color:rgba(200,48,42,0.25)}
   .seccion-titulo{font-size:11px;font-weight:700;color:var(--gris-texto);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px;margin-top:24px}
   .bloques-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:1100px){.bloques-grid{grid-template-columns:1fr}}
   .bloque{background:var(--blanco);border:1px solid var(--gris-borde);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--sombra)}
-  .bloque-emoji{font-size:20px;line-height:1}
+  .bloque-emoji{font-size:20px}
   .bloque-body{flex:1;min-width:0}
   .bloque-nombre{font-size:13px;font-weight:600}
   .barra-wrap{margin-top:6px;background:var(--gris-bg);border-radius:4px;height:5px}
@@ -98,18 +94,18 @@
   .bloque-score{font-size:18px;font-weight:700;min-width:40px;text-align:right}
   .opps-lista{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
   .opp{background:var(--blanco);border:1px solid var(--gris-borde);border-left:4px solid var(--naranja);border-radius:0 10px 10px 0;padding:12px 16px;box-shadow:var(--sombra)}
-  .opp-area{font-size:10px;font-weight:700;color:var(--naranja);text-transform:uppercase;letter-spacing:0.5px}
+  .opp-area{font-size:10px;font-weight:700;color:var(--naranja);text-transform:uppercase}
   .opp-texto{font-size:13px;color:var(--negro);margin-top:2px;font-weight:500}
   .opp-prod{display:inline-block;margin-top:5px;font-size:11px;font-weight:600;background:var(--azul-light);color:var(--azul-med);padding:2px 9px;border-radius:20px}
   .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-  .btn-sec{flex:1;min-width:130px;background:var(--blanco);color:var(--azul);border:1.5px solid var(--gris-borde);border-radius:8px;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:border-color 0.15s,background 0.15s}
+  .btn-sec{flex:1;min-width:130px;background:var(--blanco);color:var(--azul);border:1.5px solid var(--gris-borde);border-radius:8px;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
   .btn-sec:hover{border-color:var(--azul-med);background:var(--azul-light)}
-  .btn-prim{flex:1;min-width:130px;background:var(--azul);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s}
+  .btn-prim{flex:1;min-width:130px;background:var(--azul);color:white;border:none;border-radius:8px;padding:10px 16px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
   .btn-prim:hover{background:var(--azul-med)}
   .btn-prim:disabled{background:#B0BAD0;cursor:not-allowed}
-  .toast{position:fixed;bottom:24px;right:24px;background:var(--azul);color:white;border-radius:8px;padding:11px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;transform:translateY(60px);opacity:0;transition:all 0.3s cubic-bezier(0.22,0.8,0.4,1);z-index:100;pointer-events:none;box-shadow:0 4px 24px rgba(27,58,107,0.2)}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--azul);color:white;border-radius:8px;padding:11px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;transform:translateY(60px);opacity:0;transition:all 0.3s;z-index:100;pointer-events:none;box-shadow:0 4px 24px rgba(27,58,107,0.2)}
   .toast.show{transform:translateY(0);opacity:1}
-  #pdfTemplate{position:fixed;left:-9999px;top:0;width:794px;background:white;font-family:'Inter',sans-serif;font-size:13px;color:#111827;z-index:-1;pointer-events:none}
+  #pdfTemplate{position:fixed;left:-9999px;top:0;width:794px;background:white;font-family:'Inter',sans-serif;z-index:-1;pointer-events:none}
 </style>
 </head>
 <body>
@@ -124,85 +120,54 @@
   <aside class="panel-form">
     <div class="form-header">
       <h1>Diagnóstico digital del cliente</h1>
-      <p>Ingresa los datos del negocio y el sistema analiza su presencia en Google, directorios, IA, publicidad y redes sociales.</p>
+      <p>Analiza la presencia digital en Google, IA, publicidad y redes sociales.</p>
     </div>
     <form class="form" id="diagForm" novalidate>
-      <div class="field">
-        <label for="empresa">Nombre de la empresa</label>
-        <input id="empresa" type="text" placeholder="Ej: Restaurante El Portal" autocomplete="off">
-        <span class="ferr" id="fe-empresa">Ingresa el nombre de la empresa</span>
-      </div>
-      <div class="field">
-        <label for="url">Sitio web</label>
-        <input id="url" type="text" placeholder="www.ejemplo.com" autocomplete="off">
-        <span class="ferr" id="fe-url">Ingresa la URL del sitio</span>
-      </div>
+      <div class="field"><label for="empresa">Nombre de la empresa</label><input id="empresa" type="text" placeholder="Ej: Restaurante El Portal" autocomplete="off"><span class="ferr" id="fe-empresa">Ingresa el nombre</span></div>
+      <div class="field"><label for="url">Sitio web</label><input id="url" type="text" placeholder="www.ejemplo.com" autocomplete="off"><span class="ferr" id="fe-url">Ingresa la URL</span></div>
       <div class="field-row">
-        <div class="field">
-          <label for="ciudad">Ciudad</label>
-          <input id="ciudad" type="text" placeholder="Cali">
-        </div>
-        <div class="field">
-          <label for="pais">País</label>
-          <input id="pais" type="text" placeholder="CO" maxlength="2" style="text-transform:uppercase">
-        </div>
+        <div class="field"><label for="ciudad">Ciudad</label><input id="ciudad" type="text" placeholder="Cali"></div>
+        <div class="field"><label for="pais">País</label><input id="pais" type="text" placeholder="CO" maxlength="2" style="text-transform:uppercase"></div>
       </div>
-      <div class="field">
-        <label for="direccion">Dirección <span style="font-weight:400;color:var(--gris-texto);text-transform:none">(opcional)</span></label>
-        <input id="direccion" type="text" placeholder="Ej: Calle 5 # 23-45">
-      </div>
+      <div class="field"><label for="direccion">Dirección <span style="font-weight:400;color:var(--gris-texto);text-transform:none">(opcional)</span></label><input id="direccion" type="text" placeholder="Calle 5 # 23-45"></div>
       <div class="divider-label">Envío del informe</div>
-      <div class="field">
-        <label for="email_cliente">Email del cliente</label>
-        <input id="email_cliente" type="email" placeholder="cliente@empresa.com">
-        <span class="ferr" id="fe-ecli">Ingresa un email válido</span>
-      </div>
-      <div class="field">
-        <label for="email_vendedor">Tu email (vendedor Guru)</label>
-        <input id="email_vendedor" type="email" placeholder="nombre@gurusoluciones.com">
-        <span class="ferr" id="fe-even">Ingresa un email válido</span>
-      </div>
+      <div class="field"><label for="email_cliente">Email del cliente</label><input id="email_cliente" type="email" placeholder="cliente@empresa.com"><span class="ferr" id="fe-ecli">Email inválido</span></div>
+      <div class="field"><label for="email_vendedor">Tu email (vendedor Guru)</label><input id="email_vendedor" type="email" placeholder="nombre@gurusoluciones.com"><span class="ferr" id="fe-even">Email inválido</span></div>
       <div class="field">
         <button type="button" class="webhook-toggle" onclick="toggleWebhook()">⚙ Configurar URL del workflow</button>
         <div class="webhook-field" id="webhookField">
           <label for="webhook_url" style="margin-top:6px">URL del webhook (n8n)</label>
           <input id="webhook_url" type="text" placeholder="https://n8n.srv.../webhook/guru-diagnostico">
-          <span class="ferr" id="fe-wh">Ingresa la URL del webhook</span>
+          <span class="ferr" id="fe-wh">URL inválida</span>
         </div>
       </div>
-      <div class="err-banner" id="errBanner"><span>⚠</span><span id="errMsg">Error al ejecutar el diagnóstico.</span></div>
-      <button type="submit" class="btn-run" id="btnRun">
-        <div class="spinner"></div>
-        <span id="btnLabel">▶ Analizar empresa</span>
-      </button>
-      <p class="costo-nota">Costo estimado por análisis: ~$0.01 USD</p>
+      <div class="err-banner" id="errBanner"><span>⚠</span><span id="errMsg">Error al ejecutar.</span></div>
+      <button type="submit" class="btn-run" id="btnRun"><div class="spinner"></div><span id="btnLabel">▶ Analizar empresa</span></button>
+      <p class="costo-nota">Costo estimado: ~$0.01 USD por análisis</p>
     </form>
   </aside>
   <section class="panel-results" id="panelRes">
     <div class="estado-vacio" id="estadoVacio">
       <div class="vacio-icono">🔍</div>
       <h2>Listo para analizar</h2>
-      <p>Completa el formulario con los datos del cliente y haz clic en "Analizar empresa".</p>
+      <p>Completa el formulario y haz clic en "Analizar empresa".</p>
     </div>
     <div class="estado-loading" id="estadoLoading">
-      <div class="loading-header">Analizando <span id="loadNombre">—</span>…</div>
+      <div class="loading-header">Analizando <span id="loadNombre" style="color:var(--azul-med)">—</span>…</div>
       <div id="pasos">
         <div class="paso"><div class="paso-icono activo" id="pi0">🔍</div><div class="paso-info"><div class="paso-nombre">Validando datos</div><div class="paso-desc">Normalizando URL y configurando el análisis</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi1">🌐</div><div class="paso-info"><div class="paso-nombre">Descargando sitio web</div><div class="paso-desc">SSL, redirecciones y HTML</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi2">🧪</div><div class="paso-info"><div class="paso-nombre">Escaneando estructura</div><div class="paso-desc">Meta tags, headings, contenido, analytics</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi3">📍</div><div class="paso-info"><div class="paso-nombre">Consultando Google Business</div><div class="paso-desc">Reseñas, fotos, horario, categoría</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi4">📋</div><div class="paso-info"><div class="paso-nombre">Verificando directorios</div><div class="paso-desc">Facebook, Bing, directorios locales</div></div></div>
-        <div class="paso"><div class="paso-icono" id="pi5">🤖</div><div class="paso-info"><div class="paso-nombre">Evaluando presencia en IA</div><div class="paso-desc">Schema, robots.txt, rastreadores de IA</div></div></div>
+        <div class="paso"><div class="paso-icono" id="pi5">🤖</div><div class="paso-info"><div class="paso-nombre">Evaluando presencia en IA</div><div class="paso-desc">Schema, robots.txt, rastreadores</div></div></div>
         <div class="paso"><div class="paso-icono" id="pi6">🏆</div><div class="paso-info"><div class="paso-nombre">Calculando puntajes</div><div class="paso-desc">Scoring ponderado por área</div></div></div>
       </div>
     </div>
     <div class="estado-resultados" id="estadoResultados">
       <div class="res-header">
         <div class="score-wrap">
-          <svg width="96" height="96" viewBox="0 0 96 96">
-            <circle cx="48" cy="48" r="40" fill="none" stroke="#DDE3EE" stroke-width="7"/>
-            <circle id="scoreArc" cx="48" cy="48" r="40" fill="none" stroke="#1B3A6B" stroke-width="7" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251" style="transition:stroke-dashoffset 1s cubic-bezier(0.22,0.8,0.4,1),stroke 0.5s"/>
-          </svg>
+          <svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="#DDE3EE" stroke-width="7"/><circle id="scoreArc" cx="48" cy="48" r="40" fill="none" stroke="#1B3A6B" stroke-width="7" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251" style="transition:stroke-dashoffset 1s cubic-bezier(0.22,0.8,0.4,1),stroke 0.5s"/></svg>
           <span class="score-num" id="scoreNum">0</span>
         </div>
         <div class="res-info">
@@ -213,7 +178,7 @@
       </div>
       <div class="seccion-titulo">Puntaje por área</div>
       <div class="bloques-grid" id="bloquesGrid"></div>
-      <div class="seccion-titulo" id="oppsLabel" style="display:none">Oportunidades detectadas para Guru</div>
+      <div class="seccion-titulo" id="oppsLabel" style="display:none">Oportunidades detectadas</div>
       <div class="opps-lista" id="oppsList"></div>
       <div class="acciones">
         <button class="btn-sec" onclick="copiarJSON()">⬚ Copiar JSON</button>
@@ -228,39 +193,29 @@
 
 <script>
 const { jsPDF } = window.jspdf;
-let ultimoResultado = null;
-let ultimoData = {};
-let stepTimers = [];
-const DELAYS = [400,1400,2600,4000,5600,7200,9000];
+let ultimoResultado=null, ultimoData={}, stepTimers=[];
+const DELAYS=[400,1400,2600,4000,5600,7200,9000];
+// Logo Guru embebido en base64 — nunca falla sin importar la red
+const LOGO_GURU_B64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIcAAABaCAYAAACSR0X7AAAPRUlEQVR4Xu2cDbyW4x3Hf1edo6GislM2ed9ijFrEGJvGbGRWQlGMSVrS7CXvw5SRoZgm5mVbw2jZQhZmGEOEedm8rEJ8lgo70SnSufb5nnPduc/tebvPue5zOs9z/T+fPtXz3Nf/uq7/9bv+7/djFChIII8ETJBMkEA+CQRwBGzklUAARwBHAEfAQHoJBM2RXmYVMyKAo2KOOv1GAzjSy6xiRgRwVMxRp99oAEd6mVXMiACOijnq9BsN4Egvs4oZEcBRMUedfqMBHOllVjEjAjgq5qjTbzSAI73MKmZEAEfFHHX6jQZwpJdZxYwI4MjoqK21HSRt4P5USWM/lK76UNIaY4zNaFqvbAM4vIqzkZm19lOSBkhLjpfOGKgVtV3VtdcyadqfJF0n6aX2AJAADs/gcBpjoDT9Ys2/rZ/W6mMZb1y9RjuNmyMddKoxZpHnqb2zC+DwLFJrbQ9JP9UL3xyjlR9Vf4J9TdcV2nrWFZImGmM+8Dy9V3YBHF7F2WBSdpdmXqZ5V38lJ2skvvtFs6XdTjbGLPY8vVd2ARxexdkAjn2k6VM177Z+eVkPOO0e6YBxxpiXPU/vlV0Ah1dxNoCjj7RgsuaN/nZO1tUd6tXvylukPoDjHc/Te2UXwOFVnA3gIHwdq+XDz9HCZd2asEfau3zpVXWafJakW4wx9YWmt7IdJW0kqZMk/JOVRoXH+NxOAIdPaTpe1tqe0uqJWjR0hJatJqxtpJotarX1jZdIusQYQ84jL1nZLSWdLC0cLL20ibRDrbTNA5JGtxZAAjgyAAcsrbVdJH1L0kBpSQ+pxxtS9SxJ/zDGrC0CjM9IOneFZhxXq7omEU9vnXiTpGONzEcZLX0d2wCOrCXcDP5Wdl/piVsX6+meyeGd1bWum4YNMTJzm8E61ZAAjlTiyv5hq4a0+yFLdN2sNVrLv5tQJ224pkYjJxuZs7NeTQBH1hJOyd+BY9C7mjHz/YRJgVUnbfRhjUZMNDIXpGSd+vEAjtQiy36Ald1Dem3GYs3dPjlbb/VdIg0YbGQey3olARxZS7gZ/K3spyWNkZ466U091ate9Q3n1Ftb1UoHXi5pUnBImyHYchjiTEuNpD0lDZPe6yt1eUbSzZIeNjJvt8Y+W1NzMBd/tpK0mSTqCm8R9bXGRtvjHFaWMLa7pM6S3pe03KhwGOxzn1mDA/7bSjpc0nckkdgh/scLXyPpXUnPSbpV0l3u/z73F3i1QAJZgQO+oP0oSac7bVFseskPS/pZknPSHrQfQ9g8USqpSSQEZ5KiIoNhVWtLQASNyQXkQvgNQFMTcWRtQ2/InjU+FpNWbpgafcoU9O5c5fV1/bZcLQxJmcnmG9B+QYH66OuwCuDwKtJrX+cMxcoBWORwBGzklUAARwBHAEfAQHoJBM2RXmYVMyKAo2KOOv1GAzjSy6xiRgRwVMxRp99oAEd6mVXMiACOijnq9BsN4Egvs4oZEcBRMUedfqMBHOllVjEjAjgq5qjTbzSAI73MKmZEAEfFHHX6jQZwpJdZxYwI4KmorRdIG7k+VNPZD6aoPJa0xxtgM0HplG8DhVZyNzKy1n5I0QFpyvHTGQK2o7aquvZZJ0/4k6TpJL7UHgARweBaH0xgDpekXa/5t/bRWH8t449I12mncHOmgU40xizzP7Z1dAIdnkVprO0j6qV74OlbLh5+jhcu6NWGP9MizJe1zsrHGK5/ee2UXwOFVnA3gIHwdq+XDz9HCZd2asEfau3zpVXWafJakW4wx9YWmt7IdJW0kqZMk/JOVRoXH+NxOAIdPaTpe1tqe0uqJWjR0hJatJqxtpJotarX1jZdIusQYQ84jL1nZLSWdLC0cLL20ibRDrbTNA5JGtxZAAjgyAAcsrbVdJH1L0kBpSQ+pxxtS9SxJ/zDGrC0CjM9IOneFZhxXq7omEU9vnXiTpGONzEcZLX0d2wCOrCXcDP5Wdl/piVsX6+meyeGd1bWum4YNMTJzm8E61ZAAjlTiyv5hq4a0+yFLdN2sNVrLv5tQJ224pkYjJxuZs7NeTQBH1hJOyd+BY9C7mjHz/YRJgVUnbfRhjUZMNDIXpGSd+vEAjtQiy36Ald1Dem3GYs3dPjlbb/VdIg0YbGQey3olARxZS7gZ/K3spyWNkZ466U091ate9Q3n1Ftb1UoHXi5pUnBImyHYchjiTEuNpD0lDZPe6yt1eUbSzZIeNjJvt8Y+W1NzMBd/tpK0mSTqCm8R9bXGRtvjHFaWMLa7pM6S3pe03KhwGOxzn1mDA/7bSjpc0nckkdgh/scLXyPpXUnPSbpV0l3u/z73F3i1QAJZgQO+oP0oSac7bVFseskPS/pZknPSHrQfQ9g8USqpSSQEZ5KiIoNhVWtLQASNyQXkQvgNQFMTcWRtQ2/InjU+FpNWbpgafcoU9O5c5fV1/bZcLQxJmcnmG9B+QYH66OuwCuDwKtJrX+dkhjDB3gEdeUC4CeJkwDs0NTe2SXCAJpR1kwnIjA3VEK4Q==';
 
-function toggleWebhook(){ document.getElementById('webhookField').classList.toggle('open'); }
-
+function toggleWebhook(){document.getElementById('webhookField').classList.toggle('open');}
 function iniciarPasos(nombre){
-  document.getElementById('loadNombre').textContent = nombre;
+  document.getElementById('loadNombre').textContent=nombre;
   for(let i=0;i<7;i++){const el=document.getElementById('pi'+i);el.className='paso-icono';el.textContent=['🔍','🌐','🧪','📍','📋','🤖','🏆'][i];}
   document.getElementById('pi0').classList.add('activo');
   DELAYS.forEach((d,i)=>{const t=setTimeout(()=>{if(i>0){const p=document.getElementById('pi'+(i-1));p.className='paso-icono hecho';p.textContent='✓';}if(i<7)document.getElementById('pi'+i).classList.add('activo');},d);stepTimers.push(t);});
 }
 function completarPasos(){stepTimers.forEach(t=>clearTimeout(t));for(let i=0;i<7;i++){const el=document.getElementById('pi'+i);el.className='paso-icono hecho';el.textContent='✓';}}
-
 const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validar(){
   let ok=true;
   const wh=document.getElementById('webhookField').classList.contains('open');
-  const checks=[
-    {id:'empresa',err:'fe-empresa',fn:v=>v.trim().length>1},
-    {id:'url',err:'fe-url',fn:v=>v.trim().length>3},
-    {id:'email_cliente',err:'fe-ecli',fn:v=>emailRe.test(v)},
-    {id:'email_vendedor',err:'fe-even',fn:v=>emailRe.test(v)},
-    ...(wh?[{id:'webhook_url',err:'fe-wh',fn:v=>v.startsWith('http')}]:[]),
-  ];
-  checks.forEach(c=>{const inp=document.getElementById(c.id);const errEl=document.getElementById(c.err);const val=c.fn(inp.value);inp.classList.toggle('err',!val);errEl.classList.toggle('v',!val);if(!val)ok=false;});
+  const checks=[{id:'empresa',err:'fe-empresa',fn:v=>v.trim().length>1},{id:'url',err:'fe-url',fn:v=>v.trim().length>3},{id:'email_cliente',err:'fe-ecli',fn:v=>emailRe.test(v)},{id:'email_vendedor',err:'fe-even',fn:v=>emailRe.test(v)},...(wh?[{id:'webhook_url',err:'fe-wh',fn:v=>v.startsWith('http')}]:[])];
+  checks.forEach(c=>{const inp=document.getElementById(c.id);const err=document.getElementById(c.err);const val=c.fn(inp.value);inp.classList.toggle('err',!val);err.classList.toggle('v',!val);if(!val)ok=false;});
   return ok;
 }
-
 document.getElementById('diagForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  if(!validar()) return;
+  e.preventDefault();if(!validar())return;
   const empresa=document.getElementById('empresa').value.trim();
   const url=document.getElementById('url').value.trim();
   const ciudad=document.getElementById('ciudad').value.trim();
@@ -269,113 +224,68 @@ document.getElementById('diagForm').addEventListener('submit',async e=>{
   const emailCliente=document.getElementById('email_cliente').value.trim();
   const emailVendedor=document.getElementById('email_vendedor').value.trim();
   const webhookUrl=document.getElementById('webhook_url').value.trim()||localStorage.getItem('guru_wh')||'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
-  if(document.getElementById('webhook_url').value.trim()) localStorage.setItem('guru_wh',webhookUrl);
+  if(document.getElementById('webhook_url').value.trim())localStorage.setItem('guru_wh',webhookUrl);
   document.getElementById('estadoVacio').style.display='none';
   document.getElementById('estadoResultados').classList.remove('v');
   document.getElementById('estadoLoading').classList.add('v');
   document.getElementById('errBanner').classList.remove('v');
-  const btn=document.getElementById('btnRun');
-  btn.disabled=true; btn.classList.add('loading');
+  const btn=document.getElementById('btnRun');btn.disabled=true;btn.classList.add('loading');
   document.getElementById('btnLabel').textContent='Analizando…';
   iniciarPasos(empresa);
-  try {
+  try{
     const res=await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empresa,url,ciudad,pais,direccion,email_cliente:emailCliente,email_vendedor:emailVendedor})});
     const text=await res.text();
-    if(!text||!text.trim()) throw new Error('El workflow no devolvió datos. Verifica que esté activo en n8n.');
+    if(!text||!text.trim())throw new Error('El workflow no devolvió datos. Verifica que esté activo en n8n.');
     const data=JSON.parse(text);
-    if(!res.ok||data.success===false) throw new Error(data.error||data.message||'Error en el diagnóstico.');
-    completarPasos();
-    await new Promise(r=>setTimeout(r,400));
+    if(!res.ok||data.success===false)throw new Error(data.error||data.message||'Error en el diagnóstico.');
+    completarPasos();await new Promise(r=>setTimeout(r,400));
     ultimoData={empresa,url,ciudad,pais,direccion,emailCliente,emailVendedor,fecha:new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})};
-    mostrarResultados(data,empresa,url);
-    ultimoResultado=data;
-  } catch(err){
+    mostrarResultados(data,empresa,url);ultimoResultado=data;
+  }catch(err){
     stepTimers.forEach(t=>clearTimeout(t));
     document.getElementById('estadoLoading').classList.remove('v');
     document.getElementById('estadoVacio').style.display='flex';
     document.getElementById('errBanner').classList.add('v');
     document.getElementById('errMsg').textContent=err.message;
-  } finally {
-    btn.disabled=false; btn.classList.remove('loading');
-    document.getElementById('btnLabel').textContent='▶ Analizar empresa';
-  }
+  }finally{btn.disabled=false;btn.classList.remove('loading');document.getElementById('btnLabel').textContent='▶ Analizar empresa';}
 });
-
 function scoreColor(s){return s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A';}
-
 function mostrarResultados(data,empresa,url){
   document.getElementById('estadoLoading').classList.remove('v');
   document.getElementById('estadoResultados').classList.add('v');
-  const score=data.scores?.global||0;
-  const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
-  const bloques={
-    seo_local:data.scores?.seoLocal||0,
-    posicionamiento:data.scores?.posicionamiento||0,
-    construccion:data.scores?.construccion||0,
-    publicidad:data.scores?.publicidad||0,
-    aiso:data.scores?.aiso||0,
-    conversion:data.scores?.conversion||0,
-    redes_sociales:data.scores?.redes||0,
-  };
+  const score=data.scores?.global||0;const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
+  const bloques={seo_local:data.scores?.seoLocal||0,posicionamiento:data.scores?.posicionamiento||0,construccion:data.scores?.construccion||0,publicidad:data.scores?.publicidad||0,aiso:data.scores?.aiso||0,conversion:data.scores?.conversion||0,redes_sociales:data.scores?.redes||0};
   const opps=(data.oportunidades||[]).map(op=>({bloque:op.area||op.bloque||'',oportunidad:op.desc||op.oportunidad||'',producto:op.producto||''}));
-  const circ=251;
-  const arc=document.getElementById('scoreArc');
-  const color=scoreColor(score);
-  arc.style.stroke=color;
-  setTimeout(()=>{arc.style.strokeDashoffset=circ-(score/100)*circ;},50);
-  let cur=0;
-  const numEl=document.getElementById('scoreNum');
-  numEl.style.color=color;
+  const arc=document.getElementById('scoreArc');const color=scoreColor(score);
+  arc.style.stroke=color;setTimeout(()=>{arc.style.strokeDashoffset=251-(score/100)*251;},50);
+  let cur=0;const numEl=document.getElementById('scoreNum');numEl.style.color=color;
   const iv=setInterval(()=>{cur=Math.min(cur+Math.ceil(score/25),score);numEl.textContent=cur;if(cur>=score)clearInterval(iv);},40);
-  document.getElementById('resEmpresa').textContent=empresa;
-  document.getElementById('resUrl').textContent=url;
-  const nivelEl=document.getElementById('resNivel');
-  nivelEl.className='nivel-badge '+nivel;
-  nivelEl.textContent={bueno:'● Presencia digital sólida',mejorable:'● Puede mejorar',critico:'● Requiere atención urgente'}[nivel]||nivel;
-  const conf=[
-    {key:'seo_local',nombre:'SEO Local',emoji:'📍'},
-    {key:'posicionamiento',nombre:'Posicionamiento orgánico',emoji:'📈'},
-    {key:'construccion',nombre:'Construcción del sitio',emoji:'🏗️'},
-    {key:'publicidad',nombre:'Publicidad',emoji:'📢'},
-    {key:'aiso',nombre:'AISO',emoji:'🤖'},
-    {key:'conversion',nombre:'Conversión',emoji:'💰'},
-    {key:'redes_sociales',nombre:'Redes sociales',emoji:'📱'},
-  ];
-  const grid=document.getElementById('bloquesGrid');
-  grid.innerHTML='';
-  conf.forEach(b=>{const s=typeof bloques[b.key]==='number'?bloques[b.key]:0;const c=scoreColor(s);grid.innerHTML+=`<div class="bloque"><span class="bloque-emoji">${b.emoji}</span><div class="bloque-body"><div class="bloque-nombre">${b.nombre}</div><div class="barra-wrap"><div class="barra" style="width:${s}%;background:${c}"></div></div></div><span class="bloque-score" style="color:${c}">${s}</span></div>`;});
-  const oppsList=document.getElementById('oppsList');
-  const oppsLabel=document.getElementById('oppsLabel');
-  oppsList.innerHTML='';
-  if(opps.length>0){oppsLabel.style.display='block';opps.forEach(op=>{oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${op.area||op.bloque||''}</div><div class="opp-texto">${op.desc||op.oportunidad||''}</div><span class="opp-prod">${op.producto||''}</span></div>`;});}
+  document.getElementById('resEmpresa').textContent=empresa;document.getElementById('resUrl').textContent=url;
+  const nivelEl=document.getElementById('resNivel');nivelEl.className='nivel-badge '+nivel;
+  nivelEl.textContent={bueno:'● Presencia sólida',mejorable:'● Puede mejorar',critico:'● Requiere atención'}[nivel];
+  const conf=[{key:'seo_local',nombre:'SEO Local',emoji:'📍'},{key:'posicionamiento',nombre:'Posicionamiento orgánico',emoji:'📈'},{key:'construccion',nombre:'Construcción del sitio',emoji:'🏗️'},{key:'publicidad',nombre:'Publicidad',emoji:'📢'},{key:'aiso',nombre:'AISO',emoji:'🤖'},{key:'conversion',nombre:'Conversión',emoji:'💰'},{key:'redes_sociales',nombre:'Redes sociales',emoji:'📱'}];
+  const grid=document.getElementById('bloquesGrid');grid.innerHTML='';
+  conf.forEach(b=>{const s=bloques[b.key]||0;const c=scoreColor(s);grid.innerHTML+=`<div class="bloque"><span class="bloque-emoji">${b.emoji}</span><div class="bloque-body"><div class="bloque-nombre">${b.nombre}</div><div class="barra-wrap"><div class="barra" style="width:${s}%;background:${c}"></div></div></div><span class="bloque-score" style="color:${c}">${s}</span></div>`;});
+  const oppsList=document.getElementById('oppsList');const oppsLabel=document.getElementById('oppsLabel');oppsList.innerHTML='';
+  if(opps.length>0){oppsLabel.style.display='block';opps.forEach(op=>{oppsList.innerHTML+=`<div class="opp"><div class="opp-area">${op.bloque}</div><div class="opp-texto">${op.oportunidad}</div><span class="opp-prod">${op.producto}</span></div>`;});}
   document.getElementById('panelRes').scrollTo({top:0,behavior:'smooth'});
 }
 
-// ── GENERADOR DE PDF ESTILO SEMRUSH ──
+// ══════════════════════════════════════
+// PDF GENERATOR v6 — DISEÑO WOW
+// ══════════════════════════════════════
 async function generarPDF(){
   if(!ultimoResultado){showToast('Primero ejecuta un diagnóstico');return;}
-  const btn=document.getElementById('btnPDF');
-  btn.disabled=true; btn.textContent='⏳ Generando PDF…';
-  showToast('Generando PDF… puede tardar unos segundos');
-
-  try {
+  const btn=document.getElementById('btnPDF');btn.disabled=true;btn.textContent='⏳ Generando PDF…';
+  showToast('Generando PDF de alta calidad…');
+  try{
     const data=ultimoResultado;
     const score=data.scores?.global||0;
     const nivel=score>=70?'bueno':score>=45?'mejorable':'critico';
-    const bloques={
-      seo_local:data.scores?.seoLocal||0,
-      posicionamiento:data.scores?.posicionamiento||0,
-      construccion:data.scores?.construccion||0,
-      publicidad:data.scores?.publicidad||0,
-      aiso:data.scores?.aiso||0,
-      conversion:data.scores?.conversion||0,
-      redes_sociales:data.scores?.redes||0,
-    };
+    const bloques={seo_local:data.scores?.seoLocal||0,posicionamiento:data.scores?.posicionamiento||0,construccion:data.scores?.construccion||0,publicidad:data.scores?.publicidad||0,aiso:data.scores?.aiso||0,conversion:data.scores?.conversion||0,redes_sociales:data.scores?.redes||0};
     const opps=(data.oportunidades||[]).map(op=>({bloque:op.area||op.bloque||'',oportunidad:op.desc||op.oportunidad||'',producto:op.producto||''}));
 
-    // ══ FIX CRÍTICO: leer datos desde rutas correctas del payload ══
-    // N16 devuelve: data.gbp, data.directorios, data.construccion, data.conversion, data.redes
-    // NO desde data.seoLocal.gbp (esa era la ruta vieja)
+    // ══ MAPEO DE DATOS — RUTAS CORRECTAS DEL PAYLOAD DE N16 ══
     const gbpRaw   = data.gbp             || data.seoLocal?.gbp        || {};
     const dirsRaw  = data.directorios     || data.seoLocal?.directorios || {};
     const posRaw   = data.posicionamiento  || {};
@@ -384,585 +294,570 @@ async function generarPDF(){
     const pubRaw   = data.publicidad       || {};
     const convRaw  = data.conversion       || {};
     const redesRaw = data.redes            || {};
+    const haRaw    = data.htmlAnalysis     || {};
 
-    // GBP — rutas directas del payload de N4
-    const gbp = {
-      encontrado:  gbpRaw.encontrado||false,
-      reclamado:   gbpRaw.reclamado||false,
-      score:       gbpRaw.scoreGBP||0,
-      website_coincide: !!(gbpRaw.website),
-      dias_desde_ultimo_post: gbpRaw.ultimaPublicacion ? 5 : null,
+    // Analytics — leer desde htmlAnalysis (donde realmente está)
+    const analyticsDetectado = haRaw.analyticsDetectado || posRaw.analyticsDetectado || false;
+    const herramientasAnalytics = haRaw.herramientasAnalytics || [];
+
+    // GBP
+    const gbp={
+      encontrado:gbpRaw.encontrado||false, reclamado:gbpRaw.reclamado||false, score:gbpRaw.scoreGBP||0,
+      website_coincide:!!(gbpRaw.website),
+      dias_post: gbpRaw.ultimaPublicacion ? 5 : null,
       datos:{
-        nombre:       gbpRaw.nombre||ultimoData.empresa,
-        direccion:    gbpRaw.direccion||'',
-        telefono:     gbpRaw.telefono||'',
-        calificacion: gbpRaw.rating||0,
-        total_resenas:gbpRaw.resenas||0,
-        fotos:        gbpRaw.fotosCount||0,
-        categorias:   (gbpRaw.categorias||[]).join(', '),
-        tiene_horario:gbpRaw.horario||false,
-        tiene_posts:  !!(gbpRaw.ultimaPublicacion),
-        foto_principal: gbpRaw.urlFoto||null,
-        logo:           gbpRaw.urlLogo||null,
-        ultimo_post:    gbpRaw.urlPost?{image:gbpRaw.urlPost,body:gbpRaw.urlPostBody||''}:null,
+        nombre:gbpRaw.nombre||ultimoData.empresa, direccion:gbpRaw.direccion||'',
+        telefono:gbpRaw.telefono||'', calificacion:gbpRaw.rating||0,
+        total_resenas:gbpRaw.resenas||0, fotos:gbpRaw.fotosCount||0,
+        categorias:(gbpRaw.categorias||[]).join(', '),
+        tiene_horario:gbpRaw.horario||false, tiene_posts:!!(gbpRaw.ultimaPublicacion),
+        foto_principal:gbpRaw.urlFoto||null, logo:gbpRaw.urlLogo||null,
+        ultimo_post:gbpRaw.urlPost?{image:gbpRaw.urlPost,body:gbpRaw.urlPostBody||''}:null,
       }
     };
-
-    // Directorios — desde data.directorios (N16 v8)
-    const dirs = {
-      score:         dirsRaw.score||dirsRaw.scoreYext||0,
-      encontrados:   dirsRaw.encontrados||0,
-      lista:         dirsRaw.lista||[],
-      inconsistentes:dirsRaw.inconsistentes||0,
-      total_revisados:dirsRaw.total||17,
+    const dirs={score:dirsRaw.score||dirsRaw.scoreYext||0,encontrados:dirsRaw.encontrados||0,lista:dirsRaw.lista||[],total:dirsRaw.total||17};
+    const sitio={
+      analytics:{detectado:analyticsDetectado,herramientas:herramientasAnalytics,score:haRaw.scoreAnalytics||0},
+      contenido:{palabras:haRaw.palabras||posRaw.palabras||0,score:haRaw.scoreContenido||posRaw.scoreContenido||0},
+      titulo:{valor:(haRaw.titles||posRaw.titles||[]).length>0,score:haRaw.scoreTitulos||posRaw.scoreTitulos||0},
+      meta:{valor:(haRaw.descs||posRaw.descs||[]).length>0},
+      ultima_actu:{fecha:haRaw.anioReciente?'Reciente':`Año ${haRaw.anioMax||haRaw.anioDetectado||'?'}`,score:haRaw.scoreUltimaActu||posRaw.scoreUltimaActu||0},
+      blog:{encontrado:consRaw.blogDetectado||false,score:consRaw.scoreBlog||0},
+      favicon:{encontrado:consRaw.faviconDetectado||haRaw.faviconOk||false,score:consRaw.scoreFavicon||haRaw.scoreFavicon||0},
+      ssl:{ok:consRaw.ssl||false,score:consRaw.scoreSSL||0},
+      contacto:{tel:consRaw.tieneTel||!!(gbpRaw.telefono),wa:convRaw.whatsappDetectado||consRaw.tieneWA||false,score:consRaw.datosContacto?100:0},
+      cta:{ok:consRaw.ctaDetectado||consRaw.tieneTel||false,score:consRaw.scoreCTA||0},
+      faq:{encontrado:consRaw.faqDetectada||haRaw.faqDetectada||false,schema:consRaw.schemaFAQ||false,score:consRaw.scoreFAQ||0},
+      headings:{problems:consRaw.multipleH1?'Múltiples H1':consRaw.sinH1?'Sin H1':'',score:consRaw.scoreEnc||haRaw.scoreEnc||0},
+      chat:{tipo:convRaw.chatTipo||null,score:convRaw.scoreChat||0},
+      ecom:{detectado:convRaw.ecommerceDetectado||false,score:convRaw.scoreEcom||0},
+    };
+    const pub={
+      google:pubRaw.googleAdsDetectado||false, display:pubRaw.displayDetectado||false, meta:pubRaw.metaAdsDetectado||false,
+      sGoogle:pubRaw.scoreGoogleAds||0, sDisplay:pubRaw.scoreDisplayAds||0, sMeta:pubRaw.scoreMetaAds||0,
+    };
+    // AISO — buscar en múltiples rutas posibles
+    const aiso={
+      prep:{score:aisoRaw.scoreAISOPrep||haRaw.scoreAISOPrep||0,lb:aisoRaw.schemaLocalBusiness||haRaw.schemaLB||false,faq:aisoRaw.schemaFAQ||haRaw.schemaFAQ||false,bots:aisoRaw.iasPermitidas||data.robotsAnalysis?.iasPermitidas||false,sitemap:aisoRaw.sitemapRef||false},
+      chatgpt:{aparece:aisoRaw.chatgpt_aparece||false,pos:aisoRaw.chatgpt_posicion||null,score:aisoRaw.score_chatgpt||0},
+      gemini:{aparece:aisoRaw.gemini_aparece||false,pos:aisoRaw.gemini_posicion||null,score:aisoRaw.score_gemini||0},
+    };
+    // Redes — combinar URL + scores heurísticos
+    const redObj=(url,score)=>url?{url,score,label:url.replace('https://','').substring(0,38)+'...'}:score>0?{url:null,score,label:'Activo (estimado)'}:null;
+    const redes={
+      facebook:redObj(redesRaw.facebook,redesRaw.fbScore||0),
+      instagram:redObj(redesRaw.instagram,redesRaw.igScore||0),
+      tiktok:redObj(redesRaw.tiktok,redesRaw.ttScore||0),
+      linkedin:redObj(redesRaw.linkedin,redesRaw.liScore||0),
+      twitter:redObj(redesRaw.twitter,redesRaw.twScore||0),
     };
 
-    // Sitio / construcción
-    const sitio = {
-      analytics:{
-        google_analytics: posRaw.analyticsDetectado||false,
-        google_tag_manager: posRaw.analyticsDetectado||false,
-        facebook_pixel: !!(posRaw.herramientas?.includes?.('Meta Pixel')),
-        score: posRaw.scoreAnalytics||0,
-      },
-      contenido:{ palabras:posRaw.palabras||0, score:posRaw.scoreContenido||0 },
-      titulo_pagina:{ valor:(posRaw.titles||[]).length>0||(posRaw.esJSHeavy||false), score:posRaw.scoreTitulos||0 },
-      meta_descripcion:{ valor:(posRaw.descs||[]).length>0, score:posRaw.scoreTitulos||0 },
-      ultima_actualizacion:{
-        fecha:posRaw.anioReciente?'Reciente':`Año ${posRaw.anioDetectado||'?'}`,
-        score:posRaw.scoreUltimaActu||0,
-      },
-      blog:    { encontrado:consRaw.blogDetectado||false, score:consRaw.scoreBlog||0 },
-      favicon: { encontrado:consRaw.faviconDetectado||false, score:consRaw.scoreFavicon||0 },
-      contacto:{ email:consRaw.tieneEmail||false, telefono:consRaw.tieneTel||!!(gbpRaw.telefono), score:consRaw.datosContacto?100:0 },
-      cta:     { tel:consRaw.tieneTel||!!(gbpRaw.telefono), email:consRaw.tieneEmail||false, score:consRaw.scoreCTA||(consRaw.ctaDetectado?100:0) },
-      faq:     { encontrado:consRaw.faqDetectada||false, schema:consRaw.schemaFAQ||false, score:consRaw.scoreFAQ||0 },
-      headings:{ problemas:consRaw.multipleH1?['Múltiples H1']:consRaw.sinH1?['Sin H1']:[], score:consRaw.scoreEnc||0 },
-      // ── FIX CHAT: leer desde convRaw (chatDetectado y chatTipo ya vienen de N16 v8) ──
-      chat:     { herramienta:convRaw.chatTipo||null, score:convRaw.scoreChat||0 },
-      ecommerce:{ plataforma:convRaw.ecommerceDetectado?'Detectado':null, score:convRaw.scoreEcom||0 },
-    };
-    const ssl = {
-      estado:consRaw.ssl?'ssl_completo':(consRaw.scoreSSL>0?'ssl_completo':'sin_ssl'),
-      score:consRaw.scoreSSL||0,
-    };
-    const aiso = {
-      preparacion_ia:{
-        score:aisoRaw.scoreAISOPrep||0,
-        local_business_schema:aisoRaw.schemaLocalBusiness||false,
-        faq_schema:aisoRaw.schemaFAQ||false,
-        ia_crawlers_permitidos:aisoRaw.iasPermitidas||false,
-        sitemap:aisoRaw.sitemapRef||false,
-      },
-      chatgpt:{ aparece:aisoRaw.chatgpt_aparece||false, posicion:aisoRaw.chatgpt_posicion||null, score:aisoRaw.score_chatgpt||0 },
-      gemini:  { aparece:aisoRaw.gemini_aparece||false,  posicion:aisoRaw.gemini_posicion||null,  score:aisoRaw.score_gemini||0  },
-    };
-    const pub = {
-      google_ads:   pubRaw.googleAdsDetectado||false,
-      display_ads:  pubRaw.displayDetectado||false,
-      meta_ads:     pubRaw.metaAdsDetectado||false,
-      scoreGoogle:  pubRaw.scoreGoogleAds||0,
-      scoreDisplay: pubRaw.scoreDisplayAds||0,
-      scoreMeta:    pubRaw.scoreMetaAds||0,
-    };
-
-    // ══ FIX REDES: combinar URL + scores heurísticos ══
-    // Si no hay URL pero el score heurístico es >0, mostrar como "Activo (inferido)"
-    const redEntry = (urlVal, scoreVal) => {
-      if(urlVal) return { url:urlVal, score:scoreVal||0, label: urlVal.replace('https://','').substring(0,40)+'...' };
-      if(scoreVal>0) return { url:null, score:scoreVal, label:'Activo (estimado)' };
-      return null;
-    };
-    const redes = {
-      facebook:  redEntry(redesRaw.facebook,  redesRaw.fbScore),
-      instagram: redEntry(redesRaw.instagram, redesRaw.igScore),
-      tiktok:    redEntry(redesRaw.tiktok,    redesRaw.ttScore),
-      linkedin:  redEntry(redesRaw.linkedin,  redesRaw.liScore),
-      twitter:   redEntry(redesRaw.twitter,   redesRaw.twScore),
-    };
-
-    const empresa=ultimoData.empresa;
-    const url=ultimoData.url;
-    const fecha=ultimoData.fecha;
-    const emailVendedor=ultimoData.emailVendedor;
-    const ciudad=ultimoData.ciudad||'';
-    const pais=ultimoData.pais||'';
+    const empresa=ultimoData.empresa, url=ultimoData.url, fecha=ultimoData.fecha;
+    const emailVendedor=ultimoData.emailVendedor, ciudad=ultimoData.ciudad||'', pais=ultimoData.pais||'';
     const cScore=s=>s>=70?'#1A9E5C':s>=45?'#E07B2A':'#C8302A';
     const colorScore=cScore(score);
-    const nivelTexto={bueno:'Presencia digital sólida',mejorable:'Puede mejorar',critico:'Requiere atención urgente'}[nivel]||nivel;
+    const nivelTexto={bueno:'Presencia digital sólida',mejorable:'Puede mejorar',critico:'Requiere atención urgente'}[nivel];
     const nivelBg={bueno:'#E6F6EE',mejorable:'#FEF3E8',critico:'#FDECEA'}[nivel];
-    const nivelColor=colorScore;
 
-    // Cargar imágenes
-    showToast('Cargando imágenes…');
-    const imgToBase64=async(u)=>{
-      if(!u) return null;
-      try{
-        const r=await fetch('https://corsproxy.io/?'+encodeURIComponent(u));
-        if(!r.ok) return null;
-        const blob=await r.blob();
-        return new Promise(resolve=>{const fr=new FileReader();fr.onloadend=()=>resolve(fr.result);fr.onerror=()=>resolve(null);fr.readAsDataURL(blob);});
-      }catch(e){return null;}
+    // ── CARGAR IMÁGENES CON PROXY MEJORADO ──
+    showToast('Cargando imágenes del negocio…');
+    const imgToBase64=async(imgUrl)=>{
+      if(!imgUrl) return null;
+      // Intentar múltiples proxies
+      const proxies=['https://api.allorigins.win/raw?url=','https://corsproxy.io/?'];
+      for(const proxy of proxies){
+        try{
+          const r=await fetch(proxy+encodeURIComponent(imgUrl),{signal:AbortSignal.timeout(8000)});
+          if(!r.ok) continue;
+          const blob=await r.blob();
+          return await new Promise(resolve=>{const fr=new FileReader();fr.onloadend=()=>resolve(fr.result);fr.onerror=()=>resolve(null);fr.readAsDataURL(blob);});
+        }catch(e){continue;}
+      }
+      return null;
     };
-    const logoGuruUrl='https://guru-diagnostico.vercel.app/logo-guru.png';
-    const [logoGuru,fotoGBP,logoGBP,fotoPost]=await Promise.all([
-      imgToBase64(logoGuruUrl),
+    const [fotoGBP,logoGBP,fotoPost]=await Promise.all([
       imgToBase64(gbp.datos?.foto_principal),
       imgToBase64(gbp.datos?.logo),
       imgToBase64(gbp.datos?.ultimo_post?.image),
     ]);
+    // Logo Guru siempre disponible (embebido en base64)
+    const logoGuru=LOGO_GURU_B64;
 
-    const imgTag=(b64,w,h,radius='6px',alt='')=>b64
-      ?`<img src="${b64}" style="width:${w};height:${h};object-fit:cover;border-radius:${radius};display:block" alt="${alt}"/>`
-      :`<div style="width:${w};height:${h};background:#EBF1FA;border-radius:${radius};display:flex;align-items:center;justify-content:center;font-size:11px;color:#6B7A99">Sin imagen</div>`;
+    // ── HELPERS DE DISEÑO ──
+    const imgTag=(b64,w,h,r='6px',alt='')=>b64
+      ?`<img src="${b64}" style="width:${w};height:${h};object-fit:cover;border-radius:${r};display:block" alt="${alt}"/>`
+      :`<div style="width:${w};height:${h};background:#EBF1FA;border-radius:${r};display:flex;align-items:center;justify-content:center;font-size:11px;color:#6B7A99">Sin imagen</div>`;
 
-    // ── HELPERS SEMRUSH-STYLE ──
-    const chip=(v,etiq)=>{
-      if(v===null||v===undefined||v===false||v==='no_encontrado'||v==='sin_ssl')
-        return `<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'No'}</span>`;
-      if(v===true||v==='ssl_completo'||v==='encontrado'||v==='con_schema')
-        return `<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${etiq||'Sí'}</span>`;
-      return `<span style="background:#FEF3E8;color:#E07B2A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">${v}</span>`;
+    const chip=(v,yes='Sí',no='No',warn=null)=>{
+      if(v===true||v==='ssl_completo'||v==='encontrado') return `<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block">${yes}</span>`;
+      if(v===false||v===null||v===undefined||v==='no_encontrado'||v==='sin_ssl') return `<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block">${no}</span>`;
+      return `<span style="background:#FEF3E8;color:#E07B2A;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block">${v}</span>`;
     };
-    const sc=(s)=>`<span style="font-weight:700;color:${cScore(s||0)}">${s||0}</span>`;
+    const sc=s=>`<span style="font-weight:800;color:${cScore(s||0)};font-size:14px">${s||0}</span>`;
 
-    // Barra Semrush-style con label
-    const barraConScore=(s,w=140)=>`
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="background:#EEF0F5;border-radius:4px;height:6px;width:${w}px;flex-shrink:0">
-          <div style="width:${Math.min(s||0,100)}%;height:6px;border-radius:4px;background:${cScore(s||0)}"></div>
-        </div>
-        <span style="font-size:11px;font-weight:700;color:${cScore(s||0)}">${s||0}</span>
-      </div>`;
-
-    const fila=(nombre,estado,score,mostrarScore=true)=>`
-      <tr>
-        <td style="padding:9px 14px;font-size:12px;color:#374151;font-weight:500;border-bottom:1px solid #F0F2F8;width:40%">${nombre}</td>
-        <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:35%">${estado}</td>
-        <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:25%;text-align:right">${mostrarScore?sc(score):''}</td>
-      </tr>`;
-
-    // Header de página con logo Guru
-    const pageHeader=(titulo,subtitulo,num)=>`
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:14px;border-bottom:2.5px solid #1B3A6B">
-        <div>
-          <div style="font-size:20px;font-weight:700;color:#1B3A6B">${titulo}</div>
-          ${subtitulo?`<div style="font-size:12px;color:#6B7A99;margin-top:2px">${subtitulo}</div>`:''}
-        </div>
-        <div style="display:flex;align-items:center;gap:14px">
-          <span style="font-size:12px;color:#6B7A99">${empresa}</span>
-          <span style="font-size:11px;color:#B0BAD0">Pág. ${num}</span>
-          ${logoGuru?`<img src="${logoGuru}" style="height:24px;width:auto;object-fit:contain" alt="Guru"/>`:``}
-        </div>
-      </div>`;
-
-    // Sección con badge de score Semrush-style
-    const seccion=(emoji,titulo,puntaje)=>`
-      <div style="display:flex;align-items:center;gap:10px;margin:22px 0 12px;padding:12px 16px;background:#F5F7FB;border-radius:8px;border-left:3px solid ${cScore(puntaje)}">
-        <span style="font-size:18px">${emoji}</span>
-        <span style="font-size:14px;font-weight:700;color:#1B3A6B;flex:1">${titulo}</span>
-        <div style="text-align:center;background:${cScore(puntaje)};border-radius:8px;padding:4px 12px;min-width:60px">
-          <span style="font-size:16px;font-weight:700;color:white">${puntaje}</span>
-          <span style="font-size:10px;color:rgba(255,255,255,0.8)">/100</span>
-        </div>
-      </div>`;
-
-    const impacto=(texto)=>`<div style="background:#EBF1FA;border-left:3px solid #2556A0;border-radius:0 6px 6px 0;padding:8px 12px;margin:10px 0;font-size:11px;color:#1B3A6B;line-height:1.6">💡 ${texto}</div>`;
-
-    const tabla=(filas)=>`<table style="width:100%;border-collapse:collapse">${filas}</table>`;
-
-    // Gauge SVG para portada
-    const gaugeArc=(score,size=180)=>{
-      const r=size*0.38; const cx=size/2; const cy=size/2;
-      const pct=Math.min(score,100)/100;
-      const startAngle=-Math.PI*0.75; const endAngle=Math.PI*0.75;
-      const totalAngle=endAngle-startAngle;
-      const fillAngle=startAngle+totalAngle*pct;
-      const x1=cx+r*Math.cos(startAngle); const y1=cy+r*Math.sin(startAngle);
-      const x2=cx+r*Math.cos(endAngle); const y2=cy+r*Math.sin(endAngle);
-      const fx=cx+r*Math.cos(fillAngle); const fy=cy+r*Math.sin(fillAngle);
-      const la=totalAngle*pct>Math.PI?1:0;
-      const laFill=totalAngle*pct>Math.PI?1:0;
-      const col=cScore(score);
-      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-        <path d="M ${x1} ${y1} A ${r} ${r} 0 1 1 ${x2} ${y2}" fill="none" stroke="#DDE3EE" stroke-width="${size*0.08}" stroke-linecap="round"/>
-        ${score>0?`<path d="M ${x1} ${y1} A ${r} ${r} 0 ${laFill} 1 ${fx} ${fy}" fill="none" stroke="${col}" stroke-width="${size*0.08}" stroke-linecap="round"/>`:''}
-        <text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="Inter,Arial" font-size="${size*0.22}" font-weight="700" fill="${col}">${score}</text>
-        <text x="${cx}" y="${cy+size*0.13}" text-anchor="middle" font-family="Inter,Arial" font-size="${size*0.09}" fill="#6B7A99">de 100</text>
+    // Anillo SVG — el elemento signature del diseño
+    const anillo=(s,size=72,stroke=7)=>{
+      const r=(size-stroke*2)/2, cx=size/2, cy=size/2;
+      const circ=2*Math.PI*r, offset=circ-(s/100)*circ;
+      const col=cScore(s);
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E8EDF5" stroke-width="${stroke}"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
       </svg>`;
     };
 
-    // Radial chart para resumen ejecutivo (simulado con tabla visual)
-    const bloqueResumen=(b,s)=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F0F2F8">
-        <div style="width:28px;text-align:center;font-size:14px">${b.emoji}</div>
-        <div style="flex:1;font-size:12px;font-weight:500;color:#374151">${b.nombre}</div>
-        <div style="width:120px">${barraConScore(s,110)}</div>
+    // Módulo card con anillo
+    const moduloCard=(emoji,nombre,s)=>`
+      <div style="background:white;border:1px solid #DDE3EE;border-radius:10px;padding:14px 12px;text-align:center;position:relative">
+        <div style="position:relative;width:72px;height:72px;margin:0 auto 8px">
+          ${anillo(s,72,7)}
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <span style="font-size:16px">${emoji}</span>
+            <span style="font-size:14px;font-weight:800;color:${cScore(s)};line-height:1">${s}</span>
+          </div>
+        </div>
+        <div style="font-size:10px;font-weight:600;color:#374151;text-align:center;line-height:1.3">${nombre}</div>
       </div>`;
 
-    const confBloques=[
-      {key:'seo_local',nombre:'SEO Local',emoji:'📍'},
-      {key:'posicionamiento',nombre:'Posicionamiento orgánico',emoji:'📈'},
-      {key:'construccion',nombre:'Construcción del sitio',emoji:'🏗️'},
-      {key:'publicidad',nombre:'Publicidad',emoji:'📢'},
-      {key:'aiso',nombre:'AISO',emoji:'🤖'},
-      {key:'conversion',nombre:'Conversión',emoji:'💰'},
-      {key:'redes_sociales',nombre:'Redes sociales',emoji:'📱'},
-    ];
+    // Barra con score inline
+    const barra=(s,w=130)=>`<div style="display:flex;align-items:center;gap:8px">
+      <div style="background:#EEF0F5;border-radius:4px;height:6px;width:${w}px;flex-shrink:0"><div style="width:${Math.min(s||0,100)}%;height:6px;border-radius:4px;background:${cScore(s||0)}"></div></div>
+      <span style="font-size:11px;font-weight:700;color:${cScore(s||0)};min-width:24px">${s||0}</span>
+    </div>`;
 
-    const oppsChunk=3;
-    const oppsGrupos=[];
-    for(let i=0;i<opps.length;i+=oppsChunk) oppsGrupos.push(opps.slice(i,i+oppsChunk));
+    const fila=(nombre,estado,score,showScore=true)=>`<tr>
+      <td style="padding:9px 14px;font-size:12px;color:#374151;font-weight:500;border-bottom:1px solid #F0F2F8;width:42%">${nombre}</td>
+      <td style="padding:9px 14px;font-size:12px;border-bottom:1px solid #F0F2F8;width:33%">${estado}</td>
+      <td style="padding:9px 14px;border-bottom:1px solid #F0F2F8;width:25%;text-align:right">${showScore?sc(score):''}</td>
+    </tr>`;
 
-    const oppCard=(op)=>`
-      <div style="margin-bottom:14px;border-radius:10px;overflow:hidden;border:1px solid #DDE3EE">
-        <div style="background:#1B3A6B;padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:11px;font-weight:700;color:#8AADD4;text-transform:uppercase;letter-spacing:0.5px">${op.bloque}</span>
-          <span style="background:#E07B2A;color:white;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px">Oportunidad</span>
-        </div>
-        <div style="padding:14px 16px;background:white">
-          <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:8px">${op.oportunidad}</div>
-          <span style="display:inline-flex;align-items:center;gap:6px;background:#EBF1FA;color:#2556A0;font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px">🎯 Solución Guru: ${op.producto}</span>
+    // Header de página con logo embebido
+    const pageHeader=(titulo,num)=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:14px;border-bottom:2.5px solid #1B3A6B">
+        <div style="font-size:19px;font-weight:700;color:#1B3A6B">${titulo}</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="font-size:12px;color:#6B7A99">${empresa}</span>
+          <span style="font-size:11px;color:#B0BAD0">Pág. ${num}</span>
+          <img src="${logoGuru}" style="height:26px;width:auto;object-fit:contain" alt="Guru"/>
         </div>
       </div>`;
 
-    // ── CONSTRUIR HTML DEL PDF ──
-    const pdfHtml=`<div style="font-family:'Inter',Arial,sans-serif;background:white;color:#111827">
+    // Sección badge estilo Semrush
+    const seccion=(emoji,titulo,s)=>`
+      <div style="display:flex;align-items:center;gap:10px;margin:20px 0 10px;padding:10px 14px;background:#F5F7FB;border-radius:8px;border-left:3px solid ${cScore(s)}">
+        <span style="font-size:16px">${emoji}</span>
+        <span style="font-size:13px;font-weight:700;color:#1B3A6B;flex:1">${titulo}</span>
+        <div style="background:${cScore(s)};border-radius:8px;padding:4px 10px">
+          <span style="font-size:15px;font-weight:800;color:white">${s}</span><span style="font-size:10px;color:rgba(255,255,255,0.75)">/100</span>
+        </div>
+      </div>`;
 
-<!-- PÁG 1: PORTADA SEMRUSH-STYLE -->
-<div style="width:794px;min-height:1123px;background:#0F2447;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;box-sizing:border-box">
-  <!-- Patrón decorativo fondo -->
-  <div style="position:absolute;top:-80px;right:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(37,86,160,0.4) 0%,transparent 70%);pointer-events:none"></div>
-  <div style="position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(26,158,92,0.15) 0%,transparent 70%);pointer-events:none"></div>
+    const tabla=filas=>`<table style="width:100%;border-collapse:collapse">${filas}</table>`;
+    const tip=txt=>`<div style="background:#EBF1FA;border-left:3px solid #2556A0;border-radius:0 6px 6px 0;padding:8px 12px;margin:8px 0;font-size:11px;color:#1B3A6B;line-height:1.6">💡 ${txt}</div>`;
+
+    // Card IA
+    const iaCard=(nombre,aparece,pos,score,accentColor)=>`
+      <div style="border-radius:10px;overflow:hidden;border:1px solid ${aparece?accentColor+'40':'#DDE3EE'}">
+        <div style="background:${aparece?accentColor:'#F5F7FB'};padding:10px 14px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;font-weight:700;color:${aparece?'white':'#6B7A99'}">${nombre}</span>
+          ${aparece?`<span style="background:rgba(255,255,255,0.25);color:white;font-size:10px;font-weight:600;padding:1px 8px;border-radius:20px;margin-left:auto">${pos?'Pos. '+pos:'Encontrado'}</span>`:`<span style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:1px 8px;border-radius:20px;margin-left:auto">No encontrado</span>`}
+        </div>
+        <div style="padding:12px 14px;background:white;text-align:center">
+          <div style="position:relative;width:60px;height:60px;margin:0 auto 4px">
+            ${anillo(score,60,6)}
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:${cScore(score)}">${score}</div>
+          </div>
+          <div style="font-size:10px;color:#6B7A99">Score</div>
+        </div>
+      </div>`;
+
+    // Oportunidad card rediseñada
+    const oppCard=op=>`
+      <div style="margin-bottom:14px;border-radius:10px;overflow:hidden;border:1px solid #E5E9F2">
+        <div style="background:linear-gradient(135deg,#1B3A6B 0%,#2556A0 100%);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:11px;font-weight:700;color:#8AADD4;text-transform:uppercase;letter-spacing:0.8px">${op.bloque}</span>
+          <span style="background:#E07B2A;color:white;font-size:10px;font-weight:700;padding:2px 10px;border-radius:20px">Oportunidad Guru</span>
+        </div>
+        <div style="padding:14px 16px;background:white;display:flex;align-items:center;justify-content:space-between;gap:14px">
+          <div style="font-size:13px;font-weight:600;color:#111827">${op.oportunidad}</div>
+          <div style="flex-shrink:0;background:#EBF1FA;color:#2556A0;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;white-space:nowrap">🎯 ${op.producto}</div>
+        </div>
+      </div>`;
+
+    const confBloques=[{key:'seo_local',nombre:'SEO Local',emoji:'📍'},{key:'posicionamiento',nombre:'Posicion. Orgánico',emoji:'📈'},{key:'construccion',nombre:'Construcción Sitio',emoji:'🏗️'},{key:'publicidad',nombre:'Publicidad',emoji:'📢'},{key:'aiso',nombre:'AISO',emoji:'🤖'},{key:'conversion',nombre:'Conversión',emoji:'💰'},{key:'redes_sociales',nombre:'Redes Sociales',emoji:'📱'}];
+    const oppsGrupos=[];for(let i=0;i<opps.length;i+=3)oppsGrupos.push(opps.slice(i,i+3));
+    const totalPags=7+oppsGrupos.length+1;
+
+    // ════════════════════════════════════════
+    // HTML DEL PDF — DISEÑO WOW
+    // ════════════════════════════════════════
+    const pdfHtml=`<div style="font-family:'Inter',Arial,sans-serif;color:#111827">
+
+<!-- ═══ PÁG 1: PORTADA ═══ -->
+<div style="width:794px;min-height:1123px;background:#0B1D3A;padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;box-sizing:border-box">
+  <!-- Elementos decorativos geométricos -->
+  <div style="position:absolute;top:-120px;right:-120px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(37,86,160,0.35) 0%,transparent 65%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:80px;left:-80px;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(26,158,92,0.12) 0%,transparent 65%);pointer-events:none"></div>
+  <div style="position:absolute;top:200px;right:52px;width:1px;height:400px;background:linear-gradient(to bottom,transparent,rgba(255,255,255,0.06),transparent);pointer-events:none"></div>
 
   <!-- Header portada -->
   <div style="position:relative;display:flex;align-items:center;justify-content:space-between">
     <div style="display:flex;align-items:center;gap:12px">
-      ${logoGuru?`<img src="${logoGuru}" style="height:36px;width:auto;border-radius:8px;padding:5px;background:white;object-fit:contain" alt="Guru"/>`:
-      `<div style="width:40px;height:40px;background:white;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#0F2447">G</div>`}
+      <div style="background:white;border-radius:10px;padding:6px;display:flex;align-items:center;justify-content:center">
+        <img src="${logoGuru}" style="height:28px;width:auto;object-fit:contain" alt="Guru"/>
+      </div>
       <div>
-        <div style="color:white;font-size:15px;font-weight:700">Guru <span style="font-weight:400;opacity:0.6">Diagnóstico Digital</span></div>
-        <div style="color:#8AADD4;font-size:11px;margin-top:1px">Informe de Presencia Digital</div>
+        <div style="color:white;font-size:15px;font-weight:700;letter-spacing:-0.3px">Guru <span style="font-weight:400;opacity:0.55">Diagnóstico Digital</span></div>
+        <div style="color:#5B8BC0;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-top:1px">Informe de Presencia Digital</div>
       </div>
     </div>
-    <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 14px;font-size:11px;color:rgba(255,255,255,0.7)">Confidencial</div>
+    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:4px 14px;font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:0.5px">Confidencial · ${fecha}</div>
   </div>
 
   <!-- Centro portada -->
-  <div style="position:relative;flex:1;display:flex;align-items:center;gap:52px;padding:40px 0">
-    <!-- Info empresa -->
+  <div style="position:relative;flex:1;display:flex;gap:48px;align-items:center;padding:40px 0">
+    <!-- Left: info empresa -->
     <div style="flex:1">
-      <div style="font-size:11px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px">INFORME PARA</div>
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-        ${(logoGBP||fotoGBP)?`<div style="width:56px;height:56px;border-radius:10px;overflow:hidden;background:white;flex-shrink:0;padding:5px">
+      <div style="font-size:11px;font-weight:600;color:#5B8BC0;text-transform:uppercase;letter-spacing:2px;margin-bottom:16px">Informe para</div>
+
+      <!-- Logo + nombre empresa -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        ${(logoGBP||fotoGBP)?`<div style="width:60px;height:60px;border-radius:12px;overflow:hidden;background:white;flex-shrink:0;padding:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3)">
           <img src="${logoGBP||fotoGBP}" style="width:100%;height:100%;object-fit:contain" alt="${empresa}"/>
         </div>`:``}
-        <div style="font-size:36px;font-weight:700;color:white;letter-spacing:-1px;line-height:1.1">${empresa}</div>
+        <div>
+          <div style="font-size:34px;font-weight:800;color:white;letter-spacing:-1.5px;line-height:1.1">${empresa}</div>
+          <div style="font-size:13px;color:#5B8BC0;margin-top:4px">${url} · ${ciudad}${pais?', '+pais:''}</div>
+        </div>
       </div>
-      <div style="font-size:14px;color:#8AADD4;margin-bottom:10px">${url} · ${ciudad}${pais?', '+pais:''}</div>
-      <div style="display:inline-block;background:${nivelBg};color:${nivelColor};font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px">${nivelTexto}</div>
 
-      <!-- Mini stats -->
-      <div style="display:flex;gap:24px;margin-top:32px">
+      <!-- Foto principal del negocio -->
+      ${fotoGBP?`<div style="border-radius:12px;overflow:hidden;margin-bottom:24px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+        ${imgTag(fotoGBP,'100%','160px','12px','Foto del negocio')}
+      </div>`:''}
+
+      <!-- KPIs del GBP -->
+      <div style="display:flex;gap:0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">
         ${[
-          {label:'Reseñas Google',val:gbpRaw.resenas||'—'},
-          {label:'Calificación',val:gbpRaw.rating?(gbpRaw.rating+' ⭐'):'—'},
-          {label:'Fotos GBP',val:gbpRaw.fotosCount||'—'},
-        ].map(s=>`<div><div style="font-size:22px;font-weight:700;color:white">${s.val}</div><div style="font-size:11px;color:#8AADD4;margin-top:2px">${s.label}</div></div>`).join('')}
+          {label:'Reseñas',val:gbp.datos?.total_resenas||'—'},
+          {label:'Calificación',val:gbp.datos?.calificacion?(gbp.datos.calificacion+' ⭐'):'—'},
+          {label:'Fotos GBP',val:gbp.datos?.fotos||'—'},
+        ].map((s,i)=>`<div style="flex:1;padding:14px;text-align:center;${i>0?'border-left:1px solid rgba(255,255,255,0.08)':''}">
+          <div style="font-size:22px;font-weight:800;color:white;letter-spacing:-0.5px">${s.val}</div>
+          <div style="font-size:10px;color:#5B8BC0;margin-top:3px;letter-spacing:0.5px;text-transform:uppercase">${s.label}</div>
+        </div>`).join('')}
       </div>
     </div>
 
-    <!-- Gauge score -->
+    <!-- Right: gauge score grande -->
     <div style="flex-shrink:0;text-align:center">
-      <div style="font-size:11px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Puntaje Global</div>
-      ${gaugeArc(score,180)}
+      <div style="font-size:10px;font-weight:600;color:#5B8BC0;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px">Puntaje Global</div>
+      <!-- Gauge grande -->
+      <div style="position:relative;width:180px;height:180px;margin:0 auto">
+        ${anillo(score,180,14)}
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-size:52px;font-weight:800;color:${colorScore};letter-spacing:-3px;line-height:1">${score}</span>
+          <span style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px">de 100</span>
+        </div>
+      </div>
+      <div style="margin-top:16px;background:${nivelBg};color:${colorScore};font-size:12px;font-weight:700;padding:6px 16px;border-radius:20px;display:inline-block">${nivelTexto}</div>
     </div>
   </div>
 
   <!-- Footer portada -->
-  <div style="position:relative;border-top:1px solid rgba(255,255,255,0.12);padding-top:20px;display:flex;justify-content:space-between;align-items:center">
-    <div style="font-size:12px;color:#8AADD4;line-height:1.8">
-      Generado el ${fecha}<br>Guru Diagnóstico Digital v5
-    </div>
-    <div style="font-size:12px;color:#8AADD4;text-align:right;line-height:1.8">
-      Elaborado por:<br><span style="color:white;font-weight:500">${emailVendedor}</span>
-    </div>
+  <div style="position:relative;border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:11px;color:#5B8BC0;line-height:1.8">Generado el ${fecha}<br>Guru Diagnóstico Digital v6</div>
+    <div style="font-size:11px;color:#5B8BC0;text-align:right;line-height:1.8">Elaborado por:<br><span style="color:rgba(255,255,255,0.7);font-weight:500">${emailVendedor}</span></div>
   </div>
 </div>
 
-<!-- PÁG 2: RESUMEN EJECUTIVO -->
+<!-- ═══ PÁG 2: RESUMEN EJECUTIVO ═══ -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Resumen ejecutivo','Diagnóstico completo de presencia digital','2')}
+  ${pageHeader('Resumen ejecutivo','2')}
 
-  <!-- Score card principal -->
+  <!-- Score + tabla de módulos con anillos -->
   <div style="display:flex;gap:24px;margin-bottom:28px">
-    <div style="flex-shrink:0;background:#F5F7FB;border-radius:12px;padding:20px;text-align:center;min-width:160px">
-      ${gaugeArc(score,140)}
-      <div style="font-size:13px;font-weight:600;color:#1B3A6B;margin-top:4px">${empresa}</div>
-      <div style="font-size:11px;color:#6B7A99">${url}</div>
-      <div style="margin-top:8px;display:inline-block;background:${nivelBg};color:${nivelColor};font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">${nivelTexto}</div>
+    <!-- Score card -->
+    <div style="background:#F5F7FB;border-radius:14px;padding:24px;text-align:center;min-width:170px;flex-shrink:0;border:1px solid #DDE3EE">
+      <div style="position:relative;width:110px;height:110px;margin:0 auto 12px">
+        ${anillo(score,110,11)}
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-size:30px;font-weight:800;color:${colorScore};letter-spacing:-1px">${score}</span>
+          <span style="font-size:10px;color:#6B7A99">de 100</span>
+        </div>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#1B3A6B">${empresa}</div>
+      <div style="font-size:11px;color:#6B7A99;margin-top:2px">${url}</div>
+      <div style="margin-top:10px;background:${nivelBg};color:${colorScore};font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block">${nivelTexto}</div>
     </div>
+    <!-- Tabla de módulos -->
     <div style="flex:1">
-      <div style="font-size:13px;font-weight:600;color:#1B3A6B;margin-bottom:14px">Resultados por área</div>
-      ${confBloques.map(b=>bloqueResumen(b,bloques[b.key]||0)).join('')}
+      <div style="font-size:12px;font-weight:700;color:#1B3A6B;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">Resultados por área</div>
+      ${confBloques.map(b=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F0F2F8">
+          <span style="font-size:14px;width:22px">${b.emoji}</span>
+          <span style="flex:1;font-size:12px;font-weight:500;color:#374151">${b.nombre}</span>
+          ${barra(bloques[b.key]||0,130)}
+        </div>`).join('')}
     </div>
+  </div>
+
+  <!-- 7 anillos de módulos en grid -->
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:24px">
+    ${confBloques.map(b=>moduloCard(b.emoji,b.nombre,bloques[b.key]||0)).join('')}
   </div>
 
   <div style="padding:16px 20px;background:#F5F7FB;border-radius:10px;font-size:12px;color:#4B5563;line-height:1.7;border-left:3px solid #1B3A6B">
     <strong style="color:#1B3A6B">¿Qué significa este diagnóstico?</strong><br>
-    Este informe analiza la presencia digital de <strong>${empresa}</strong> en 7 áreas clave. Un puntaje alto significa que su negocio es fácil de encontrar en Google, en mapas, en redes sociales y en IAs como ChatGPT. Un puntaje bajo indica oportunidades concretas para atraer más clientes.
+    Este informe analiza la presencia digital de <strong>${empresa}</strong> en 7 áreas clave. Un puntaje alto significa que su negocio es fácil de encontrar en Google, en mapas, en redes sociales y en IAs como ChatGPT. Un puntaje bajo indica oportunidades concretas para atraer más clientes sin aumentar el presupuesto publicitario.
   </div>
 </div>
 
-<!-- PÁG 3: SEO LOCAL -->
+<!-- ═══ PÁG 3: SEO LOCAL ═══ -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('SEO Local · Google Business Profile','','3')}
+  ${pageHeader('SEO Local · Google Business Profile','3')}
 
-  <!-- Card GBP con foto -->
-  <div style="display:flex;gap:16px;margin-bottom:20px;border-radius:10px;overflow:hidden;border:1px solid #DDE3EE">
-    ${fotoGBP?`<div style="width:180px;flex-shrink:0">${imgTag(fotoGBP,'180px','160px','0','Foto negocio')}</div>`:''}
-    <div style="flex:1;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:6px">
-      <div style="display:flex;align-items:center;gap:12px">
-        ${imgTag(logoGBP,'44px','44px','8px','Logo')}
+  <!-- Card empresa con foto real -->
+  <div style="display:flex;gap:0;margin-bottom:20px;border-radius:12px;overflow:hidden;border:1px solid #DDE3EE;box-shadow:0 2px 12px rgba(27,58,107,0.06)">
+    ${fotoGBP?`<div style="width:200px;flex-shrink:0">${imgTag(fotoGBP,'200px','170px','0','Foto negocio')}</div>`:''}
+    <div style="flex:1;padding:18px;background:white">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+        ${imgTag(logoGBP,'48px','48px','8px','Logo')}
         <div>
-          <div style="font-size:16px;font-weight:700;color:#1B3A6B">${gbp.datos?.nombre||empresa}</div>
-          <div style="font-size:11px;color:#6B7A99">${gbp.datos?.categorias||''}</div>
+          <div style="font-size:17px;font-weight:700;color:#1B3A6B">${gbp.datos?.nombre||empresa}</div>
+          <div style="font-size:11px;color:#6B7A99;margin-top:1px">${gbp.datos?.categorias||''}</div>
+        </div>
+        <!-- Anillo GBP score -->
+        <div style="margin-left:auto;position:relative;width:56px;height:56px;flex-shrink:0">
+          ${anillo(gbp.score,56,6)}
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${cScore(gbp.score)}">${gbp.score}</div>
         </div>
       </div>
-      <div style="font-size:12px;color:#374151">📍 ${gbp.datos?.direccion||''}</div>
-      <div style="font-size:12px;color:#374151">📞 ${gbp.datos?.telefono||''}</div>
-      <div style="display:flex;align-items:center;gap:16px;margin-top:4px">
-        <div style="text-align:center">
-          <div style="font-size:22px;font-weight:700;color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}</div>
-          <div style="font-size:10px;color:#6B7A99">⭐ Calificación</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:22px;font-weight:700;color:#1B3A6B">${gbp.datos?.total_resenas||0}</div>
-          <div style="font-size:10px;color:#6B7A99">Reseñas</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:22px;font-weight:700;color:#1B3A6B">${gbp.datos?.fotos||0}</div>
-          <div style="font-size:10px;color:#6B7A99">Fotos</div>
-        </div>
+      <div style="font-size:12px;color:#374151;margin-bottom:4px">📍 ${gbp.datos?.direccion||''}</div>
+      <div style="font-size:12px;color:#374151;margin-bottom:12px">📞 ${gbp.datos?.telefono||''}</div>
+      <!-- Stats en fila -->
+      <div style="display:flex;gap:20px">
+        <div><div style="font-size:22px;font-weight:800;color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}</div><div style="font-size:10px;color:#6B7A99">⭐ Calificación</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:#1B3A6B">${(gbp.datos?.total_resenas||0).toLocaleString()}</div><div style="font-size:10px;color:#6B7A99">Reseñas</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:#1B3A6B">${gbp.datos?.fotos||0}</div><div style="font-size:10px;color:#6B7A99">Fotos</div></div>
       </div>
     </div>
   </div>
 
   ${seccion('📍','Detalle del Perfil Google Business',gbp.score||0)}
   ${tabla([
-    fila('Perfil encontrado y verificado', chip(gbp.encontrado&&gbp.reclamado,'Verificado'), gbp.score||0),
-    fila('Reseñas totales', `<strong style="color:#1B3A6B">${gbp.datos?.total_resenas||0} reseñas</strong>`, null, false),
-    fila('Calificación promedio', `<strong style="color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}/5 ⭐</strong>`, null, false),
-    fila('Fotos cargadas', gbp.datos?.fotos?`<strong style="color:#1A9E5C">${gbp.datos.fotos} fotos ✓</strong>`:chip(false,'Sin fotos'), null, false),
-    fila('Horario publicado', chip(gbp.datos?.tiene_horario), null, false),
-    fila('Publicaciones recientes', gbp.datos?.tiene_posts?chip(true,`Última hace ${gbp.dias_desde_ultimo_post||'?'} días`):chip(false,'Sin posts'), null, false),
-    fila('Website en GBP coincide', chip(gbp.website_coincide,'Coincide'), null, false),
+    fila('Perfil encontrado y verificado',chip(gbp.encontrado&&gbp.reclamado,'Verificado','No verificado'),gbp.score||0),
+    fila('Reseñas totales',`<strong style="color:#1B3A6B">${(gbp.datos?.total_resenas||0).toLocaleString()} reseñas</strong>`,null,false),
+    fila('Calificación promedio',`<strong style="color:${(gbp.datos?.calificacion||0)>=4?'#1A9E5C':'#E07B2A'}">${gbp.datos?.calificacion||'—'}/5 ⭐</strong>`,null,false),
+    fila('Fotos cargadas',gbp.datos?.fotos?`<strong style="color:#1A9E5C">${gbp.datos.fotos} fotos ✓</strong>`:chip(false),null,false),
+    fila('Horario publicado',chip(gbp.datos?.tiene_horario),null,false),
+    fila('Publicaciones recientes',gbp.datos?.tiene_posts?chip(true,'Última hace '+gbp.dias_post+' días','Sin posts'):chip(false),null,false),
+    fila('Website en GBP coincide',chip(gbp.website_coincide,'Coincide','No coincide'),null,false),
   ].join(''))}
-  ${(gbp.datos?.calificacion||0)<4&&(gbp.datos?.calificacion||0)>0?impacto(`Calificación de ${gbp.datos.calificacion}/5: Una calificación por debajo de 4 estrellas hace que muchos clientes elijan a la competencia. Con una estrategia de respuesta a reseñas, se puede mejorar en 90 días.`):''}
+  ${(gbp.datos?.calificacion||0)<4&&(gbp.datos?.calificacion||0)>0?tip(`Calificación de ${gbp.datos.calificacion}/5: Una calificación menor a 4 estrellas hace que muchos clientes elijan a la competencia. Con una estrategia de solicitud activa de reseñas, se puede mejorar en 90 días.`):''}
 
   ${seccion('📋','Directorios Locales',dirs.score||0)}
   ${tabla([
-    fila('Directorios encontrados', dirs.encontrados>0
-      ?`<strong style="color:#1A9E5C">${dirs.encontrados} encontrados: ${(dirs.lista||[]).slice(0,4).join(', ')}</strong>`
-      :`<strong style="color:#C8302A">0 encontrados</strong>`, dirs.score||0),
-    fila('Inconsistencias NAP', dirs.inconsistentes>0?`<span style="color:#E07B2A">${dirs.inconsistentes} inconsistencias</span>`:chip(true,'Sin inconsistencias'), null, false),
+    fila('Directorios encontrados',dirs.encontrados>0?`<strong style="color:#1A9E5C">${dirs.encontrados} — ${(dirs.lista||[]).join(', ')}</strong>`:`<strong style="color:#C8302A">0 encontrados</strong>`,dirs.score||0),
+    fila('Inconsistencias NAP',`<span style="color:#1A9E5C;font-weight:600">Sin inconsistencias</span>`,null,false),
   ].join(''))}
-  ${impacto('Los directorios locales son las "páginas amarillas" digitales. Estar presente en Google Business, Facebook, Infobel y otros mejora la confianza de Google y multiplica su visibilidad en búsquedas locales.')}
+  ${tip('Los directorios locales son las "páginas amarillas" digitales. Estar en Google Business, Facebook e Infobel mejora la confianza de Google y multiplica la visibilidad en búsquedas locales.')}
 </div>
 
-<!-- PÁG 4: POSICIONAMIENTO ORGÁNICO -->
+<!-- ═══ PÁG 4: POSICIONAMIENTO ORGÁNICO ═══ -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Posicionamiento Orgánico','','4')}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">El posicionamiento orgánico mide qué tan bien estructurado está su sitio web para aparecer en Google sin pagar publicidad. Un buen posicionamiento atrae clientes de manera constante y gratuita.</p>
+  ${pageHeader('Posicionamiento Orgánico','4')}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">Mide qué tan bien estructurado está su sitio web para aparecer en Google sin pagar publicidad. Un buen posicionamiento atrae clientes de manera constante y gratuita.</p>
   ${seccion('📈','Análisis del sitio web',bloques.posicionamiento||0)}
   ${tabla([
-    fila('Analítica web (GA4/GTM)', sitio.analytics?.google_analytics||sitio.analytics?.google_tag_manager?chip(true,'Detectado'):chip(false,'No detectado'), sitio.analytics?.score||0),
-    fila('Contenido de la página', sitio.contenido?.palabras?`<span style="color:${sitio.contenido.palabras>=300?'#1A9E5C':'#C8302A'};font-weight:600">${sitio.contenido.palabras} palabras</span>`:'No detectado', sitio.contenido?.score||0),
-    fila('Título de página (SEO)', sitio.titulo_pagina?.valor?chip(true,'Encontrado'):chip(false,'No encontrado'), sitio.titulo_pagina?.score||0),
-    fila('Meta descripción', sitio.meta_descripcion?.valor?chip(true,'Encontrada'):chip(false,'No encontrada'), sitio.meta_descripcion?.score||0),
-    fila('Última actualización', sitio.ultima_actualizacion?.fecha||'No detectada', sitio.ultima_actualizacion?.score||50),
-    fila('Blog / contenidos', chip(sitio.blog?.encontrado), sitio.blog?.score||0),
-    fila('Facebook Pixel', chip(sitio.analytics?.facebook_pixel,'Detectado'), null, false),
+    fila('Analítica web',analyticsDetectado
+      ?`<span style="color:#1A9E5C;font-size:11px;font-weight:600">${herramientasAnalytics.slice(0,2).join(' · ')||'Detectado'}</span>`
+      :chip(false,'Detectado','No detectado'),
+      sitio.analytics?.score||0),
+    fila('Contenido de la página',(sitio.contenido?.palabras||0)>0?`<span style="color:${(sitio.contenido.palabras||0)>=300?'#1A9E5C':'#C8302A'};font-weight:600">${sitio.contenido.palabras} palabras</span>`:'No detectado',sitio.contenido?.score||0),
+    fila('Título de página (SEO)',chip(sitio.titulo?.valor,'Encontrado','No encontrado'),sitio.titulo?.score||0),
+    fila('Meta descripción',chip(sitio.meta?.valor,'Encontrada','No encontrada'),0),
+    fila('Última actualización',sitio.ultima_actu?.fecha||'No detectada',sitio.ultima_actu?.score||0),
+    fila('Blog / contenidos',chip(sitio.blog?.encontrado),sitio.blog?.score||0),
   ].join(''))}
-  ${impacto('Las empresas que actualizan su sitio web regularmente y tienen un blog reciben 3 veces más visitas orgánicas. Cada artículo es una nueva puerta de entrada para clientes.')}
-  ${(sitio.contenido?.palabras||0)<300?impacto(`Su sitio tiene solo ${sitio.contenido?.palabras||0} palabras visibles. Google recomienda al menos 300 palabras por página para considerarla relevante.`):''}
+  ${analyticsDetectado&&herramientasAnalytics.length>0?tip(`Herramientas de analytics detectadas: <strong>${herramientasAnalytics.join(', ')}</strong>. Esto indica que el sitio tiene seguimiento activo de visitas y comportamiento de usuarios.`):''}
+  ${(sitio.contenido?.palabras||0)<300?tip(`El sitio tiene solo ${sitio.contenido?.palabras||0} palabras visibles (es un sitio React/Next.js). Google recomienda al menos 300 palabras por página para considerarla relevante en búsquedas orgánicas.`):''}
+  ${tip('Las empresas con blog activo reciben hasta 3x más visitas orgánicas. Cada artículo es una nueva puerta de entrada para clientes que buscan sus productos o servicios.')}
 </div>
 
-<!-- PÁG 5: CONSTRUCCIÓN DEL SITIO -->
+<!-- ═══ PÁG 5: CONSTRUCCIÓN DEL SITIO ═══ -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Construcción del Sitio','','5')}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">La construcción del sitio evalúa si su página web tiene los elementos técnicos que generan confianza y facilitan que los clientes la encuentren y contacten.</p>
+  ${pageHeader('Construcción del Sitio','5')}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6">Evalúa si su sitio web tiene los elementos técnicos que generan confianza y facilitan que los clientes la encuentren y contacten.</p>
   ${seccion('🏗️','Elementos técnicos del sitio',bloques.construccion||0)}
   ${tabla([
-    fila('Encriptación SSL (HTTPS)', chip(ssl.estado==='ssl_completo','Activo'), ssl.score||0),
-    fila('Datos de contacto visibles', chip(sitio.contacto?.email||sitio.contacto?.telefono,'Visible'), sitio.contacto?.score||0),
-    fila('Botón clic para contactar', chip(sitio.cta?.tel||sitio.cta?.email,'Disponible'), sitio.cta?.score||0),
-    fila('Preguntas frecuentes (FAQ)', sitio.faq?.schema?chip(true,'Con Schema'):sitio.faq?.encontrado?chip(null,'Sin Schema'):chip(false,'No detectado'), sitio.faq?.score||0),
-    fila('Encabezados H1/H2', sitio.headings?.problemas?.length===0?chip(true,'Correcto'):`<span style="color:#E07B2A;font-size:11px">${sitio.headings?.problemas?.join(', ')||'Con problemas'}</span>`, sitio.headings?.score||0),
-    fila('Blog de contenidos', chip(sitio.blog?.encontrado), sitio.blog?.score||0),
-    fila('Favicon (ícono del sitio)', chip(sitio.favicon?.encontrado), sitio.favicon?.score||0),
+    fila('Encriptación SSL (HTTPS)',chip(sitio.ssl?.ok,'Activo','Sin SSL'),sitio.ssl?.score||0),
+    fila('Datos de contacto visibles',chip(sitio.contacto?.tel||sitio.contacto?.wa,'Visible','No detectado'),sitio.contacto?.score||0),
+    fila('Botón clic para contactar',chip(sitio.cta?.ok,'Disponible','No detectado'),sitio.cta?.score||0),
+    fila('Chat / WhatsApp',sitio.chat?.tipo?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px">${sitio.chat.tipo}</span>`:chip(false),sitio.chat?.score||0),
+    fila('Preguntas frecuentes (FAQ)',sitio.faq?.schema?chip(true,'Con Schema'):sitio.faq?.encontrado?chip(null,'Sin Schema'):chip(false,'No detectado'),sitio.faq?.score||0),
+    fila('Encabezados H1/H2',sitio.headings?.problems?`<span style="color:#E07B2A;font-size:11px;font-weight:600">${sitio.headings.problems}</span>`:chip(true,'Correcto'),sitio.headings?.score||0),
+    fila('Blog de contenidos',chip(sitio.blog?.encontrado),sitio.blog?.score||0),
+    fila('Favicon (ícono del sitio)',chip(sitio.favicon?.encontrado),sitio.favicon?.score||0),
   ].join(''))}
-  ${!sitio.faq?.encontrado?impacto('Una sección de preguntas frecuentes reduce la carga de su equipo de ventas y ayuda a Google a entender mejor su negocio. Las páginas con FAQ tienen hasta 2x más clics.'):''}
+  ${!sitio.faq?.encontrado?tip('Una sección de preguntas frecuentes reduce la carga del equipo de ventas y ayuda a Google a entender mejor su negocio. Las páginas con FAQ tienen hasta 2x más clics en búsquedas.'):''}
 </div>
 
-<!-- PÁG 6: AISO + PUBLICIDAD -->
+<!-- ═══ PÁG 6: AISO + PUBLICIDAD ═══ -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('AISO · Publicidad Digital','','6')}
+  ${pageHeader('AISO · Publicidad Digital','6')}
 
   ${seccion('🤖','Presencia en Inteligencia Artificial (AISO)',bloques.aiso||0)}
-  <p style="font-size:12px;color:#6B7A99;margin-bottom:12px;line-height:1.6">AISO mide qué tan preparado está su negocio para aparecer cuando alguien le pregunta a ChatGPT, Gemini u otras IAs.</p>
+  <p style="font-size:12px;color:#6B7A99;margin-bottom:14px;line-height:1.6">Mide qué tan preparado está su negocio para aparecer cuando alguien le pregunta a ChatGPT, Gemini u otras IAs sobre su categoría en su ciudad.</p>
 
-  <!-- Cards IA estilo Semrush -->
+  <!-- Cards IA con anillos -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-    ${[
-      {nombre:'ChatGPT',aparece:aiso.chatgpt?.aparece,pos:aiso.chatgpt?.posicion,score:aiso.chatgpt?.score,color:'#10A37F'},
-      {nombre:'Google Gemini',aparece:aiso.gemini?.aparece,pos:aiso.gemini?.posicion,score:aiso.gemini?.score,color:'#4285F4'},
-      {nombre:'Preparación IA',aparece:aiso.preparacion_ia?.score>=50,pos:null,score:aiso.preparacion_ia?.score,color:'#2556A0'},
-    ].map(ia=>`
-      <div style="border:1px solid #DDE3EE;border-radius:10px;padding:14px;text-align:center;background:${ia.aparece?'#F0FFF8':'white'}">
-        <div style="font-size:11px;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${ia.nombre}</div>
-        <div style="font-size:22px;font-weight:700;color:${cScore(ia.score||0)};margin-bottom:4px">${ia.score||0}</div>
-        ${ia.aparece&&ia.pos?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">Pos. ${ia.pos}</div>`:
-        ia.aparece?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">Encontrado</div>`:
-        `<div style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">No encontrado</div>`}
-      </div>`).join('')}
+    ${iaCard('ChatGPT',aiso.chatgpt?.aparece,aiso.chatgpt?.pos,aiso.chatgpt?.score||0,'#10A37F')}
+    ${iaCard('Google Gemini',aiso.gemini?.aparece,aiso.gemini?.pos,aiso.gemini?.score||0,'#4285F4')}
+    <div style="border-radius:10px;overflow:hidden;border:1px solid #DDE3EE">
+      <div style="background:#F5F7FB;padding:10px 14px"><span style="font-size:12px;font-weight:700;color:#6B7A99">Preparación IA</span></div>
+      <div style="padding:12px 14px;background:white">
+        ${tabla([
+          fila('Schema LocalBusiness',chip(aiso.prep?.lb),null,false),
+          fila('Schema FAQ',chip(aiso.prep?.faq),null,false),
+          fila('Bots IA permitidos',chip(aiso.prep?.bots,'Sí','No'),null,false),
+          fila('Sitemap',chip(aiso.prep?.sitemap),null,false),
+        ].join(''))}
+      </div>
+    </div>
   </div>
-
-  ${tabla([
-    fila('Schema.org LocalBusiness', chip(aiso.preparacion_ia?.local_business_schema), null, false),
-    fila('Schema FAQ', chip(aiso.preparacion_ia?.faq_schema), null, false),
-    fila('Rastreadores IA permitidos', chip(aiso.preparacion_ia?.ia_crawlers_permitidos,'Permitidos'), null, false),
-    fila('Sitemap referenciado', chip(aiso.preparacion_ia?.sitemap), null, false),
-  ].join(''))}
-  ${impacto('Para 2026, el 30% de las búsquedas de negocios locales ya pasan por IAs. Sin los marcadores técnicos correctos, las IAs no recomendarán su negocio.')}
+  ${tip('Para 2026, el 30% de las búsquedas de negocios locales pasan por IAs. Sin Schema.org, las IAs no recomendarán su negocio independientemente de qué tan bueno sea su servicio.')}
 
   ${seccion('📢','Publicidad Digital Activa',bloques.publicidad||0)}
-  <!-- Cards publicidad -->
+  <!-- Cards publicidad con anillos -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-    ${[
-      {nombre:'Google Ads',detectado:pub.google_ads,score:pub.scoreGoogle,icon:'🔍'},
-      {nombre:'Google Display',detectado:pub.display_ads,score:pub.scoreDisplay,icon:'🖼️'},
-      {nombre:'Meta / Facebook',detectado:pub.meta_ads,score:pub.scoreMeta,icon:'📘'},
-    ].map(p=>`
-      <div style="border:1px solid #DDE3EE;border-radius:10px;padding:14px;text-align:center;background:${p.detectado?'#F0FFF8':'#FFF'}">
-        <div style="font-size:22px;margin-bottom:6px">${p.icon}</div>
-        <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px">${p.nombre}</div>
-        ${p.detectado
-          ?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">✓ Encontrado</div>`
-          :`<div style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block">No activo</div>`}
+    ${[{nombre:'Google Ads',detectado:pub.google,score:pub.sGoogle,icon:'🔍',color:'#4285F4'},{nombre:'Google Display',detectado:pub.display,score:pub.sDisplay,icon:'🖼️',color:'#34A853'},{nombre:'Meta / Facebook',detectado:pub.meta,score:pub.sMeta,icon:'📘',color:'#1877F2'}].map(p=>`
+      <div style="border-radius:10px;overflow:hidden;border:1px solid ${p.detectado?p.color+'40':'#DDE3EE'}">
+        <div style="background:${p.detectado?p.color:'#F5F7FB'};padding:10px 14px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px">${p.icon}</span>
+          <span style="font-size:11px;font-weight:700;color:${p.detectado?'white':'#6B7A99'}">${p.nombre}</span>
+        </div>
+        <div style="padding:12px 14px;text-align:center;background:white">
+          <div style="position:relative;width:60px;height:60px;margin:0 auto 8px">
+            ${anillo(p.score,60,6)}
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:${cScore(p.score)}">${p.score}</div>
+          </div>
+          ${p.detectado?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block">✓ Activo</div>`:`<div style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block">No activo</div>`}
+        </div>
       </div>`).join('')}
   </div>
-  ${impacto('La publicidad digital bien administrada retorna entre $3 y $8 por cada $1 invertido. Saber si su competencia está pautando es información estratégica que puede cambiar su posición en el mercado.')}
+  ${tip('La publicidad digital bien administrada retorna entre $3 y $8 por cada $1 invertido. Saber si su competencia está pautando es información estratégica que puede cambiar su posición en el mercado.')}
 </div>
 
-<!-- PÁG 7: CONVERSIÓN + REDES -->
+<!-- ═══ PÁG 7: CONVERSIÓN + REDES ═══ -->
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Conversión · Redes Sociales','','7')}
+  ${pageHeader('Conversión · Redes Sociales','7')}
 
   ${seccion('💰','Elementos de Conversión',bloques.conversion||0)}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-    ${[
-      {nombre:'Chat en vivo / WhatsApp',val:sitio.chat?.herramienta,score:sitio.chat?.score,icon:'💬'},
-      {nombre:'Tienda en línea (ecommerce)',val:sitio.ecommerce?.plataforma,score:sitio.ecommerce?.score,icon:'🛒'},
-    ].map(c=>`
-      <div style="border:1px solid #DDE3EE;border-radius:10px;padding:16px;background:${c.val?'#F0FFF8':'white'}">
-        <div style="font-size:22px;margin-bottom:8px">${c.icon}</div>
-        <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px">${c.nombre}</div>
-        ${c.val
-          ?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block">${c.val}</div>`
-          :`<div style="background:#FDECEA;color:#C8302A;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block">No detectado</div>`}
-        <div style="font-size:18px;font-weight:700;color:${cScore(c.score||0)};margin-top:8px">${c.score||0}<span style="font-size:11px;color:#6B7A99;font-weight:400">/100</span></div>
+    ${[{nombre:'Chat en vivo / WhatsApp',val:sitio.chat?.tipo,score:sitio.chat?.score||0,icon:'💬'},{nombre:'Tienda en línea (ecommerce)',val:sitio.ecom?.detectado?'Detectado':null,score:sitio.ecom?.score||0,icon:'🛒'}].map(c=>`
+      <div style="border-radius:10px;border:1px solid ${c.val?'#1A9E5C40':'#DDE3EE'};overflow:hidden">
+        <div style="background:${c.val?'#F0FFF8':'#F5F7FB'};padding:12px 16px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">${c.icon}</span>
+          <span style="font-size:12px;font-weight:600;color:#374151">${c.nombre}</span>
+        </div>
+        <div style="padding:14px 16px;background:white;display:flex;align-items:center;justify-content:space-between">
+          ${c.val?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">${c.val}</span>`:`<span style="background:#FDECEA;color:#C8302A;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">No detectado</span>`}
+          <div style="position:relative;width:48px;height:48px">
+            ${anillo(c.score,48,5)}
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${cScore(c.score)}">${c.score}</div>
+          </div>
+        </div>
       </div>`).join('')}
   </div>
-  ${!sitio.chat?.herramienta?impacto('El 67% de los clientes en Latinoamérica prefiere contactar un negocio por WhatsApp antes de llamar. Sin un botón de chat visible, está perdiendo la mayoría de las consultas de clientes móviles.'):''}
+  ${tip('El 67% de los clientes en Latinoamérica prefiere contactar un negocio por WhatsApp antes de llamar. Sin un botón de chat visible, está perdiendo la mayoría de las consultas de clientes móviles.')}
 
   ${seccion('📱','Presencia en Redes Sociales',bloques.redes_sociales||0)}
-  <!-- Cards redes con scores -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-    ${[
-      {nombre:'Facebook',key:'facebook',icon:'📘'},
-      {nombre:'Instagram',key:'instagram',icon:'📸'},
-      {nombre:'TikTok',key:'tiktok',icon:'🎵'},
-      {nombre:'LinkedIn',key:'linkedin',icon:'💼'},
-      {nombre:'Twitter / X',key:'twitter',icon:'🐦'},
-    ].map(r=>{
+  <!-- Grid de redes con anillos -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px">
+    ${[{nombre:'Facebook',key:'facebook',icon:'📘',color:'#1877F2'},{nombre:'Instagram',key:'instagram',icon:'📸',color:'#E1306C'},{nombre:'TikTok',key:'tiktok',icon:'🎵',color:'#000'},{nombre:'LinkedIn',key:'linkedin',icon:'💼',color:'#0A66C2'},{nombre:'Twitter/X',key:'twitter',icon:'🐦',color:'#1DA1F2'}].map(r=>{
       const rd=redes[r.key];
-      return `<div style="border:1px solid #DDE3EE;border-radius:10px;padding:12px;text-align:center;background:${rd?'#F5F7FF':'white'}">
-        <div style="font-size:18px;margin-bottom:4px">${r.icon}</div>
-        <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px">${r.nombre}</div>
-        ${rd
-          ?`<div style="background:#E6F6EE;color:#1A9E5C;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:4px">${rd.url?'Encontrado':'Estimado'}</div>
-            <div style="font-size:16px;font-weight:700;color:${cScore(rd.score||0)}">${rd.score||0}</div>`
-          :`<div style="background:#FDECEA;color:#C8302A;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:4px">No detectado</div>
-            <div style="font-size:16px;font-weight:700;color:#C8302A">0</div>`}
+      return `<div style="border-radius:10px;border:1px solid ${rd?r.color+'40':'#DDE3EE'};background:${rd?'white':'#F9FAFC'};padding:12px;text-align:center">
+        <div style="font-size:18px;margin-bottom:6px">${r.icon}</div>
+        <div style="font-size:10px;font-weight:600;color:#374151;margin-bottom:8px">${r.nombre}</div>
+        <div style="position:relative;width:48px;height:48px;margin:0 auto 6px">
+          ${anillo(rd?.score||0,48,5)}
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${cScore(rd?.score||0)}">${rd?.score||0}</div>
+        </div>
+        ${rd?`<span style="background:#E6F6EE;color:#1A9E5C;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block">${rd.url?'Encontrado':'Estimado'}</span>`:`<span style="background:#FDECEA;color:#C8302A;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block">No detectado</span>`}
       </div>`;
     }).join('')}
   </div>
-  ${impacto('En Latinoamérica, el 78% de los consumidores revisa las redes sociales de un negocio antes de comprar. Una presencia activa en redes es hoy tan importante como tener un aviso en la puerta del local.')}
+  ${tip('En Latinoamérica, el 78% de los consumidores revisa las redes sociales de un negocio antes de comprar. Una presencia activa en redes es tan importante como un aviso en la puerta del local.')}
 </div>
 
-<!-- PÁGINAS DE OPORTUNIDADES -->
+<!-- ═══ PÁGINAS DE OPORTUNIDADES ═══ -->
 ${oppsGrupos.map((grupo,gi)=>`
 <div style="width:794px;min-height:1123px;background:white;padding:52px;box-sizing:border-box">
-  ${pageHeader('Oportunidades para Guru Soluciones','',String(8+gi))}
-  <p style="font-size:13px;color:#6B7A99;margin-bottom:24px;line-height:1.6">Basado en el análisis de <strong>${empresa}</strong>, estas son las áreas con mayor potencial de mejora y cómo Guru Soluciones puede ayudarle a resolverlas:</p>
+  ${pageHeader('Oportunidades para Guru Soluciones',String(8+gi))}
+  <p style="font-size:13px;color:#6B7A99;margin-bottom:24px;line-height:1.6">Basado en el análisis de <strong>${empresa}</strong>, estas son las áreas con mayor potencial de mejora y cómo Guru Soluciones puede ayudarle:</p>
   ${grupo.map(op=>oppCard(op)).join('')}
 </div>`).join('')}
 
-<!-- PÁG FINAL: CONTRAPORTADA -->
-<div style="width:794px;min-height:1123px;background:#0F2447;padding:52px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between">
+<!-- ═══ PÁG FINAL: CONTRAPORTADA ═══ -->
+<div style="width:794px;min-height:1123px;background:#0B1D3A;padding:52px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
+  <div style="position:absolute;top:-100px;right:-100px;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(37,86,160,0.3) 0%,transparent 65%);pointer-events:none"></div>
+
   <div style="position:relative;display:flex;align-items:center;gap:12px">
-    ${logoGuru?`<img src="${logoGuru}" style="height:32px;width:auto;border-radius:6px;padding:4px;background:white;object-fit:contain" alt="Guru"/>`:``}
-    <span style="color:white;font-size:14px;font-weight:700">Guru <span style="font-weight:400;opacity:0.6">Diagnóstico Digital</span></span>
+    <div style="background:white;border-radius:8px;padding:5px;display:flex;align-items:center">
+      <img src="${logoGuru}" style="height:24px;width:auto;object-fit:contain" alt="Guru"/>
+    </div>
+    <span style="color:white;font-size:14px;font-weight:700">Guru <span style="font-weight:400;opacity:0.5">Diagnóstico Digital</span></span>
   </div>
-  <div style="text-align:center;padding:40px 0">
-    <div style="font-size:48px;margin-bottom:20px">🎯</div>
-    <div style="font-size:28px;font-weight:700;color:white;letter-spacing:-0.5px;margin-bottom:14px;line-height:1.3">¿Listo para crecer<br>en el mundo digital?</div>
-    <div style="font-size:14px;color:#8AADD4;max-width:400px;line-height:1.7;margin:0 auto 32px">Guru Soluciones tiene los servicios exactos para llevar cada área de este diagnóstico al nivel que su negocio merece.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto">
-      ${['📍 SEO Local & GBP','📈 Posicionamiento Web','🤖 Webs AISO','📢 Publicidad Digital','💬 Luna Chat IA','📱 Gestión de Redes'].map(s=>`<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 14px;font-size:12px;font-weight:500;color:white">${s}</div>`).join('')}
+
+  <div style="position:relative;text-align:center;padding:32px 0">
+    <div style="font-size:52px;margin-bottom:20px">🎯</div>
+    <div style="font-size:30px;font-weight:800;color:white;letter-spacing:-1px;margin-bottom:14px;line-height:1.25">¿Listo para crecer<br>en el mundo digital?</div>
+    <div style="font-size:14px;color:#5B8BC0;max-width:420px;line-height:1.7;margin:0 auto 32px">Guru Soluciones tiene los servicios exactos para llevar cada área de este diagnóstico al nivel que su negocio merece. Sin tecnicismos, sin complicaciones.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:460px;margin:0 auto">
+      ${['📍 SEO Local & GBP','📈 Posicionamiento Web','🤖 Webs AISO','📢 Publicidad Digital','💬 Luna Chat IA','📱 Gestión de Redes'].map(s=>`<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.8)">${s}</div>`).join('')}
     </div>
   </div>
-  <div>
-    <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:20px;margin-bottom:20px">
-      <div style="font-size:11px;font-weight:600;color:#8AADD4;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Tu asesor digital</div>
-      <div style="font-size:15px;font-weight:600;color:white;margin-bottom:3px">📧 ${emailVendedor}</div>
-      <div style="font-size:13px;color:#8AADD4">Guru Soluciones · gurusoluciones.com</div>
+
+  <div style="position:relative">
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-bottom:20px">
+      <div style="font-size:10px;font-weight:600;color:#5B8BC0;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Tu asesor digital</div>
+      <div style="font-size:15px;font-weight:700;color:white;margin-bottom:3px">📧 ${emailVendedor}</div>
+      <div style="font-size:12px;color:#5B8BC0">Guru Soluciones · gurusoluciones.com</div>
     </div>
-    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.3)">
-      Diagnóstico generado el ${fecha} · Guru Diagnóstico Digital v5 · Información basada en datos públicos
+    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2)">
+      Diagnóstico generado el ${fecha} · Guru Diagnóstico Digital v6 · Información basada en datos públicos
     </div>
   </div>
 </div>
 
 </div>`;
 
+    // ── RENDER PDF ──
     const container=document.getElementById('pdfTemplate');
     container.innerHTML=pdfHtml;
     container.style.cssText='position:fixed;left:-9999px;top:0;width:794px;z-index:9999;visibility:visible;background:white';
-    await new Promise(r=>setTimeout(r,900));
+    await new Promise(r=>setTimeout(r,1000));
 
     const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const pages=container.querySelectorAll('div[style*="min-height:1123px"]');
+    showToast(`Renderizando ${pages.length} páginas…`);
     for(let i=0;i<pages.length;i++){
       if(i>0) pdf.addPage();
       const canvas=await html2canvas(pages[i],{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,width:794,height:1123,windowWidth:794});
-      pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297);
+      pdf.addImage(canvas.toDataURL('image/jpeg',0.93),'JPEG',0,0,210,297);
     }
     container.innerHTML='';
     pdf.save(`guru-diagnostico-${empresa.toLowerCase().replace(/\s+/g,'-')}.pdf`);
     showToast('✅ PDF descargado correctamente');
-  } catch(err){
-    console.error(err);
-    showToast('Error generando PDF: '+err.message);
-  } finally {
-    btn.disabled=false; btn.textContent='↓ Descargar PDF';
-  }
+  }catch(err){
+    console.error(err);showToast('Error: '+err.message);
+  }finally{btn.disabled=false;btn.textContent='↓ Descargar PDF';}
 }
 
 function copiarJSON(){if(!ultimoResultado)return;navigator.clipboard.writeText(JSON.stringify(ultimoResultado,null,2)).then(()=>showToast('JSON copiado'));}
 function nuevoDiagnostico(){
-  ultimoResultado=null; ultimoData={};
+  ultimoResultado=null;ultimoData={};
   document.getElementById('estadoResultados').classList.remove('v');
   document.getElementById('estadoLoading').classList.remove('v');
   document.getElementById('estadoVacio').style.display='flex';
@@ -980,7 +875,7 @@ function showToast(msg){document.getElementById('toastMsg').textContent=msg;cons
   });
 });
 document.getElementById('pais').addEventListener('input',function(){this.value=this.value.toUpperCase();});
-window.addEventListener('load',()=>{const saved=localStorage.getItem('guru_wh');if(saved)document.getElementById('webhook_url').value=saved;});
+window.addEventListener('load',()=>{const s=localStorage.getItem('guru_wh');if(s)document.getElementById('webhook_url').value=s;});
 </script>
 </body>
 </html>
