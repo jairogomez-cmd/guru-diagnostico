@@ -1,3 +1,4 @@
+
 <h2 class="sr-only">Guru Diagnóstico Digital — Dashboard de presencia digital con generador de PDF</h2>
 
 <style>
@@ -48,7 +49,6 @@ body { font-family:var(--font) }
   transition:opacity 0.15s; box-shadow:0 4px 14px rgba(109,40,217,0.3) }
 .btn-run:hover { opacity:0.9 }
 .btn-run:disabled { opacity:0.5; cursor:not-allowed }
-.cost-note { text-align:center; font-size:11px; color:var(--text-muted) }
 .err-box { background:#fef2f2; border:1px solid #fecaca; border-radius:8px;
   padding:10px 12px; font-size:12px; color:#dc2626; display:none }
 .err-box.v { display:block }
@@ -225,7 +225,6 @@ body { font-family:var(--font) }
       <i class="ti ti-radar" aria-hidden="true"></i>
       <span id="btnLbl">Analizar empresa</span>
     </button>
-    <p class="cost-note">Costo estimado: ~$0.01 USD · Tiempo: ~40 seg</p>
   </aside>
 
   <!-- MAIN PANEL -->
@@ -447,9 +446,31 @@ function runDiagnostico() {
 
 let chartBar=null, chartDonut=null;
 
+function leerScore(data, key) {
+  // Leer score desde múltiples rutas posibles del payload de N16
+  const v = data.scores?.[key];
+  if (v !== undefined && v !== null) return Math.round(v);
+  // Fallbacks alternativos según cómo N16 puede devolver los datos
+  const alt = {
+    seoLocal: data.seoLocal?.score || data.gbp?.scoreGBP || 0,
+    posicionamiento: data.posicionamiento?.score || data.htmlAnalysis?.scorePOS || 0,
+    construccion: data.construccion?.score || data.htmlAnalysis?.scoreCONS || 0,
+    publicidad: data.publicidad?.scorePub || data.publicidad?.score || 0,
+    aiso: data.aiso?.scoreTotal || data.htmlAnalysis?.scoreAISO || 0,
+    conversion: data.conversion?.score || data.conversion?.scoreConv || 0,
+    redes: data.redesScores?.scoreRedes || data.redes?.scoreRedes || 0,
+  };
+  return Math.round(alt[key] || 0);
+}
+
 function mostrarResultados(data) {
   setState('stResults');
-  const score = data.scores?.global||0;
+  // Score global con múltiples fallbacks
+  const score = Math.round(data.scores?.global || data.scores?.overall ||
+    (() => {
+      const w = {seoLocal:0.20,posicionamiento:0.15,construccion:0.20,publicidad:0.10,aiso:0.15,conversion:0.10,redes:0.10};
+      return Object.keys(w).reduce((a,k) => a + leerScore(data,k)*w[k], 0);
+    })());
   const empresa = ultimoData.empresa;
   const url = ultimoData.url;
   const nivel = score>=70?'Presencia sólida':score>=45?'Puede mejorar':'Requiere atención';
@@ -470,7 +491,7 @@ function mostrarResultados(data) {
   document.getElementById('heroKpis').innerHTML = [
     {l:'Reseñas',v:gbp.resenas||'—'},
     {l:'Calificación',v:gbp.rating?(gbp.rating+' ★'):'—'},
-    {l:'Score GBP',v:(gbp.scoreGBP||0)+'/100'},
+    {l:'Score GBP',v:leerScore(data,'seoLocal')+'/100'},
   ].map(k=>`<div class="kpi"><div class="kpi-val">${k.v}</div><div class="kpi-lab">${k.l}</div></div>`).join('');
 
   // MÓDULOS
@@ -485,7 +506,7 @@ function mostrarResultados(data) {
   ];
   const grid = document.getElementById('modulesGrid');
   grid.innerHTML = conf.map(b => {
-    const s = data.scores?.[b.key]||0;
+    const s = leerScore(data, b.key);
     const col = SC(s);
     return `<div class="mod-card">
       <div class="mod-emoji">${b.e}</div>
@@ -499,7 +520,7 @@ function mostrarResultados(data) {
 
   // CHART BARRAS
   const labels = conf.map(b=>b.n.replace(' ',''));
-  const vals = conf.map(b=>data.scores?.[b.key]||0);
+  const vals = conf.map(b=>leerScore(data, b.key));
   const barColors = vals.map(v=>SC(v)+'CC');
 
   if (chartBar) chartBar.destroy();
@@ -522,7 +543,7 @@ function mostrarResultados(data) {
 
   // CHART DONUT
   const donutLabels = ['SEO Local','Posicionamiento','Construcción','Publicidad','AISO','Conversión','Redes'];
-  const donutVals = conf.map(b=>data.scores?.[b.key]||0);
+  const donutVals = conf.map(b=>leerScore(data, b.key));
   const donutColors = ['#7C3AED','#8B5CF6','#A78BFA','#6D28D9','#5B21B6','#4C1D95','#C4B5FD'];
 
   if (chartDonut) chartDonut.destroy();
@@ -580,7 +601,12 @@ async function generarPDF() {
 
   try {
     const data = ultimoDato;
-    const score = data.scores?.global||0;
+    // Score con múltiples fallbacks — mismo que en mostrarResultados
+    const score = Math.round(data.scores?.global || data.scores?.overall ||
+      (() => {
+        const w = {seoLocal:0.20,posicionamiento:0.15,construccion:0.20,publicidad:0.10,aiso:0.15,conversion:0.10,redes:0.10};
+        return Object.keys(w).reduce((a,k) => a + leerScore(data,k)*w[k], 0);
+      })());
     const empresa = ultimoData.empresa, url = ultimoData.url;
     const fecha = ultimoData.fecha, emailVendedor = ultimoData.even||'';
     const ciudad = ultimoData.ciudad||'', pais = ultimoData.pais||'';
@@ -720,7 +746,7 @@ async function generarPDF() {
     <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
       ${conf.map(b=>`<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 6px;text-align:center">
         <div style="font-size:12px;margin-bottom:3px">${b.e}</div>
-        <div style="font-size:16px;font-weight:800;color:${score>=70?'#C4B5FD':score>=45?'#FCD34D':'#FCA5A5'}">${data.scores?.[b.key]||0}</div>
+        <div style="font-size:16px;font-weight:800;color:${score>=70?'#C4B5FD':score>=45?'#FCD34D':'#FCA5A5'}">${leerScore(data,b.key)}</div>
         <div style="font-size:9px;color:rgba(255,255,255,0.45);margin-top:2px;line-height:1.2">${b.n}</div>
       </div>`).join('')}
     </div>
@@ -762,7 +788,7 @@ async function generarPDF() {
   <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:18px">
     ${conf.map(b=>`<div style="background:#F5F3FF;border:1px solid #EDE9FE;border-radius:10px;padding:12px 8px;text-align:center">
       <div style="font-size:14px;margin-bottom:4px">${b.e}</div>
-      ${anilloHTML(data.scores?.[b.key]||0,56,5)}
+      ${anilloHTML(leerScore(data,b.key),56,5)}
       <div style="font-size:9px;font-weight:600;color:#6B7A99;margin-top:4px;line-height:1.3">${b.n}</div>
     </div>`).join('')}
   </div>
@@ -789,11 +815,11 @@ async function generarPDF() {
         <div><div style="font-size:20px;font-weight:800;color:#4C1D95">${gbpRaw.fotosCount||0}</div><div style="font-size:10px;color:#6B7A99">Fotos</div></div>
       </div>
     </div>
-    <div style="flex-shrink:0;padding:16px;display:flex;align-items:center">${anilloHTML(data.scores?.seoLocal||0,72,7)}</div>
+    <div style="flex-shrink:0;padding:16px;display:flex;align-items:center">${anilloHTML(leerScore(data,"seoLocal"),72,7)}</div>
   </div>
-  ${seccion('📍','Detalle del Perfil Google Business',data.scores?.seoLocal||0)}
+  ${seccion('📍','Detalle del Perfil Google Business',leerScore(data,"seoLocal"))}
   ${tabla([
-    fila('Perfil encontrado y verificado',chip(gbpRaw.encontrado&&gbpRaw.reclamado,'Verificado','No verificado'),data.scores?.seoLocal||0),
+    fila('Perfil encontrado y verificado',chip(gbpRaw.encontrado&&gbpRaw.reclamado,'Verificado','No verificado'),leerScore(data,"seoLocal")),
     fila('Reseñas totales',`<strong style="color:#4C1D95">${(gbpRaw.resenas||0).toLocaleString()} reseñas</strong>`,null,false),
     fila('Calificación',`<strong style="color:${(gbpRaw.rating||0)>=4?'#6D28D9':'#D97706'}">${gbpRaw.rating||'—'}/5 ⭐</strong>`,null,false),
     fila('Fotos cargadas',gbpRaw.fotosCount?`<strong style="color:#6D28D9">${gbpRaw.fotosCount} fotos ✓</strong>`:chip(false),null,false),
@@ -811,7 +837,7 @@ async function generarPDF() {
 <!-- PÁG 4: POSICIONAMIENTO + CONSTRUCCIÓN -->
 <div class="pdf-page" style="${P};background:white;padding:52px">
   ${pageHdr('Posicionamiento · Construcción del Sitio','4')}
-  ${seccion('📈','Análisis del sitio web',data.scores?.posicionamiento||0)}
+  ${seccion('📈','Análisis del sitio web',leerScore(data,"posicionamiento"))}
   ${tabla([
     fila('Analítica web (GA4/GTM)',haRaw.analyticsDetectado?`<span style="color:#6D28D9;font-weight:600">${(haRaw.herramientasAnalytics||[]).slice(0,2).join(' · ')||'Detectado'}</span>`:chip(false,'Detectado','No detectado'),haRaw.scoreAnalytics||0),
     fila('Contenido visible',(haRaw.palabras||0)>0?`<span style="color:${(haRaw.palabras||0)>=300?'#6D28D9':'#DC2626'};font-weight:600">${haRaw.palabras} palabras</span>`:'No detectado',haRaw.scoreContenido||0),
@@ -822,7 +848,7 @@ async function generarPDF() {
   ].join(''))}
   ${tip('Las empresas con blog activo reciben hasta 3x más visitas orgánicas. Cada artículo es una nueva puerta de entrada para clientes.')}
 
-  ${seccion('🏗️','Elementos técnicos del sitio',data.scores?.construccion||0)}
+  ${seccion('🏗️','Elementos técnicos del sitio',leerScore(data,"construccion"))}
   ${tabla([
     fila('Encriptación SSL (HTTPS)',chip(consRaw.ssl||false,'Activo','Sin SSL'),consRaw.scoreSSL||0),
     fila('Chat / WhatsApp',convRaw.chatTipo?`<span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${convRaw.chatTipo}</span>`:chip(false),convRaw.scoreChat||0),
@@ -836,7 +862,7 @@ async function generarPDF() {
 <!-- PÁG 5: AISO + PUBLICIDAD -->
 <div class="pdf-page" style="${P};background:white;padding:52px">
   ${pageHdr('AISO · Publicidad Digital','5')}
-  ${seccion('🤖','Presencia en Inteligencia Artificial (AISO)',data.scores?.aiso||0)}
+  ${seccion('🤖','Presencia en Inteligencia Artificial (AISO)',leerScore(data,"aiso"))}
   <p style="font-size:12px;color:#6B7A99;margin-bottom:12px;line-height:1.6">AISO mide qué tan preparado está el negocio para aparecer cuando alguien le pregunta a ChatGPT, Gemini u otras IAs.</p>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
     ${[{n:'ChatGPT',a:aisoRaw.chatgpt_aparece||false,p:aisoRaw.chatgpt_posicion||null,s:aisoRaw.score_chatgpt||0,c:'#10A37F'},{n:'Google Gemini',a:aisoRaw.gemini_aparece||false,p:aisoRaw.gemini_posicion||null,s:aisoRaw.score_gemini||0,c:'#4285F4'},{n:'Preparación IA',a:(aisoRaw.scoreAISOPrep||haRaw.scoreAISOPrep||0)>=50,p:null,s:aisoRaw.scoreAISOPrep||haRaw.scoreAISOPrep||0,c:'#7C3AED'}].map(ia=>`
@@ -854,7 +880,7 @@ async function generarPDF() {
   ${tabla([fila('Schema LocalBusiness',chip(aisoRaw.schemaLocalBusiness||haRaw.schemaLB||false),null,false),fila('Schema FAQ',chip(aisoRaw.schemaFAQ||haRaw.schemaFAQ||false),null,false),fila('Bots IA permitidos',chip(aisoRaw.iasPermitidas||data.robotsAnalysis?.iasPermitidas||false,'Permitidos','Bloqueados'),null,false)].join(''))}
   ${tip('Para 2026, el 30% de las búsquedas de negocios locales pasan por IAs. Sin Schema.org, las IAs no recomendarán el negocio.')}
 
-  ${seccion('📢','Publicidad Digital Activa',data.scores?.publicidad||0)}
+  ${seccion('📢','Publicidad Digital Activa',leerScore(data,"publicidad"))}
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:10px">
     ${[{n:'Google Ads',ok:pubRaw.googleAdsDetectado||false,s:pubRaw.scoreGoogleAds||0,i:'🔍',c:'#4285F4'},{n:'Google Display',ok:pubRaw.displayDetectado||false,s:pubRaw.scoreDisplayAds||0,i:'🖼️',c:'#34A853'},{n:'Meta / Facebook',ok:pubRaw.metaAdsDetectado||false,s:pubRaw.scoreMetaAds||0,i:'📘',c:'#1877F2'}].map(p=>`
       <div style="border-radius:10px;overflow:hidden;border:1px solid ${p.ok?p.c+'40':'#EDE9FE'}">
@@ -872,7 +898,7 @@ async function generarPDF() {
 <!-- PÁG 6: CONVERSIÓN + REDES -->
 <div class="pdf-page" style="${P};background:white;padding:52px">
   ${pageHdr('Conversión · Redes Sociales','6')}
-  ${seccion('💰','Elementos de Conversión',data.scores?.conversion||0)}
+  ${seccion('💰','Elementos de Conversión',leerScore(data,"conversion"))}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
     ${[{n:'Chat en vivo / WhatsApp',v:convRaw.chatTipo||null,s:convRaw.scoreChat||0,i:'💬'},{n:'Tienda en línea (ecommerce)',v:convRaw.ecommerceDetectado?'Detectado':null,s:convRaw.scoreEcom||0,i:'🛒'}].map(c=>`
       <div style="border-radius:10px;border:1px solid ${c.v?'#A78BFA50':'#EDE9FE'};overflow:hidden">
@@ -887,7 +913,7 @@ async function generarPDF() {
   </div>
   ${tip('El 67% de los clientes en Latinoamérica prefiere contactar por WhatsApp antes de llamar. Sin chat visible, se pierden consultas de clientes móviles.')}
 
-  ${seccion('📱','Presencia en Redes Sociales',data.scores?.redes||0)}
+  ${seccion('📱','Presencia en Redes Sociales',leerScore(data,"redes"))}
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px">
     ${[{n:'Facebook',rd:redesRaw.facebook,s:redesRaw.fbScore||0,i:'📘',c:'#1877F2'},{n:'Instagram',rd:redesRaw.instagram,s:redesRaw.igScore||0,i:'📸',c:'#E1306C'},{n:'TikTok',rd:redesRaw.tiktok,s:redesRaw.ttScore||0,i:'🎵',c:'#000'},{n:'LinkedIn',rd:redesRaw.linkedin,s:redesRaw.liScore||0,i:'💼',c:'#0A66C2'},{n:'Twitter/X',rd:redesRaw.twitter,s:redesRaw.twScore||0,i:'🐦',c:'#1DA1F2'}].map(r=>`
       <div style="border-radius:10px;border:1px solid ${(r.rd||r.s>0)?r.c+'40':'#EDE9FE'};background:${(r.rd||r.s>0)?'#FAFAFF':'#F9FAFC'};padding:11px;text-align:center">
