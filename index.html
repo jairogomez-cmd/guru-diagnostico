@@ -15,13 +15,19 @@ body { font-family:var(--font) }
 .hdr { background:#fff; border-bottom:1px solid var(--pu100); padding:14px 24px;
   display:flex; align-items:center; justify-content:space-between }
 .hdr-logo { display:flex; align-items:center; gap:10px }
-.logo-mark { width:32px; height:32px; background:linear-gradient(135deg,var(--pu600),var(--pu400));
-  border-radius:8px; display:flex; align-items:center; justify-content:center;
-  color:#fff; font-weight:800; font-size:15px }
+.logo-mark { height:30px; width:auto; display:block }
 .logo-text { font-size:15px; font-weight:700; color:var(--pu700) }
 .logo-text span { color:var(--pu400); font-weight:400 }
 .hdr-badge { font-size:11px; font-weight:600; background:var(--pu100);
-  color:var(--pu600); padding:3px 10px; border-radius:20px }
+  color:var(--pu600); padding:3px 10px; border-radius:20px;
+  display:flex; align-items:center; gap:6px }
+.hdr-badge .live-dot { width:6px; height:6px; border-radius:50%; background:#22C55E;
+  box-shadow:0 0 0 0 rgba(34,197,94,0.6); animation:livePulse 2s infinite }
+@keyframes livePulse {
+  0% { box-shadow:0 0 0 0 rgba(34,197,94,0.5) }
+  70% { box-shadow:0 0 0 6px rgba(34,197,94,0) }
+  100% { box-shadow:0 0 0 0 rgba(34,197,94,0) }
+}
 
 /* LAYOUT */
 .layout { display:grid; grid-template-columns:340px 1fr; gap:0; min-height:560px }
@@ -60,14 +66,27 @@ body { font-family:var(--font) }
 .empty-ring { width:80px; height:80px; border-radius:50%;
   background:linear-gradient(135deg,var(--pu100),var(--pu50));
   border:2px solid var(--pu200); display:flex; align-items:center; justify-content:center;
-  font-size:32px }
+  font-size:32px; animation:ringPulse 3s ease-in-out infinite }
+@keyframes ringPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(139,92,246,0.15) }
+  50% { box-shadow:0 0 0 10px rgba(139,92,246,0) }
+}
 .empty h3 { font-size:16px; font-weight:600; color:var(--pu700) }
 .empty p { font-size:13px; color:var(--text-secondary); max-width:260px; line-height:1.6 }
 
 /* LOADING */
 .loading { display:none; flex-direction:column; gap:0; padding-top:40px }
 .loading.v { display:flex }
-.load-title { font-size:14px; font-weight:600; color:var(--pu700); margin-bottom:20px; text-align:center }
+.load-title { font-size:14px; font-weight:600; color:var(--pu700); margin-bottom:16px; text-align:center }
+.load-progress { width:100%; height:5px; border-radius:20px; background:var(--pu100);
+  overflow:hidden; margin-bottom:24px }
+.load-progress-bar { height:100%; width:0%; border-radius:20px;
+  background:linear-gradient(90deg,var(--pu400),var(--pu600));
+  transition:width 1.4s cubic-bezier(0.22,0.8,0.4,1); position:relative; overflow:hidden }
+.load-progress-bar::after { content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);
+  animation:shimmer 1.3s linear infinite }
+@keyframes shimmer { 0%{ transform:translateX(-100%) } 100%{ transform:translateX(100%) } }
 .step { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--pu50) }
 .step:last-child { border-bottom:none }
 .step-dot { width:32px; height:32px; border-radius:50%; border:1.5px solid var(--pu200);
@@ -85,11 +104,20 @@ body { font-family:var(--font) }
 /* SCORE HERO */
 .score-hero { background:linear-gradient(135deg,var(--pu700) 0%,var(--pu500) 100%);
   border-radius:16px; padding:24px; display:grid; grid-template-columns:auto 1fr auto;
-  gap:20px; align-items:center; margin-bottom:18px; position:relative; overflow:hidden }
+  gap:20px; align-items:center; margin-bottom:18px; position:relative; overflow:hidden;
+  box-shadow:0 10px 30px -8px rgba(109,40,217,0.45);
+  opacity:0; transform:translateY(10px); animation:heroIn 0.6s cubic-bezier(0.22,0.8,0.4,1) 0.15s forwards }
+@keyframes heroIn { to { opacity:1; transform:translateY(0) } }
 .score-hero::before { content:''; position:absolute; top:-40px; right:-40px;
   width:200px; height:200px; border-radius:50%;
-  background:rgba(255,255,255,0.06); pointer-events:none }
-.sh-gauge { position:relative; width:90px; height:90px; flex-shrink:0 }
+  background:rgba(255,255,255,0.06); pointer-events:none;
+  animation:floatDrift2 16s ease-in-out infinite }
+.score-hero::after { content:''; position:absolute; bottom:-60px; left:-20px;
+  width:160px; height:160px; border-radius:50%;
+  background:rgba(255,255,255,0.05); pointer-events:none;
+  animation:floatDrift3 20s ease-in-out infinite }
+.sh-gauge { position:relative; width:90px; height:90px; flex-shrink:0;
+  filter:drop-shadow(0 0 10px rgba(255,255,255,0.35)) }
 .sh-gauge svg { transform:rotate(-90deg) }
 .sh-num { position:absolute; inset:0; display:flex; flex-direction:column;
   align-items:center; justify-content:center; color:#fff }
@@ -107,7 +135,12 @@ body { font-family:var(--font) }
 /* MÓDULOS GRID */
 .modules-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px }
 .mod-card { background:#fff; border:1px solid var(--pu100); border-radius:12px;
-  padding:14px 12px; text-align:center; position:relative; overflow:hidden }
+  padding:14px 12px; text-align:center; position:relative; overflow:hidden;
+  transition:transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  opacity:0; transform:translateY(8px); animation:cardIn 0.5s ease forwards }
+.mod-card:hover { transform:translateY(-3px); box-shadow:0 10px 22px -10px rgba(109,40,217,0.35);
+  border-color:var(--pu400) }
+@keyframes cardIn { to { opacity:1; transform:translateY(0) } }
 .mod-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px;
   background:linear-gradient(90deg,var(--pu400),var(--pu600)) }
 .mod-emoji { font-size:18px; margin-bottom:6px }
@@ -119,7 +152,9 @@ body { font-family:var(--font) }
 
 /* CHARTS ROW */
 .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px }
-.chart-card { background:#fff; border:1px solid var(--pu100); border-radius:12px; padding:16px }
+.chart-card { background:#fff; border:1px solid var(--pu100); border-radius:12px; padding:16px;
+  transition:box-shadow 0.2s ease, border-color 0.2s ease }
+.chart-card:hover { box-shadow:0 10px 22px -10px rgba(109,40,217,0.25); border-color:var(--pu200) }
 .chart-title { font-size:12px; font-weight:600; color:var(--pu700); margin-bottom:12px }
 
 /* OPORTUNIDADES */
@@ -128,7 +163,9 @@ body { font-family:var(--font) }
   letter-spacing:0.6px; margin-bottom:10px }
 .opps-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px }
 .opp-card { background:#fff; border:1px solid var(--pu100); border-radius:10px;
-  padding:12px 14px; border-left:3px solid var(--pu400) }
+  padding:12px 14px; border-left:3px solid var(--pu400);
+  transition:transform 0.15s ease, box-shadow 0.15s ease }
+.opp-card:hover { transform:translateX(2px); box-shadow:0 6px 16px -8px rgba(109,40,217,0.3) }
 .opp-area { font-size:10px; font-weight:700; color:var(--pu600); text-transform:uppercase; letter-spacing:0.5px }
 .opp-txt { font-size:12px; font-weight:500; color:var(--text-primary); margin-top:3px }
 .opp-prod { display:inline-block; margin-top:5px; font-size:10px; font-weight:600;
@@ -144,12 +181,30 @@ body { font-family:var(--font) }
   color:#fff; border:none; border-radius:8px; padding:10px; font-size:13px;
   font-weight:600; cursor:pointer; font-family:var(--font);
   display:flex; align-items:center; justify-content:center; gap:6px;
-  box-shadow:0 4px 12px rgba(109,40,217,0.25) }
-.btn-pdf:hover { opacity:0.9 }
-.btn-pdf:disabled { opacity:0.5; cursor:not-allowed }
+  box-shadow:0 4px 12px rgba(109,40,217,0.25);
+  animation:pdfPulse 2.4s ease-in-out infinite; transition:transform 0.15s ease }
+.btn-pdf:hover { opacity:0.95; transform:translateY(-1px) }
+.btn-pdf:active { transform:translateY(0) }
+.btn-pdf:disabled { opacity:0.5; cursor:not-allowed; animation:none }
+@keyframes pdfPulse {
+  0%,100% { box-shadow:0 4px 12px rgba(109,40,217,0.25) }
+  50% { box-shadow:0 4px 20px rgba(109,40,217,0.5) }
+}
 
 /* FLOAT ELEMENTS */
 .float-el { position:absolute; border-radius:50%; pointer-events:none; opacity:0.45 }
+.float-el.f1 { animation:floatDrift1 14s ease-in-out infinite }
+.float-el.f2 { animation:floatDrift2 18s ease-in-out infinite }
+.float-el.f3 { animation:floatDrift3 22s ease-in-out infinite }
+@keyframes floatDrift1 { 0%,100%{ transform:translate(0,0) scale(1) } 50%{ transform:translate(-18px,22px) scale(1.06) } }
+@keyframes floatDrift2 { 0%,100%{ transform:translate(0,0) scale(1) } 50%{ transform:translate(16px,-18px) scale(0.95) } }
+@keyframes floatDrift3 { 0%,100%{ transform:translate(0,0) } 50%{ transform:translate(-12px,-14px) } }
+.float-dot { position:absolute; border-radius:50%; pointer-events:none }
+@keyframes dotBob { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-10px) } }
+
+@media (prefers-reduced-motion:reduce) {
+  .float-el, .float-el.f1, .float-el.f2, .float-el.f3, .float-dot { animation:none !important }
+}
 
 /* SPINNER */
 @keyframes spin { to { transform:rotate(360deg) } }
@@ -168,16 +223,19 @@ body { font-family:var(--font) }
 <div class="app" id="app">
 
 <!-- FLOAT DECORATIVE ELEMENTS -->
-<div class="float-el" style="width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,0.08),transparent);top:-80px;right:0;position:absolute"></div>
-<div class="float-el" style="width:200px;height:200px;background:radial-gradient(circle,rgba(167,139,250,0.06),transparent);bottom:40px;left:50px;position:absolute"></div>
+<div class="float-el f1" style="width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,0.08),transparent);top:-80px;right:0;position:absolute"></div>
+<div class="float-el f2" style="width:200px;height:200px;background:radial-gradient(circle,rgba(167,139,250,0.06),transparent);bottom:40px;left:50px;position:absolute"></div>
+<div class="float-el f3" style="width:140px;height:140px;background:radial-gradient(circle,rgba(139,92,246,0.05),transparent);top:220px;left:-40px;position:absolute"></div>
+<div class="float-dot" style="width:8px;height:8px;background:#A78BFA;opacity:0.5;top:120px;right:120px;animation:dotBob 5s ease-in-out infinite"></div>
+<div class="float-dot" style="width:5px;height:5px;background:#7C3AED;opacity:0.4;top:340px;right:60px;animation:dotBob 6.5s ease-in-out infinite 1s"></div>
 
 <!-- HEADER -->
 <header class="hdr">
   <div class="hdr-logo">
-    <div class="logo-mark">G</div>
-    <span class="logo-text">Guru <span>Diagnóstico Digital</span></span>
+    <img class="logo-mark" id="hdrLogo" alt="Guru" />
+    <span class="logo-text">Diagnóstico <span>Digital</span></span>
   </div>
-  <span class="hdr-badge">Herramienta interna · v8</span>
+  <span class="hdr-badge"><span class="live-dot"></span>Herramienta interna · v8</span>
 </header>
 
 <!-- MAIN LAYOUT -->
@@ -260,6 +318,7 @@ body { font-family:var(--font) }
     <!-- LOADING -->
     <div class="loading" id="stLoading">
       <div class="load-title">Analizando <span id="loadName" style="color:var(--pu600)">—</span>…</div>
+      <div class="load-progress"><div class="load-progress-bar" id="loadProgressBar"></div></div>
       <div id="stepsList">
         <div class="step"><div class="step-dot active" id="sd0">🔍</div><div class="step-info"><div class="sn">Validando y normalizando datos</div><div class="sd">URL, ciudad, formulario</div></div></div>
         <div class="step"><div class="step-dot" id="sd1">🌐</div><div class="step-info"><div class="sn">Descargando sitio web</div><div class="sd">HTML, SSL, redirecciones</div></div></div>
@@ -340,7 +399,9 @@ const { jsPDF } = window.jspdf;
 let ultimoDato = null, ultimoData = {}, stepTimers = [];
 const DELAYS = [500,1600,3000,4600,6400,8200,10200];
 
-const LOGO_B64 = 'data:image/png;base64,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';
+const LOGO_B64 = 'data:image/png;base64,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';
+
+document.getElementById('hdrLogo').src = LOGO_B64;
 
 const SC = s => s>=70?'#7C3AED':s>=45?'#D97706':'#DC2626';
 const SC_BG = s => s>=70?'#EDE9FE':s>=45?'#FEF3C7':'#FEE2E2';
@@ -373,6 +434,8 @@ function setState(id) {
 
 function iniciarPasos(nombre) {
   document.getElementById('loadName').textContent = nombre;
+  const bar = document.getElementById('loadProgressBar');
+  if (bar) bar.style.width = '4%';
   for (let i=0; i<7; i++) {
     const el = document.getElementById('sd'+i);
     el.className = 'step-dot';
@@ -383,6 +446,7 @@ function iniciarPasos(nombre) {
     const t = setTimeout(() => {
       if (i>0) { const p=document.getElementById('sd'+(i-1)); p.className='step-dot done'; p.textContent='✓'; }
       if (i<7) document.getElementById('sd'+i).classList.add('active');
+      if (bar) bar.style.width = Math.round(((i+1)/7)*96)+'%';
     }, d);
     stepTimers.push(t);
   });
@@ -390,6 +454,8 @@ function iniciarPasos(nombre) {
 function completarPasos() {
   stepTimers.forEach(t=>clearTimeout(t));
   for (let i=0; i<7; i++) { const el=document.getElementById('sd'+i); el.className='step-dot done'; el.textContent='✓'; }
+  const bar = document.getElementById('loadProgressBar');
+  if (bar) bar.style.width = '100%';
 }
 
 function runDiagnostico() {
@@ -508,10 +574,10 @@ function mostrarResultados(rawData) {
     {key:'redes',n:'Redes Sociales',e:'📱'},
   ];
   const grid = document.getElementById('modulesGrid');
-  grid.innerHTML = conf.map(b => {
+  grid.innerHTML = conf.map((b,idx) => {
     const s = data.scores?.[b.key]||0;
     const col = SC(s);
-    return `<div class="mod-card">
+    return `<div class="mod-card" style="animation-delay:${idx*60}ms">
       <div class="mod-emoji">${b.e}</div>
       <div class="mod-ring">
         ${anilloSVG(s,56,5,'#E8E0FA')}
@@ -620,12 +686,6 @@ async function generarPDF() {
 
     // GBP — múltiples rutas posibles según versión de N4/N16
     const gbpRaw = data.gbp || data.seoLocal?.gbp || data.gbp_data || {};
-    // Debug: mostrar en consola exactamente qué llega
-    console.log('=== DEBUG PDF ===');
-    console.log('data keys:', Object.keys(data));
-    console.log('gbpRaw:', JSON.stringify(gbpRaw).substring(0,300));
-    console.log('scores:', JSON.stringify(data.scores));
-    console.log('directorios:', JSON.stringify(data.directorios));
     const dirsRaw = data.directorios||{};
     const haRaw = data.htmlAnalysis||{};
     const consRaw = data.construccion||{};
@@ -814,6 +874,26 @@ async function generarPDF() {
     </div>`).join('')}
   </div>
 
+  <!-- Comparativo vs. promedio -->
+  <div style="background:white;border:1px solid #EDE9FE;border-radius:12px;padding:16px;margin-bottom:14px">
+    <div style="font-size:12px;font-weight:700;color:#4C1D95;margin-bottom:10px">Tu puntaje frente al promedio del sector*</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:10px;color:#6B7A99;width:78px;flex-shrink:0">${empresa}</span>
+      <div style="flex:1;height:14px;background:#F5F3FF;border-radius:20px;overflow:hidden">
+        <div style="width:${Math.max(score,4)}%;height:100%;border-radius:20px;background:linear-gradient(90deg,${nivelC},${nivelC}CC)"></div>
+      </div>
+      <span style="font-size:12px;font-weight:800;color:${nivelC};width:32px;text-align:right">${score}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:10px;color:#6B7A99;width:78px;flex-shrink:0">Promedio pymes</span>
+      <div style="flex:1;height:14px;background:#F5F3FF;border-radius:20px;overflow:hidden">
+        <div style="width:52%;height:100%;border-radius:20px;background:#C4B5FD"></div>
+      </div>
+      <span style="font-size:12px;font-weight:800;color:#A78BFA;width:32px;text-align:right">52</span>
+    </div>
+    <div style="font-size:9px;color:#A1A9BC;margin-top:8px">*Referencia estimada por Guru Soluciones sobre pymes de rubros similares en Latinoamérica.</div>
+  </div>
+
   <div style="padding:14px 16px;background:#F5F3FF;border-radius:10px;font-size:12px;color:#374151;line-height:1.7;border-left:3px solid #7C3AED">
     <strong style="color:#4C1D95">¿Qué significa este diagnóstico?</strong><br>
     Analizamos la presencia digital de <strong>${empresa}</strong> en 7 áreas clave. Un puntaje alto significa visibilidad en Google, IAs como ChatGPT y redes sociales. Cada área con score bajo es una oportunidad de crecimiento que Guru Soluciones puede resolver.
@@ -972,21 +1052,32 @@ ${oppsGrupos.map((grupo,gi)=>`
     <div style="background:white;border-radius:8px;padding:5px 7px"><img src="${LOGO_B64}" style="height:22px;width:auto" alt="Guru"/></div>
     <span style="color:white;font-size:14px;font-weight:700">Guru <span style="font-weight:400;opacity:0.5">Diagnóstico Digital</span></span>
   </div>
-  <div style="text-align:center;padding:60px 40px 40px">
-    <div style="font-size:52px;margin-bottom:18px">🎯</div>
-    <div style="font-size:28px;font-weight:800;color:white;letter-spacing:-1px;margin-bottom:12px;line-height:1.25">¿Listo para crecer<br>en el mundo digital?</div>
-    <div style="font-size:14px;color:#C4B5FD;max-width:400px;line-height:1.7;margin:0 auto 28px">Guru Soluciones tiene los servicios exactos para cada área de este diagnóstico. Sin tecnicismos, sin complicaciones.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:440px;margin:0 auto">
+  <div style="text-align:center;padding:44px 40px 28px">
+    <div style="font-size:44px;margin-bottom:14px">🎯</div>
+    <div style="font-size:27px;font-weight:800;color:white;letter-spacing:-1px;margin-bottom:10px;line-height:1.25">¿Listo para subir tu score<br>de ${score} a 90+?</div>
+    <div style="font-size:13px;color:#C4B5FD;max-width:400px;line-height:1.7;margin:0 auto 22px">Guru Soluciones tiene los servicios exactos para cada área de este diagnóstico. Sin tecnicismos, sin complicaciones.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:440px;margin:0 auto 22px">
       ${['📍 SEO Local & GBP','📈 Posicionamiento Web','🤖 Webs AISO','📢 Publicidad Digital','💬 Luna Chat IA','📱 Gestión de Redes'].map(s=>`<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 14px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.85)">${s}</div>`).join('')}
     </div>
+    <!-- CTA principal -->
+    <div style="display:inline-block;background:white;border-radius:40px;padding:14px 32px;box-shadow:0 10px 30px rgba(0,0,0,0.25)">
+      <span style="font-size:14px;font-weight:800;color:#4C1D95">📅 Agenda tu asesoría gratuita</span>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:10px">Responde este informe o escribe a tu asesor — sin costo, sin compromiso.</div>
   </div>
   <div style="position:absolute;bottom:40px;left:52px;right:52px">
-    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:18px;margin-bottom:14px">
-      <div style="font-size:10px;font-weight:600;color:#C4B5FD;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Tu asesor digital</div>
-      <div style="font-size:15px;font-weight:700;color:white;margin-bottom:3px">📧 ${emailVendedor}</div>
-      <div style="font-size:12px;color:#C4B5FD">Guru Soluciones · gurusoluciones.com</div>
+    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:10px;font-weight:600;color:#C4B5FD;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Tu asesor digital</div>
+        <div style="font-size:15px;font-weight:700;color:white;margin-bottom:3px">📧 ${emailVendedor}</div>
+        <div style="font-size:12px;color:#C4B5FD">Guru Soluciones · gurusoluciones.com</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:10px 16px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:white">${score}</div>
+        <div style="font-size:9px;color:#C4B5FD;text-transform:uppercase">score actual</div>
+      </div>
     </div>
-    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.25)">Generado el ${fecha} · Guru Diagnóstico Digital v8 · Basado en datos públicos</div>
+    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.25)">Generado el ${fecha} · Guru Diagnóstico Digital · Basado en datos públicos</div>
   </div>
 </div>
 
