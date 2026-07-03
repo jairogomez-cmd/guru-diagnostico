@@ -1,3 +1,4 @@
+
 <h2 class="sr-only">Guru Diagnóstico Digital — Dashboard de presencia digital con generador de PDF</h2>
 
 <style>
@@ -424,7 +425,11 @@ function runDiagnostico() {
   .then(r => r.text())
   .then(txt => {
     if (!txt||!txt.trim()) throw new Error('El workflow no devolvió datos. Verifica que esté activo en n8n.');
-    const data = JSON.parse(txt);
+    let data = JSON.parse(txt);
+    // n8n puede devolver array [{...}] — normalizar a objeto
+    if (Array.isArray(data)) data = data[0] || {};
+    // Si hay wrapper {data: {...}} también normalizar
+    if (data.data && !data.scores && !data.gbp) data = data.data;
     completarPasos();
     setTimeout(() => mostrarResultados(data), 400);
     ultimoDato = data;
@@ -459,7 +464,11 @@ function leerScore(data, key) {
 
 let chartBar=null, chartDonut=null;
 
-function mostrarResultados(data) {
+function mostrarResultados(rawData) {
+  // Normalizar por si llega como array
+  let data = rawData;
+  if (Array.isArray(data)) data = data[0] || {};
+  if (data.data && !data.scores && !data.gbp) data = data.data;
   setState('stResults');
   const score = Math.round(data.scores?.global || data.scores?.overall || (()=>{
       const w={seoLocal:0.20,posicionamiento:0.15,construccion:0.20,publicidad:0.10,aiso:0.15,conversion:0.10,redes:0.10};
@@ -594,7 +603,10 @@ async function generarPDF() {
   showToast('Preparando PDF profesional…');
 
   try {
-    const data = ultimoDato;
+    // Normalizar ultimoDato por si n8n devolvió array
+    let data = ultimoDato;
+    if (Array.isArray(data)) data = data[0] || {};
+    if (data.data && !data.scores && !data.gbp) data = data.data;
     const score = Math.round(data.scores?.global || data.scores?.overall || (()=>{
       const w={seoLocal:0.20,posicionamiento:0.15,construccion:0.20,publicidad:0.10,aiso:0.15,conversion:0.10,redes:0.10};
       return Object.keys(w).reduce((a,k)=>a+leerScore(data,k)*w[k],0);
@@ -606,7 +618,14 @@ async function generarPDF() {
     const nivelBg = score>=70?'#EDE9FE':score>=45?'#FEF3C7':'#FEE2E2';
     const nivelC = SC(score);
 
-    const gbpRaw = data.gbp||{};
+    // GBP — múltiples rutas posibles según versión de N4/N16
+    const gbpRaw = data.gbp || data.seoLocal?.gbp || data.gbp_data || {};
+    // Debug: mostrar en consola exactamente qué llega
+    console.log('=== DEBUG PDF ===');
+    console.log('data keys:', Object.keys(data));
+    console.log('gbpRaw:', JSON.stringify(gbpRaw).substring(0,300));
+    console.log('scores:', JSON.stringify(data.scores));
+    console.log('directorios:', JSON.stringify(data.directorios));
     const dirsRaw = data.directorios||{};
     const haRaw = data.htmlAnalysis||{};
     const consRaw = data.construccion||{};
@@ -735,7 +754,7 @@ async function generarPDF() {
       <div>
         <div style="background:${nivelBg};color:${nivelC};font-size:13px;font-weight:700;padding:6px 16px;border-radius:20px;display:inline-block;margin-bottom:16px">${nivel}</div>
         <div style="display:flex;gap:24px">
-          ${[{l:'Reseñas GBP',v:(gbpRaw.resenas||gbpRaw.total_resenas||0)||'—'},{l:'Calificación',v:gbpRaw.rating?(gbpRaw.rating+' ★'):gbpRaw.calificacion?(gbpRaw.calificacion+' ★'):'—'},{l:'Fotos GBP',v:(gbpRaw.fotosCount||gbpRaw.fotos||0)||'—'}].map(k=>`
+          ${[{l:'Reseñas GBP',v:(gbpRaw.resenas||gbpRaw.total_resenas||gbpRaw.reviews||gbpRaw.reviews_count||0)>0?(gbpRaw.resenas||gbpRaw.total_resenas||gbpRaw.reviews||0).toLocaleString()+'':'—'},{l:'Calificación',v:(gbpRaw.rating||gbpRaw.calificacion||gbpRaw.score_rating||0)>0?((gbpRaw.rating||gbpRaw.calificacion||gbpRaw.score_rating)+' ★'):'—'},{l:'Fotos GBP',v:(gbpRaw.fotosCount||gbpRaw.fotos||gbpRaw.photos||gbpRaw.photos_count||0)>0?(gbpRaw.fotosCount||gbpRaw.fotos||gbpRaw.photos||0)+'':'—'}].map(k=>`
             <div>
               <div style="font-size:24px;font-weight:800;color:white">${k.v}</div>
               <div style="font-size:10px;color:#C4B5FD;text-transform:uppercase;letter-spacing:0.5px">${k.l}</div>
@@ -812,9 +831,9 @@ async function generarPDF() {
       <div style="font-size:12px;color:#374151;margin-bottom:3px">📍 ${gbpRaw.direccion||''}</div>
       <div style="font-size:12px;color:#374151;margin-bottom:10px">📞 ${gbpRaw.telefono||''}</div>
       <div style="display:flex;gap:20px">
-        <div><div style="font-size:20px;font-weight:800;color:${(gbpRaw.rating||0)>=4?'#6D28D9':'#D97706'}">${gbpRaw.rating||'—'}</div><div style="font-size:10px;color:#6B7A99">⭐ Calificación</div></div>
+        <div><div style="font-size:20px;font-weight:800;color:${((gbpRaw.rating||gbpRaw.calificacion)||0)>=4?'#6D28D9':'#D97706'}">${gbpRaw.rating||gbpRaw.calificacion||'—'}</div><div style="font-size:10px;color:#6B7A99">⭐ Calificación</div></div>
         <div><div style="font-size:20px;font-weight:800;color:#4C1D95">${(gbpRaw.resenas||0).toLocaleString()}</div><div style="font-size:10px;color:#6B7A99">Reseñas</div></div>
-        <div><div style="font-size:20px;font-weight:800;color:#4C1D95">${gbpRaw.fotosCount||0}</div><div style="font-size:10px;color:#6B7A99">Fotos</div></div>
+        <div><div style="font-size:20px;font-weight:800;color:#4C1D95">${gbpRaw.fotosCount||gbpRaw.fotos||0}</div><div style="font-size:10px;color:#6B7A99">Fotos</div></div>
       </div>
     </div>
     <div style="flex-shrink:0;padding:16px;display:flex;align-items:center">${anilloHTML(leerScore(data,"seoLocal"),72,7)}</div>
@@ -822,9 +841,9 @@ async function generarPDF() {
   ${seccion('📍','Detalle del Perfil Google Business',leerScore(data,"seoLocal"))}
   ${tabla([
     fila('Perfil encontrado y verificado',chip(gbpRaw.encontrado&&gbpRaw.reclamado,'Verificado','No verificado'),leerScore(data,"seoLocal")),
-    fila('Reseñas totales',`<strong style="color:#4C1D95">${(gbpRaw.resenas||0).toLocaleString()} reseñas</strong>`,null,false),
-    fila('Calificación',`<strong style="color:${(gbpRaw.rating||0)>=4?'#6D28D9':'#D97706'}">${gbpRaw.rating||'—'}/5 ⭐</strong>`,null,false),
-    fila('Fotos cargadas',gbpRaw.fotosCount?`<strong style="color:#6D28D9">${gbpRaw.fotosCount} fotos ✓</strong>`:chip(false),null,false),
+    fila('Reseñas totales',`<strong style="color:#4C1D95">${(gbpRaw.resenas||gbpRaw.total_resenas||gbpRaw.reviews||0).toLocaleString()} reseñas</strong>`,null,false),
+    fila('Calificación',`<strong style="color:${(gbpRaw.rating||0)>=4?'#6D28D9':'#D97706'}">${gbpRaw.rating||gbpRaw.calificacion||'—'}/5 ⭐</strong>`,null,false),
+    fila('Fotos cargadas',(gbpRaw.fotosCount||gbpRaw.fotos||0)?`<strong style="color:#6D28D9">${gbpRaw.fotosCount||gbpRaw.fotos} fotos ✓</strong>`:chip(false),null,false),
     fila('Horario publicado',chip(gbpRaw.horario),null,false),
     fila('Website en GBP',chip(!!gbpRaw.website,'Coincide','No coincide'),null,false),
   ].join(''))}
