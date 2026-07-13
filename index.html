@@ -379,7 +379,7 @@ body { font-family:var(--font) }
       <div class="actions">
         <button class="btn-sec" onclick="nuevoDiag()"><i class="ti ti-refresh" aria-hidden="true"></i> Nuevo análisis</button>
         <button class="btn-sec" onclick="copiarJSON()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar JSON</button>
-        <button class="btn-pdf" id="btnPdf" onclick="generarPDF()"><i class="ti ti-file-download" aria-hidden="true"></i> Descargar PDF profesional</button>
+        <button class="btn-pdf" id="btnPdf" onclick="generarPDF()" disabled><i class="ti ti-file-download" aria-hidden="true"></i> Descargar PDF profesional</button>
       </div>
 
     </div><!-- /results -->
@@ -477,6 +477,7 @@ function runDiagnostico() {
 
   const btn = document.getElementById('btnRun');
   btn.disabled = true;
+  document.getElementById('btnPdf').disabled = true;
   document.getElementById('btnLbl').innerHTML = '<span class="spin-icon">⟳</span> Analizando…';
   setState('stLoading');
   iniciarPasos(empresa);
@@ -499,6 +500,8 @@ function runDiagnostico() {
     completarPasos();
     setTimeout(() => mostrarResultados(data), 400);
     ultimoDato = data;
+    document.getElementById('btnPdf').disabled = !data.empresa;
+    if (!data.empresa) console.warn('La respuesta de n8n no trae "empresa":', data);
   })
   .catch(err => {
     stepTimers.forEach(t=>clearTimeout(t));
@@ -650,6 +653,7 @@ function mostrarResultados(rawData) {
 
 function nuevoDiag() {
   ultimoDato=null; ultimoData={};
+  document.getElementById('btnPdf').disabled = true;
   if(chartBar){chartBar.destroy();chartBar=null;}
   if(chartDonut){chartDonut.destroy();chartDonut=null;}
   setState('stEmpty');
