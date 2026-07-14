@@ -20,7 +20,9 @@ async function captureWebsiteScreenshot(browser, url) {
   let page;
   try {
     page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 800 });
+    // Viewport más alto: le da a la captura más "aire" para no cortar
+    // el banner/menú del sitio del cliente a la mitad.
+    await page.setViewport({ width: 1280, height: 1100 });
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 8000 });
     const buffer = await page.screenshot({ type: 'jpeg', quality: 65 });
     return `data:image/jpeg;base64,${buffer.toString('base64')}`;
@@ -54,8 +56,15 @@ async function handler(req, res) {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });
     const pdfBuffer = await page.pdf({
-      format: 'A4', printBackground: true,
-      margin: { top: '0', bottom: '0', left: '0', right: '0' },
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '0px', bottom: '34px', left: '0px', right: '0px' },
+      displayHeaderFooter: true,
+      headerTemplate: '<span></span>',
+      footerTemplate: `
+        <div style="width:100%; font-family:'DM Sans',Arial,sans-serif; font-size:8.5px; color:#94A3B8; text-align:center; padding-top:6px;">
+          Guru Diagnóstico Digital &middot; Página <span class="pageNumber"></span> de <span class="totalPages"></span>
+        </div>`,
     });
 
     const slug = (diagnostico.empresa || 'diagnostico')
