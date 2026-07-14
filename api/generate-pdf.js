@@ -15,6 +15,23 @@ async function getBrowser() {
   return puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 }
 
+async function captureWebsiteScreenshot(browser, url) {
+  if (!url) return null;
+  let page;
+  try {
+    page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 800 });
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 8000 });
+    const buffer = await page.screenshot({ type: 'jpeg', quality: 65 });
+    return `data:image/jpeg;base64,${buffer.toString('base64')}`;
+  } catch (err) {
+    console.error('No se pudo capturar el sitio del cliente (se omite, no rompe el PDF):', err.message);
+    return null;
+  } finally {
+    if (page) await page.close();
+  }
+}
+
 async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Método no permitido' });
@@ -29,8 +46,11 @@ async function handler(req, res) {
 
   let browser;
   try {
-    const html = generateReportHtml(diagnostico);
     browser = await getBrowser();
+
+    const screenshotDataUri = await captureWebsiteScreenshot(browser, diagnostico.website);
+    const html = generateReportHtml(diagnostico, { screenshotDataUri });
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });
     const pdfBuffer = await page.pdf({
