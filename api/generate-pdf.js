@@ -15,25 +15,6 @@ async function getBrowser() {
   return puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 }
 
-async function captureWebsiteScreenshot(browser, url) {
-  if (!url) return null;
-  let page;
-  try {
-    page = await browser.newPage();
-    // Viewport más alto: le da a la captura más "aire" para no cortar
-    // el banner/menú del sitio del cliente a la mitad.
-    await page.setViewport({ width: 1280, height: 1100 });
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 8000 });
-    const buffer = await page.screenshot({ type: 'jpeg', quality: 65 });
-    return `data:image/jpeg;base64,${buffer.toString('base64')}`;
-  } catch (err) {
-    console.error('No se pudo capturar el sitio del cliente (se omite, no rompe el PDF):', err.message);
-    return null;
-  } finally {
-    if (page) await page.close();
-  }
-}
-
 async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Método no permitido' });
@@ -49,16 +30,14 @@ async function handler(req, res) {
   let browser;
   try {
     browser = await getBrowser();
-
-    const screenshotDataUri = await captureWebsiteScreenshot(browser, diagnostico.website);
-    const html = generateReportHtml(diagnostico, { screenshotDataUri });
+    const html = generateReportHtml(diagnostico);
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
-      margin: { top: '0px', bottom: '34px', left: '0px', right: '0px' },
+      margin: { top: '26px', bottom: '34px', left: '0px', right: '0px' },
       displayHeaderFooter: true,
       headerTemplate: '<span></span>',
       footerTemplate: `
