@@ -42,9 +42,11 @@ async function handler(req, res) {
       .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
+    res.statusCode = 200;
     res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
     res.setHeader('Content-Disposition', `inline; filename="diagnostico-${slug}.pdf"`);
-    res.status(200).send(pdfBuffer);
+    res.end(pdfBuffer);
   } catch (err) {
     console.error('Error generando PDF:', err);
     res.status(500).json({ error: 'No se pudo generar el PDF', detalle: err.message, stack: err.stack });
