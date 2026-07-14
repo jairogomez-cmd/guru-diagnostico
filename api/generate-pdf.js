@@ -2,8 +2,8 @@ const { generateReportHtml } = require('../lib/generateReportHtml');
 
 async function getBrowser() {
   if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
-    const chromium = require('@sparticuz/chromium');
-    const puppeteer = require('puppeteer-core');
+    const chromium = (await import('@sparticuz/chromium')).default;
+    const puppeteer = (await import('puppeteer-core')).default;
     return puppeteer.launch({
       args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: chromium.defaultViewport,
@@ -11,7 +11,7 @@ async function getBrowser() {
       headless: chromium.headless,
     });
   }
-  const puppeteer = require('puppeteer');
+  const puppeteer = (await import('puppeteer')).default;
   return puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 }
 
@@ -47,7 +47,7 @@ async function handler(req, res) {
     res.status(200).send(pdfBuffer);
   } catch (err) {
     console.error('Error generando PDF:', err);
-    res.status(500).json({ error: 'No se pudo generar el PDF', detalle: err.message });
+    res.status(500).json({ error: 'No se pudo generar el PDF', detalle: err.message, stack: err.stack });
   } finally {
     if (browser) await browser.close();
   }
