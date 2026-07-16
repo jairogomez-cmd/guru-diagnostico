@@ -37,12 +37,15 @@ async function handler(req, res) {
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
-      margin: { top: '26px', bottom: '34px', left: '0px', right: '0px' },
+      margin: { top: '26px', bottom: '40px', left: '0px', right: '0px' },
       displayHeaderFooter: true,
       headerTemplate: '<span></span>',
       footerTemplate: `
-        <div style="width:100%; font-family:'DM Sans',Arial,sans-serif; font-size:8.5px; color:#94A3B8; text-align:center; padding-top:6px;">
-          Guru Diagnóstico Digital &middot; Página <span class="pageNumber"></span> de <span class="totalPages"></span>
+        <div style="position:relative; width:100%; box-sizing:border-box; padding:0 40px; font-family:Arial,Helvetica,sans-serif; font-size:8.5px; color:#94A3B8;">
+          <div style="text-align:center; padding-top:8px;">
+            Guru Diagnóstico Digital &middot; Página <span class="pageNumber"></span> de <span class="totalPages"></span>
+          </div>
+          <img src="https://guru-diagnostico.vercel.app/logo-guru.png" style="position:absolute; top:2px; right:40px; height:13px; width:auto; opacity:.65;" />
         </div>`,
     });
 
