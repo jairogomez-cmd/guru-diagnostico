@@ -5,7 +5,7 @@
 :root {
   --pu50:#F5F3FF; --pu100:#EDE9FE; --pu200:#DDD6FE; --pu400:#A78BFA;
   --pu500:#8B5CF6; --pu600:#7C3AED; --pu700:#6D28D9; --pu900:#2E1065;
-  --sl:#F8F7FF; --font:'Inter',system-ui,sans-serif;
+  --sl:#F8F7FF; --font:'Inter',system-ui,sans-serif; --teal:#0EA5A0;
 }
 * { box-sizing:border-box; margin:0; padding:0 }
 body { font-family:var(--font) }
@@ -45,6 +45,8 @@ body { font-family:var(--font) }
   font-family:var(--font); color:var(--text-primary) }
 .field input:focus { border-color:var(--pu500); box-shadow:0 0 0 3px rgba(139,92,246,0.12) }
 .field-row { display:grid; grid-template-columns:1fr 72px; gap:8px }
+.field-hint { font-size:10.5px; color:var(--text-muted); line-height:1.5; margin-top:-8px }
+.field-hint strong { color:var(--pu600); font-weight:700 }
 .divider { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600;
   color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px }
 .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--pu100) }
@@ -97,6 +99,29 @@ body { font-family:var(--font) }
 .step-info .sn { font-size:13px; font-weight:500; color:var(--text-primary) }
 .step-info .sd { font-size:11px; color:var(--text-muted) }
 
+/* LOADING — antena transmitiendo señal */
+.load-hero { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:18px; height:70px }
+.load-antenna, .load-target { font-size:32px; position:relative; z-index:2; flex-shrink:0 }
+.load-antenna { position:relative }
+.load-antenna::before, .load-antenna::after { content:''; position:absolute; inset:-16px; border-radius:50%;
+  border:2px solid var(--pu400); opacity:0; animation:radarPulse 2.2s ease-out infinite }
+.load-antenna::after { animation-delay:1.1s }
+@keyframes radarPulse { 0%{ transform:scale(0.55); opacity:0.65 } 100%{ transform:scale(2.3); opacity:0 } }
+.load-signal-track { flex:1; max-width:200px; height:2px; margin:0 16px; position:relative;
+  background:repeating-linear-gradient(90deg,var(--pu200) 0 6px,transparent 6px 12px) }
+.load-dot { position:absolute; top:-3px; left:0; width:8px; height:8px; border-radius:50%;
+  background:var(--pu600); box-shadow:0 0 8px var(--pu400); opacity:0; animation:signalMove 1.8s linear infinite }
+.load-dot:nth-child(2) { animation-delay:0.6s }
+.load-dot:nth-child(3) { animation-delay:1.2s }
+@keyframes signalMove { 0%{ left:0%; opacity:0 } 8%{ opacity:1 } 92%{ opacity:1 } 100%{ left:96%; opacity:0 } }
+.load-message { background:linear-gradient(135deg,var(--pu50),#fff); border:1px solid var(--pu100);
+  border-radius:12px; padding:14px 18px; font-size:12.5px; color:var(--text-secondary);
+  line-height:1.55; text-align:center; margin-bottom:20px }
+.load-message strong { color:var(--pu700) }
+@media (prefers-reduced-motion:reduce) {
+  .load-antenna::before, .load-antenna::after, .load-dot { animation:none !important }
+}
+
 /* RESULTADOS */
 .results { display:none }
 .results.v { display:block }
@@ -131,6 +156,33 @@ body { font-family:var(--font) }
 .kpi { display:flex; flex-direction:column; align-items:flex-end }
 .kpi-val { font-size:18px; font-weight:800; color:#fff }
 .kpi-lab { font-size:10px; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.5px }
+
+/* TABS */
+.tabs-bar { display:inline-flex; gap:4px; background:var(--pu50); border:1px solid var(--pu100);
+  border-radius:10px; padding:4px; margin-bottom:16px }
+.tab-btn { border:none; background:transparent; padding:8px 20px; font-size:12.5px; font-weight:600;
+  color:var(--text-secondary); border-radius:7px; cursor:pointer; font-family:var(--font);
+  transition:all .18s ease }
+.tab-btn.active { background:#fff; color:var(--pu700); box-shadow:0 2px 8px rgba(109,40,217,.18) }
+.tab-btn:hover:not(.active) { color:var(--pu600) }
+
+/* DETALLES — filas expandidas por módulo */
+.detail-list { display:flex; flex-direction:column; gap:10px; margin-bottom:16px }
+.detail-row { display:flex; align-items:center; gap:16px; background:#fff; border:1px solid var(--pu100);
+  border-radius:12px; padding:14px 18px; opacity:0; transform:translateY(6px);
+  animation:cardIn .45s ease forwards; transition:box-shadow .2s ease, border-color .2s ease }
+.detail-row:hover { box-shadow:0 8px 20px -10px rgba(109,40,217,.3); border-color:var(--pu200) }
+.dr-ring { position:relative; width:50px; height:50px; flex-shrink:0 }
+.dr-ring svg { transform:rotate(-90deg) }
+.dr-ring-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:12.5px; font-weight:800 }
+.dr-emoji { font-size:19px; flex-shrink:0; width:24px; text-align:center }
+.dr-info { flex:1; min-width:0 }
+.dr-name { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:4px }
+.dr-bullets { display:flex; flex-wrap:wrap; gap:5px 16px }
+.dr-bullet { font-size:11.5px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;
+  white-space:nowrap }
+.dr-bullet .dot { width:5px; height:5px; border-radius:50%; background:var(--teal); flex-shrink:0 }
 
 /* MÓDULOS GRID */
 .modules-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px }
@@ -250,16 +302,17 @@ body { font-family:var(--font) }
 
     <div class="field">
       <label>Nombre de la empresa</label>
-      <input id="f-empresa" type="text" placeholder="Ej: Montironi Ford" />
+      <input id="f-empresa" type="text" placeholder="Ej: nombre de tu empresa" />
     </div>
     <div class="field">
       <label>Sitio web</label>
       <input id="f-url" type="text" placeholder="www.empresa.com" />
     </div>
     <div class="field-row">
-      <div class="field"><label>Ciudad</label><input id="f-ciudad" type="text" placeholder="Córdoba" /></div>
+      <div class="field"><label>Ciudad</label><input id="f-ciudad" type="text" placeholder="Buenos Aires" /></div>
       <div class="field"><label>País</label><input id="f-pais" type="text" placeholder="AR" maxlength="2" style="text-transform:uppercase" /></div>
     </div>
+    <p class="field-hint">Código de país de 2 letras (ISO 3166-1). Ej: Argentina <strong>AR</strong>, Colombia <strong>CO</strong>, Chile <strong>CL</strong>, Perú <strong>PE</strong>, Ecuador <strong>EC</strong>, Panamá <strong>PA</strong>, Guatemala <strong>GT</strong>, El Salvador <strong>SV</strong>, Nicaragua <strong>NI</strong>.</p>
     <div class="field">
       <label>Dirección <span style="font-weight:400;text-transform:none;font-size:10px">(opcional)</span></label>
       <input id="f-direccion" type="text" placeholder="Av. Principal 1234" />
@@ -273,10 +326,7 @@ body { font-family:var(--font) }
       <label>Tu email (Guru)</label>
       <input id="f-even" type="email" placeholder="nombre@gurusoluciones.com" />
     </div>
-    <div class="field">
-      <label>Webhook n8n</label>
-      <input id="f-wh" type="text" placeholder="https://n8n.srv.../webhook/guru-diagnostico" />
-    </div>
+    <input id="f-wh" type="hidden" value="" />
 
     <div class="err-box" id="errBox"></div>
 
@@ -317,6 +367,12 @@ body { font-family:var(--font) }
 
     <!-- LOADING -->
     <div class="loading" id="stLoading">
+      <div class="load-hero">
+        <div class="load-antenna">📡</div>
+        <div class="load-signal-track"><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span></div>
+        <div class="load-target">📊</div>
+      </div>
+      <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar uno o dos minutos</strong>, vale la pena la espera.</div>
       <div class="load-title">Analizando <span id="loadName" style="color:var(--pu600)">—</span>…</div>
       <div class="load-progress"><div class="load-progress-bar" id="loadProgressBar"></div></div>
       <div id="stepsList">
@@ -352,21 +408,35 @@ body { font-family:var(--font) }
         <div class="sh-kpis" id="heroKpis"></div>
       </div>
 
-      <!-- MÓDULOS (anillos) -->
-      <div class="modules-grid" id="modulesGrid"></div>
+      <!-- TABS -->
+      <div class="tabs-bar">
+        <button class="tab-btn active" id="tabBtnOverview" onclick="switchTab('overview')" type="button">Visión general</button>
+        <button class="tab-btn" id="tabBtnDetails" onclick="switchTab('details')" type="button">Detalles</button>
+      </div>
 
-      <!-- GRÁFICOS -->
-      <div class="charts-row">
-        <div class="chart-card">
-          <div class="chart-title">Puntaje por área</div>
-          <div id="legendRadar" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
-          <div style="position:relative;height:180px"><canvas id="chartRadar" role="img" aria-label="Gráfico de barras con puntajes por módulo"></canvas></div>
+      <!-- PANEL: VISIÓN GENERAL -->
+      <div id="panelOverview">
+        <!-- MÓDULOS (anillos) -->
+        <div class="modules-grid" id="modulesGrid"></div>
+
+        <!-- GRÁFICOS -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Puntaje por área</div>
+            <div id="legendRadar" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
+            <div style="position:relative;height:180px"><canvas id="chartRadar" role="img" aria-label="Gráfico de barras con puntajes por módulo"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Distribución de presencia</div>
+            <div id="legendDonut" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
+            <div style="position:relative;height:180px"><canvas id="chartDonut" role="img" aria-label="Gráfico de dona con distribución de presencia digital"></canvas></div>
+          </div>
         </div>
-        <div class="chart-card">
-          <div class="chart-title">Distribución de presencia</div>
-          <div id="legendDonut" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
-          <div style="position:relative;height:180px"><canvas id="chartDonut" role="img" aria-label="Gráfico de dona con distribución de presencia digital"></canvas></div>
-        </div>
+      </div>
+
+      <!-- PANEL: DETALLES -->
+      <div id="panelDetails" style="display:none">
+        <div class="detail-list" id="detailList"></div>
       </div>
 
       <!-- OPORTUNIDADES -->
@@ -378,7 +448,6 @@ body { font-family:var(--font) }
       <!-- ACCIONES -->
       <div class="actions">
         <button class="btn-sec" onclick="nuevoDiag()"><i class="ti ti-refresh" aria-hidden="true"></i> Nuevo análisis</button>
-        <button class="btn-sec" onclick="copiarJSON()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar JSON</button>
         <button class="btn-pdf" id="btnPdf" onclick="generarPDF()" disabled><i class="ti ti-file-download" aria-hidden="true"></i> Descargar PDF profesional</button>
       </div>
 
@@ -466,14 +535,12 @@ function runDiagnostico() {
   const direccion = document.getElementById('f-direccion').value.trim();
   const ecli = document.getElementById('f-ecli').value.trim();
   const even = document.getElementById('f-even').value.trim();
-  const wh = document.getElementById('f-wh').value.trim() || localStorage.getItem('guru_wh') || 'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
+  const wh = 'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
 
   const errEl = document.getElementById('errBox');
   if (!empresa) { errEl.textContent='Ingresa el nombre de la empresa'; errEl.className='err-box v'; return; }
   if (!url) { errEl.textContent='Ingresa el sitio web'; errEl.className='err-box v'; return; }
   errEl.className = 'err-box';
-
-  if (document.getElementById('f-wh').value.trim()) localStorage.setItem('guru_wh', wh);
 
   const btn = document.getElementById('btnRun');
   btn.disabled = true;
@@ -533,6 +600,64 @@ function leerScore(data, key) {
 
 let chartBar=null, chartDonut=null;
 
+function switchTab(tab) {
+  document.getElementById('tabBtnOverview').classList.toggle('active', tab==='overview');
+  document.getElementById('tabBtnDetails').classList.toggle('active', tab==='details');
+  document.getElementById('panelOverview').style.display = tab==='overview' ? 'block' : 'none';
+  document.getElementById('panelDetails').style.display = tab==='details' ? 'block' : 'none';
+}
+
+// Genera 2 highlights cortos por módulo, a partir de datos que ya llegan en el payload
+// (versión resumida — el detalle completo con "por qué importa" y próximos pasos vive en el PDF)
+function bulletsFor(key, data) {
+  const gbp = data.gbp||{}, ha = data.htmlAnalysis||{}, aiso = data.aiso||{}, pub = data.publicidad||{},
+        dom = data.dominio||{}, ps = data.pagespeed||{}, dirs = data.directorios||{},
+        conv = data.conversion||{}, redes = data.redes||data.redesScores||{};
+  switch (key) {
+    case 'seoLocal':
+      return [
+        `${gbp.resenas ?? 0} reseñas · ${gbp.rating ?? '—'}★ en Google`,
+        `${(dirs.lista||[]).length} directorios activos`
+      ];
+    case 'posicionamiento':
+      return [
+        `${ha.palabras ?? '—'} palabras en la portada`,
+        ha.analyticsDetectado ? 'Analítica web instalada' : 'Sin analítica web detectada'
+      ];
+    case 'construccion':
+      return [
+        dom.antiguedadAnios != null ? `Dominio con ${dom.antiguedadAnios} años` : 'Antigüedad de dominio no disponible',
+        ps.scorePerformance != null ? `Velocidad móvil: ${ps.scorePerformance}/100` : 'Velocidad móvil no disponible'
+      ];
+    case 'publicidad':
+      return [
+        pub.googleAdsDetectado ? 'Google Ads activo' : 'Sin Google Ads',
+        pub.metaAdsDetectado ? 'Meta Ads activo' : 'Sin Meta Ads'
+      ];
+    case 'aiso':
+      return [
+        `ChatGPT: ${aiso.chatgpt_aparece ? 'aparece' : 'no aparece'}`,
+        `Gemini: ${aiso.gemini_aparece ? 'aparece' : 'no aparece'}`
+      ];
+    case 'conversion':
+      return [
+        conv.chatDetectado ? `Chat/WhatsApp visible${conv.chatTipo ? ' (' + conv.chatTipo + ')' : ''}` : 'Sin chat ni WhatsApp visible',
+        conv.ecommerceDetectado ? 'Tienda online activa' : 'Sin tienda online'
+      ];
+    case 'redes': {
+      const items = [['Facebook', redes.fbScore], ['Instagram', redes.igScore], ['TikTok', redes.ttScore], ['LinkedIn', redes.liScore], ['Twitter/X', redes.twScore]];
+      const activas = items.filter((i) => i[1] > 0).map((i) => i[0]);
+      const faltan = items.filter((i) => !i[1]).map((i) => i[0]);
+      return [
+        activas.length ? `Activo en ${activas.join(', ')}` : 'Sin presencia detectada',
+        faltan.length ? `Falta: ${faltan.join(', ')}` : 'Presencia en todas las redes principales'
+      ];
+    }
+    default:
+      return ['', ''];
+  }
+}
+
 function mostrarResultados(rawData) {
   // Normalizar por si llega como array
   let data = rawData;
@@ -589,6 +714,26 @@ function mostrarResultados(rawData) {
       <div class="mod-name">${b.n}</div>
     </div>`;
   }).join('');
+
+  // DETALLES (misma info que los módulos, con 2 highlights cortos por área)
+  const detailList = document.getElementById('detailList');
+  detailList.innerHTML = conf.map((b,idx) => {
+    const s = data.scores?.[b.key]||0;
+    const col = SC(s);
+    const [b1,b2] = bulletsFor(b.key, data);
+    return `<div class="detail-row" style="animation-delay:${idx*50}ms">
+      <div class="dr-ring">${anilloSVG(s,50,5,'#E8E0FA')}<div class="dr-ring-num" style="color:${col}">${s}</div></div>
+      <div class="dr-emoji">${b.e}</div>
+      <div class="dr-info">
+        <div class="dr-name">${b.n}</div>
+        <div class="dr-bullets">
+          ${b1 ? `<span class="dr-bullet"><span class="dot"></span>${b1}</span>` : ''}
+          ${b2 ? `<span class="dr-bullet"><span class="dot"></span>${b2}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  switchTab('overview');
 
   // CHART BARRAS
   const labels = conf.map(b=>b.n.replace(' ',''));
@@ -658,6 +803,13 @@ function nuevoDiag() {
   if(chartDonut){chartDonut.destroy();chartDonut=null;}
   setState('stEmpty');
   document.getElementById('errBox').className='err-box';
+  // Limpiamos los datos del cliente anterior para que el vendedor cargue uno nuevo.
+  // "Tu email (Guru)" se mantiene porque es el mismo vendedor en la próxima corrida.
+  ['f-empresa','f-url','f-ciudad','f-pais','f-direccion','f-ecli'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  switchTab('overview');
 }
 
 function copiarJSON() {
@@ -711,8 +863,6 @@ async function generarPDF() {
 }
 
 window.addEventListener('load',()=>{
-  const s=localStorage.getItem('guru_wh');
-  if(s) document.getElementById('f-wh').value=s;
   document.getElementById('f-pais').addEventListener('input',function(){this.value=this.value.toUpperCase();});
 });
 </script>
