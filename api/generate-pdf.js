@@ -15,6 +15,105 @@ async function getBrowser() {
   return puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 }
 
+// ══════════════════════════════════════════════════════════════
+// ENVÍO DE CORREOS — al vendedor siempre, al cliente si cargó su email
+// ══════════════════════════════════════════════════════════════
+function wrapEmailHtml(bodyHtml) {
+  const logoUrl = 'https://guru-diagnostico.vercel.app/logo-guru.png';
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F8F7FF;font-family:Arial,Helvetica,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F7FF;padding:32px 0;">
+      <tr><td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(109,40,217,.12);">
+          <tr><td style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);padding:22px 28px;">
+            <img src="${logoUrl}" alt="Guru Soluciones" height="28" style="display:block;" />
+          </td></tr>
+          <tr><td style="padding:28px 32px;">${bodyHtml}</td></tr>
+          <tr><td style="padding:16px 32px;background:#F8F7FF;font-size:11px;color:#9CA3AF;text-align:center;">
+            Guru Soluciones &copy; ${new Date().getFullYear()} &middot; Diagnóstico automatizado de presencia digital
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body></html>`;
+}
+
+async function enviarCorreos(diagnostico, pdfBuffer, slug) {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn('SMTP no configurado (faltan variables de entorno) — se omite el envío de correos.');
+    return;
+  }
+  const nodemailer = require('nodemailer');
+  const port = Number(process.env.SMTP_PORT || 465);
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port,
+    secure: port === 465, // true (SSL) para el puerto 465, false (STARTTLS) para el 587
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+
+  const empresa = diagnostico.empresa || 'tu empresa';
+  const score = diagnostico.scores?.global ?? '—';
+  const nombreVendedor = diagnostico.nombreVendedor || 'Asesor Guru';
+  const emailVendedor = diagnostico.emailVendedor || diagnostico.email_vendedor;
+  const emailCliente = diagnostico.emailCliente || diagnostico.email_cliente;
+  const attachments = [{ filename: `diagnostico-${slug}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }];
+
+  const envios = [];
+
+  if (emailCliente) {
+    const bodyCliente = `
+      <p style="font-size:15px;color:#1A1A2E;margin:0 0 14px;">Hola,</p>
+      <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 14px;">
+        Te compartimos el <strong>Diagnóstico de Presencia Digital de ${empresa}</strong> — un análisis completo de tu SEO local,
+        tu posicionamiento, tu presencia en Inteligencia Artificial (ChatGPT, Gemini), publicidad, redes sociales y mucho más.
+      </p>
+      <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 14px;">
+        Esta información es <strong style="color:#6D28D9;">oro puro</strong>: te muestra exactamente dónde estás parado hoy
+        frente a tu competencia, y qué acciones concretas te van a ayudar a ganar más visibilidad, atraer más clientes y cerrar más ventas.
+      </p>
+      <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 20px;">
+        Encontrás el informe completo adjunto en PDF. Tu asesor de Guru Soluciones va a contactarte pronto para revisarlo
+        juntos y armar un plan de acción concreto.
+      </p>
+      <p style="font-size:13px;color:#6B7280;margin:0;">&mdash; ${nombreVendedor}, Guru Soluciones</p>
+    `;
+    envios.push(transporter.sendMail({
+      from: `"Guru Soluciones" <${process.env.SMTP_USER}>`,
+      to: emailCliente,
+      subject: `📈 El diagnóstico digital de ${empresa} ya está listo`,
+      html: wrapEmailHtml(bodyCliente),
+      attachments,
+    }));
+  }
+
+  if (emailVendedor) {
+    const bodyVendedor = `
+      <p style="font-size:15px;color:#1A1A2E;margin:0 0 14px;">Hola ${nombreVendedor},</p>
+      <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 14px;">
+        El diagnóstico de <strong>${empresa}</strong> se generó correctamente. Adjunto tenés una copia del PDF completo.
+      </p>
+      <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 14px;">
+        ${emailCliente ? `También se envió una copia a <strong>${emailCliente}</strong>.` : 'No se cargó un email del cliente en el formulario, así que este envío quedó solo para vos.'}
+      </p>
+      <p style="font-size:14px;color:#374151;line-height:1.6;margin:0;">
+        Score global: <strong style="color:#6D28D9;">${score}/100</strong> — usalo como punto de partida para la conversación con el cliente.
+      </p>
+    `;
+    envios.push(transporter.sendMail({
+      from: `"Guru Diagnóstico" <${process.env.SMTP_USER}>`,
+      to: emailVendedor,
+      subject: `✅ Diagnóstico de ${empresa} generado`,
+      html: wrapEmailHtml(bodyVendedor),
+      attachments,
+    }));
+  }
+
+  const resultados = await Promise.allSettled(envios);
+  resultados.forEach((r, i) => {
+    if (r.status === 'rejected') console.error(`Error enviando correo #${i}:`, r.reason?.message || r.reason);
+  });
+}
+
 async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Método no permitido' });
@@ -58,6 +157,15 @@ async function handler(req, res) {
     res.setHeader('Content-Length', pdfBuffer.length);
     res.setHeader('Content-Disposition', `inline; filename="diagnostico-${slug}.pdf"`);
     res.end(pdfBuffer);
+
+    // El navegador ya recibió el PDF — ahora mandamos los correos en la misma ejecución,
+    // sin demorar la descarga. Si el envío falla, solo lo logueamos: nunca debe romper
+    // la respuesta que el usuario ya recibió.
+    try {
+      await enviarCorreos(diagnostico, pdfBuffer, slug);
+    } catch (emailErr) {
+      console.error('Error en el envío de correos:', emailErr);
+    }
   } catch (err) {
     console.error('Error generando PDF:', err);
     res.status(500).json({ error: 'No se pudo generar el PDF', detalle: err.message, stack: err.stack });
