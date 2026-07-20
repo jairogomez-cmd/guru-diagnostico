@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@sparticuz/chromium": "latest",
+    "nodemailer": "^9.0.3",
     "puppeteer-core": "latest"
   },
   "devDependencies": {
