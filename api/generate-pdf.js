@@ -108,9 +108,14 @@ async function enviarCorreos(diagnostico, pdfBuffer, slug) {
     }));
   }
 
+  console.log(`Preparando ${envios.length} correo(s) — cliente: ${emailCliente || '(no cargado)'} · vendedor: ${emailVendedor || '(no cargado)'}`);
   const resultados = await Promise.allSettled(envios);
   resultados.forEach((r, i) => {
-    if (r.status === 'rejected') console.error(`Error enviando correo #${i}:`, r.reason?.message || r.reason);
+    if (r.status === 'fulfilled') {
+      console.log(`Correo #${i + 1} enviado OK — messageId: ${r.value?.messageId}`);
+    } else {
+      console.error(`Error enviando correo #${i + 1}:`, r.reason?.message || r.reason);
+    }
   });
 }
 
@@ -152,20 +157,25 @@ async function handler(req, res) {
       .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
+    // IMPORTANTE: los correos se mandan ANTES de responder al navegador, no después.
+    // En una función serverless de Vercel no hay garantía de que el código posterior a
+    // res.end() llegue a terminar de ejecutarse — el runtime puede cortar la ejecución
+    // apenas la respuesta se considera "enviada". Por eso esperamos acá, dentro del
+    // mismo ciclo de vida de la función, antes de cerrar la respuesta.
+    console.log('Intentando enviar correos para:', diagnostico.empresa);
+    try {
+      await enviarCorreos(diagnostico, pdfBuffer, slug);
+      console.log('Envío de correos finalizado sin excepciones.');
+    } catch (emailErr) {
+      // Un correo que falla nunca debe impedir que el vendedor reciba su PDF.
+      console.error('Error en el envío de correos:', emailErr);
+    }
+
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Length', pdfBuffer.length);
     res.setHeader('Content-Disposition', `inline; filename="diagnostico-${slug}.pdf"`);
     res.end(pdfBuffer);
-
-    // El navegador ya recibió el PDF — ahora mandamos los correos en la misma ejecución,
-    // sin demorar la descarga. Si el envío falla, solo lo logueamos: nunca debe romper
-    // la respuesta que el usuario ya recibió.
-    try {
-      await enviarCorreos(diagnostico, pdfBuffer, slug);
-    } catch (emailErr) {
-      console.error('Error en el envío de correos:', emailErr);
-    }
   } catch (err) {
     console.error('Error generando PDF:', err);
     res.status(500).json({ error: 'No se pudo generar el PDF', detalle: err.message, stack: err.stack });
