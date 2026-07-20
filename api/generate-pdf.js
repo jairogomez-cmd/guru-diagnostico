@@ -24,8 +24,13 @@ function wrapEmailHtml(bodyHtml) {
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F7FF;padding:32px 0;">
       <tr><td align="center">
         <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(109,40,217,.12);">
-          <tr><td style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);padding:22px 28px;">
-            <img src="${logoUrl}" alt="Guru Soluciones" height="28" style="display:block;" />
+          <tr><td style="background:linear-gradient(135deg,#8B5CF6,#A78BFA);padding:24px 28px;">
+            <table cellpadding="0" cellspacing="0"><tr>
+              <td style="vertical-align:middle;"><img src="${logoUrl}" alt="Guru Soluciones" height="42" style="display:block;" /></td>
+              <td style="vertical-align:middle;padding-left:16px;border-left:1px solid rgba(76,29,149,.25);">
+                <span style="font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;color:#4C1D95;padding-left:16px;">Diagnóstico Digital</span>
+              </td>
+            </tr></table>
           </td></tr>
           <tr><td style="padding:28px 32px;">${bodyHtml}</td></tr>
           <tr><td style="padding:16px 32px;background:#F8F7FF;font-size:11px;color:#9CA3AF;text-align:center;">
@@ -35,6 +40,18 @@ function wrapEmailHtml(bodyHtml) {
       </td></tr>
     </table>
   </body></html>`;
+}
+
+// Convierte "jairo.gomez@gurusoluciones.com" en "Jairo Gomez"
+function nombreDesdeEmail(email) {
+  if (!email || typeof email !== 'string') return null;
+  const local = email.split('@')[0];
+  if (!local) return null;
+  return local
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
 }
 
 async function enviarCorreos(diagnostico, pdfBuffer, slug) {
@@ -53,7 +70,7 @@ async function enviarCorreos(diagnostico, pdfBuffer, slug) {
 
   const empresa = diagnostico.empresa || 'tu empresa';
   const score = diagnostico.scores?.global ?? '—';
-  const nombreVendedor = diagnostico.nombreVendedor || 'Asesor Guru';
+  const nombreVendedor = nombreDesdeEmail(diagnostico.emailVendedor || diagnostico.email_vendedor) || diagnostico.nombreVendedor || 'Asesor Guru';
   const emailVendedor = diagnostico.emailVendedor || diagnostico.email_vendedor;
   const emailCliente = diagnostico.emailCliente || diagnostico.email_cliente;
   const attachments = [{ filename: `diagnostico-${slug}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }];
