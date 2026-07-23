@@ -127,19 +127,21 @@ body { font-family:var(--font) }
 }
 
 .load-signal-track { flex:1 1 auto; min-width:120px; max-width:210px; width:210px; height:3px; margin:0 18px;
-  position:relative; overflow:visible;
+  position:relative; overflow:visible; display:flex; align-items:center; justify-content:space-between;
   background:repeating-linear-gradient(90deg,var(--pu200) 0 6px,transparent 6px 12px) }
-.load-dot { position:absolute; top:50%; left:0; width:11px; height:11px; border-radius:50%;
+.load-dot { position:relative; width:9px; height:9px; border-radius:50%;
   background:radial-gradient(circle at 35% 35%,#fff,var(--pu500) 55%,var(--pu700));
-  box-shadow:0 0 12px 3px var(--pu400); opacity:0; will-change:transform,opacity;
-  animation:signalMove 1.8s cubic-bezier(0.4,0,0.6,1) infinite }
-.load-dot:nth-child(2) { animation-delay:0.6s }
-.load-dot:nth-child(3) { animation-delay:1.2s }
-@keyframes signalMove {
-  0% { transform:translate(0,-50%) scale(0.5); opacity:0 }
-  10% { opacity:1; transform:translate(0,-50%) scale(1) }
-  85% { opacity:1 }
-  100% { transform:translate(198px,-50%) scale(0.5); opacity:0 }
+  box-shadow:0 0 10px 3px var(--pu400); opacity:0.15; transform:scale(0.7);
+  will-change:transform,opacity; animation:dotChase 1.2s ease-in-out infinite }
+.load-dot:nth-child(1) { animation-delay:0s }
+.load-dot:nth-child(2) { animation-delay:0.2s }
+.load-dot:nth-child(3) { animation-delay:0.4s }
+.load-dot:nth-child(4) { animation-delay:0.6s }
+.load-dot:nth-child(5) { animation-delay:0.8s }
+@keyframes dotChase {
+  0%,100% { opacity:0.15; transform:scale(0.7) }
+  40% { opacity:1; transform:scale(1.25) }
+  70% { opacity:0.5; transform:scale(0.9) }
 }
 
 /* Antena receptora: "atrapa" cada punto que llega, cada 0.6s (mismo ritmo que los puntos) */
@@ -429,15 +431,10 @@ body { font-family:var(--font) }
           <div style="font-size:12px;font-weight:700;color:var(--pu700)">PDF profesional</div>
           <div style="font-size:10.5px;color:var(--text-muted)">Con gráficos y métricas</div>
         </div>
-        <div class="empty-card">
+        <div class="empty-card" style="grid-column:1 / -1">
           <div class="ec-emoji">💡</div>
           <div style="font-size:12px;font-weight:700;color:var(--pu700)">Oportunidades</div>
           <div style="font-size:10.5px;color:var(--text-muted)">Productos Guru sugeridos</div>
-        </div>
-        <div class="empty-card">
-          <div class="ec-emoji">⚡</div>
-          <div style="font-size:12px;font-weight:700;color:var(--pu700)">Costo casi nulo</div>
-          <div style="font-size:10.5px;color:var(--text-muted)">Centavos vs. USD$4 de la competencia</div>
         </div>
       </div>
     </div>
@@ -446,7 +443,7 @@ body { font-family:var(--font) }
     <div class="loading" id="stLoading">
       <div class="load-hero">
         <div class="load-antenna">📡</div>
-        <div class="load-signal-track"><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span></div>
+        <div class="load-signal-track"><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span></div>
         <div class="load-receiver">🛰️</div>
       </div>
       <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar algunos minutos</strong>, vale la pena la espera.</div>
