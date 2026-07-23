@@ -14,12 +14,12 @@ body { font-family:var(--font) }
 /* HEADER */
 .hdr { background:#fff; border-bottom:1px solid var(--pu100); padding:14px 24px;
   display:flex; align-items:center; justify-content:space-between }
-.hdr-logo { display:flex; align-items:center; gap:10px }
-.logo-mark { height:30px; width:auto; display:block }
+.hdr-logo { display:flex; align-items:center; gap:12px }
+.logo-mark { height:42px; width:auto; display:block }
 .logo-text { font-size:15px; font-weight:700; color:var(--pu700) }
 .logo-text span { color:var(--pu400); font-weight:400 }
-.hdr-badge { font-size:11px; font-weight:600; background:var(--pu100);
-  color:var(--pu600); padding:3px 10px; border-radius:20px;
+.hdr-badge { font-size:13px; font-weight:600; background:var(--pu100);
+  color:var(--pu600); padding:4px 12px; border-radius:20px;
   display:flex; align-items:center; gap:6px }
 .hdr-badge .live-dot { width:6px; height:6px; border-radius:50%; background:#22C55E;
   box-shadow:0 0 0 0 rgba(34,197,94,0.6); animation:livePulse 2s infinite }
@@ -44,7 +44,11 @@ body { font-family:var(--font) }
   font-size:13px; outline:none; transition:border-color 0.15s; width:100%;
   font-family:var(--font); color:var(--text-primary) }
 .field input:focus { border-color:var(--pu500); box-shadow:0 0 0 3px rgba(139,92,246,0.12) }
-.field-row { display:grid; grid-template-columns:1fr 72px; gap:8px }
+.field select { border:1.5px solid var(--pu200); border-radius:8px; padding:9px 10px;
+  font-size:13px; outline:none; transition:border-color 0.15s; width:100%;
+  font-family:var(--font); color:var(--text-primary); background:#fff; cursor:pointer }
+.field select:focus { border-color:var(--pu500); box-shadow:0 0 0 3px rgba(139,92,246,0.12) }
+.field-row { display:grid; grid-template-columns:1fr 178px; gap:8px }
 .field-hint { font-size:10.5px; color:var(--text-muted); line-height:1.5; margin-top:-8px }
 .field-hint strong { color:var(--pu600); font-weight:700 }
 .divider { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600;
@@ -65,16 +69,21 @@ body { font-family:var(--font) }
 /* ESTADO VACÍO */
 .empty { display:flex; flex-direction:column; align-items:center; justify-content:center;
   min-height:480px; gap:16px; text-align:center }
-.empty-ring { width:80px; height:80px; border-radius:50%;
+.empty-ring { width:112px; height:112px; border-radius:50%;
   background:linear-gradient(135deg,var(--pu100),var(--pu50));
   border:2px solid var(--pu200); display:flex; align-items:center; justify-content:center;
-  font-size:32px; animation:ringPulse 3s ease-in-out infinite }
+  font-size:46px; animation:ringPulse 3s ease-in-out infinite;
+  filter:drop-shadow(0 6px 18px rgba(139,92,246,0.25)) }
 @keyframes ringPulse {
-  0%,100% { box-shadow:0 0 0 0 rgba(139,92,246,0.15) }
-  50% { box-shadow:0 0 0 10px rgba(139,92,246,0) }
+  0%,100% { box-shadow:0 0 0 0 rgba(139,92,246,0.15); transform:scale(1) }
+  50% { box-shadow:0 0 0 14px rgba(139,92,246,0); transform:scale(1.035) }
 }
-.empty h3 { font-size:16px; font-weight:600; color:var(--pu700) }
-.empty p { font-size:13px; color:var(--text-secondary); max-width:260px; line-height:1.6 }
+.empty h3 { font-size:18px; font-weight:700; color:var(--pu700) }
+.empty p { font-size:13px; color:var(--text-secondary); max-width:280px; line-height:1.6 }
+.empty-card { background:#fff; border:1px solid var(--pu100); border-radius:12px;
+  padding:14px 12px; text-align:center; transition:transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease }
+.empty-card:hover { transform:translateY(-3px); box-shadow:0 10px 22px -10px rgba(109,40,217,0.3); border-color:var(--pu300,var(--pu400)) }
+.empty-card .ec-emoji { font-size:24px; margin-bottom:5px }
 
 /* LOADING */
 .loading { display:none; flex-direction:column; gap:0; padding-top:40px }
@@ -117,18 +126,20 @@ body { font-family:var(--font) }
   100% { opacity:0; transform:scale(1.25) rotate(45deg) }
 }
 
-.load-signal-track { flex:1; max-width:210px; height:2px; margin:0 18px; position:relative;
+.load-signal-track { flex:1 1 auto; min-width:120px; max-width:210px; width:210px; height:3px; margin:0 18px;
+  position:relative; overflow:visible;
   background:repeating-linear-gradient(90deg,var(--pu200) 0 6px,transparent 6px 12px) }
-.load-dot { position:absolute; top:-4px; left:0; width:10px; height:10px; border-radius:50%;
-  background:var(--pu600); box-shadow:0 0 10px 2px var(--pu400); opacity:0;
-  animation:signalMove 1.8s linear infinite }
+.load-dot { position:absolute; top:50%; left:0; width:11px; height:11px; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff,var(--pu500) 55%,var(--pu700));
+  box-shadow:0 0 12px 3px var(--pu400); opacity:0; will-change:transform,opacity;
+  animation:signalMove 1.8s cubic-bezier(0.4,0,0.6,1) infinite }
 .load-dot:nth-child(2) { animation-delay:0.6s }
 .load-dot:nth-child(3) { animation-delay:1.2s }
 @keyframes signalMove {
-  0% { left:0%; opacity:0; transform:scale(0.6) }
-  8% { opacity:1; transform:scale(1) }
-  88% { opacity:1 }
-  100% { left:97%; opacity:0; transform:scale(0.6) }
+  0% { transform:translate(0,-50%) scale(0.5); opacity:0 }
+  10% { opacity:1; transform:translate(0,-50%) scale(1) }
+  85% { opacity:1 }
+  100% { transform:translate(198px,-50%) scale(0.5); opacity:0 }
 }
 
 /* Antena receptora: "atrapa" cada punto que llega, cada 0.6s (mismo ritmo que los puntos) */
@@ -322,7 +333,7 @@ body { font-family:var(--font) }
     <img class="logo-mark" id="hdrLogo" alt="Guru" />
     <span class="logo-text">Diagnóstico <span>Digital</span></span>
   </div>
-  <span class="hdr-badge"><span class="live-dot"></span>Herramienta interna · v8</span>
+  <span class="hdr-badge"><span class="live-dot"></span>Herramienta interna</span>
 </header>
 
 <!-- MAIN LAYOUT -->
@@ -332,7 +343,7 @@ body { font-family:var(--font) }
   <aside class="sidebar">
     <div>
       <div class="form-title">Analizar empresa</div>
-      <div class="form-sub">Ingresa los datos del cliente y genera el diagnóstico en segundos</div>
+      <div class="form-sub">Ingresa los datos del cliente y genera el diagnóstico en algunos minutos</div>
     </div>
 
     <div class="field">
@@ -344,17 +355,44 @@ body { font-family:var(--font) }
       <input id="f-url" type="text" placeholder="www.empresa.com" />
     </div>
     <div class="field-row">
-      <div class="field"><label>Ciudad</label><input id="f-ciudad" type="text" placeholder="Buenos Aires" /></div>
-      <div class="field"><label>País</label><input id="f-pais" type="text" placeholder="AR" maxlength="2" style="text-transform:uppercase" /></div>
+      <div class="field">
+        <label>Ciudad</label>
+        <input id="f-ciudad" type="text" list="ciudad-list" placeholder="Buenos Aires" autocomplete="off" />
+        <datalist id="ciudad-list"></datalist>
+      </div>
+      <div class="field">
+        <label>País</label>
+        <select id="f-pais">
+          <option value="AR">Argentina</option>
+          <option value="BO">Bolivia</option>
+          <option value="CL">Chile</option>
+          <option value="CO">Colombia</option>
+          <option value="CR">Costa Rica</option>
+          <option value="EC">Ecuador</option>
+          <option value="SV">El Salvador</option>
+          <option value="ES">España</option>
+          <option value="US">Estados Unidos</option>
+          <option value="GT">Guatemala</option>
+          <option value="HN">Honduras</option>
+          <option value="MX">México</option>
+          <option value="NI">Nicaragua</option>
+          <option value="PA">Panamá</option>
+          <option value="PY">Paraguay</option>
+          <option value="PE">Perú</option>
+          <option value="DO">República Dominicana</option>
+          <option value="UY">Uruguay</option>
+          <option value="VE">Venezuela</option>
+        </select>
+      </div>
     </div>
-    <p class="field-hint">Código de país de 2 letras (ISO 3166-1). Ej: Argentina <strong>AR</strong>, Colombia <strong>CO</strong>, Chile <strong>CL</strong>, Perú <strong>PE</strong>, Ecuador <strong>EC</strong>, Panamá <strong>PA</strong>, Guatemala <strong>GT</strong>, El Salvador <strong>SV</strong>, Nicaragua <strong>NI</strong>.</p>
+    <p class="field-hint">Selecciona el país y te sugerimos las ciudades principales — así evitamos errores de tipeo. Si la ciudad no aparece en la lista, puedes escribirla igual.</p>
     <div class="field">
-      <label>Dirección <span style="font-weight:400;text-transform:none;font-size:10px">(opcional)</span></label>
+      <label>Dirección</label>
       <input id="f-direccion" type="text" placeholder="Av. Principal 1234" />
     </div>
     <div class="divider">Envío del informe</div>
     <div class="field">
-      <label>Email del cliente</label>
+      <label>Email del cliente <span style="font-weight:400;text-transform:none;font-size:10px">(opcional)</span></label>
       <input id="f-ecli" type="email" placeholder="cliente@empresa.com" />
     </div>
     <div class="field">
@@ -379,24 +417,28 @@ body { font-family:var(--font) }
     <div class="empty" id="stEmpty">
       <div class="empty-ring">📡</div>
       <h3>Listo para diagnosticar</h3>
-      <p>Completa el formulario con los datos del cliente y genera el diagnóstico completo en segundos.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;width:100%;max-width:280px;margin-left:auto;margin-right:auto">
-        <div style="background:#fff;border:1px solid var(--pu100);border-radius:10px;padding:12px;text-align:center">
-          <div style="font-size:20px;margin-bottom:4px">🎯</div>
-          <div style="font-size:11px;font-weight:600;color:var(--pu700)">7 módulos</div>
-          <div style="font-size:10px;color:var(--text-muted)">SEO, AISO, Publicidad…</div>
+      <p>Completa el formulario con los datos del cliente y genera el diagnóstico completo en algunos minutos.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;width:100%;max-width:320px;margin-left:auto;margin-right:auto">
+        <div class="empty-card">
+          <div class="ec-emoji">🎯</div>
+          <div style="font-size:12px;font-weight:700;color:var(--pu700)">7 módulos</div>
+          <div style="font-size:10.5px;color:var(--text-muted)">SEO, AISO, Publicidad…</div>
         </div>
-        <div style="background:#fff;border:1px solid var(--pu100);border-radius:10px;padding:12px;text-align:center">
-          <div style="font-size:20px;margin-bottom:4px">📄</div>
-          <div style="font-size:11px;font-weight:600;color:var(--pu700)">PDF profesional</div>
-          <div style="font-size:10px;color:var(--text-muted)">Con gráficos y métricas</div>
+        <div class="empty-card">
+          <div class="ec-emoji">📄</div>
+          <div style="font-size:12px;font-weight:700;color:var(--pu700)">PDF profesional</div>
+          <div style="font-size:10.5px;color:var(--text-muted)">Con gráficos y métricas</div>
         </div>
-        <div style="background:#fff;border:1px solid var(--pu100);border-radius:10px;padding:12px;text-align:center">
-          <div style="font-size:20px;margin-bottom:4px">💡</div>
-          <div style="font-size:11px;font-weight:600;color:var(--pu700)">Oportunidades</div>
-          <div style="font-size:10px;color:var(--text-muted)">Productos Guru sugeridos</div>
+        <div class="empty-card">
+          <div class="ec-emoji">💡</div>
+          <div style="font-size:12px;font-weight:700;color:var(--pu700)">Oportunidades</div>
+          <div style="font-size:10.5px;color:var(--text-muted)">Productos Guru sugeridos</div>
         </div>
-
+        <div class="empty-card">
+          <div class="ec-emoji">⚡</div>
+          <div style="font-size:12px;font-weight:700;color:var(--pu700)">Costo casi nulo</div>
+          <div style="font-size:10.5px;color:var(--text-muted)">Centavos vs. USD$4 de la competencia</div>
+        </div>
       </div>
     </div>
 
@@ -407,7 +449,7 @@ body { font-family:var(--font) }
         <div class="load-signal-track"><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span></div>
         <div class="load-receiver">🛰️</div>
       </div>
-      <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar uno o dos minutos</strong>, vale la pena la espera.</div>
+      <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar algunos minutos</strong>, vale la pena la espera.</div>
       <div class="load-title">Analizando <span id="loadName" style="color:var(--pu600)">—</span>…</div>
       <div class="load-progress"><div class="load-progress-bar" id="loadProgressBar"></div></div>
       <div id="stepsList">
@@ -525,7 +567,7 @@ function showToast(msg) {
   document.getElementById('toastMsg').textContent = msg;
   const t = document.getElementById('toast');
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  setTimeout(() => t.classList.remove('show'), 3400);
 }
 
 function setState(id) {
@@ -604,6 +646,7 @@ function runDiagnostico() {
     ultimoDato = data;
     document.getElementById('btnPdf').disabled = !data.empresa;
     if (!data.empresa) console.warn('La respuesta de n8n no trae "empresa":', data);
+    avisarDiagnosticoListo(data.empresa || empresa);
   })
   .catch(err => {
     stepTimers.forEach(t=>clearTimeout(t));
@@ -869,10 +912,12 @@ function nuevoDiag() {
   document.getElementById('errBox').className='err-box';
   // Limpiamos los datos del cliente anterior para que el vendedor cargue uno nuevo.
   // "Tu email (Guru)" se mantiene porque es el mismo vendedor en la próxima corrida.
-  ['f-empresa','f-url','f-ciudad','f-pais','f-direccion','f-ecli'].forEach(id => {
+  ['f-empresa','f-url','f-ciudad','f-direccion','f-ecli'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  document.getElementById('f-pais').value = 'AR';
+  actualizarCiudadesSugeridas();
   switchTab('overview');
 }
 
@@ -916,7 +961,11 @@ async function generarPDF() {
     a.remove();
     URL.revokeObjectURL(url);
 
-    showToast('PDF descargado correctamente');
+    const emailCliente = document.getElementById('f-ecli').value.trim();
+    const mensajeCopia = emailCliente
+      ? 'PDF descargado. También llegará una copia a tu email y al del cliente.'
+      : 'PDF descargado. También llegará una copia a tu email.';
+    showToast(mensajeCopia);
   } catch (err) {
     console.error(err);
     showToast('Error generando el PDF: ' + err.message);
@@ -926,7 +975,79 @@ async function generarPDF() {
   }
 }
 
+// Ciudades sugeridas por país — autocompletar liviano, no restrictivo (el vendedor
+// siempre puede escribir una ciudad distinta si no está en la lista).
+const CIUDADES_POR_PAIS = {
+  AR: ['Buenos Aires','Córdoba','Rosario','Mendoza','La Plata','Mar del Plata','Tucumán','Salta'],
+  BO: ['La Paz','Santa Cruz de la Sierra','Cochabamba','Sucre'],
+  CL: ['Santiago','Valparaíso','Concepción','La Serena','Antofagasta','Temuco'],
+  CO: ['Bogotá','Medellín','Cali','Barranquilla','Cartagena','Bucaramanga','Pereira','Manizales'],
+  CR: ['San José','Alajuela','Heredia','Cartago'],
+  EC: ['Quito','Guayaquil','Cuenca','Manta','Ambato'],
+  SV: ['San Salvador','Santa Ana','San Miguel'],
+  ES: ['Madrid','Barcelona','Valencia','Sevilla','Bilbao'],
+  US: ['Miami','New York','Los Angeles','Houston'],
+  GT: ['Ciudad de Guatemala','Quetzaltenango','Antigua Guatemala'],
+  HN: ['Tegucigalpa','San Pedro Sula'],
+  MX: ['Ciudad de México','Guadalajara','Monterrey','Puebla','Tijuana','Mérida'],
+  NI: ['Managua','León','Granada'],
+  PA: ['Ciudad de Panamá','Colón','David'],
+  PY: ['Asunción','Ciudad del Este'],
+  PE: ['Lima','Arequipa','Trujillo','Chiclayo','Piura','Cusco'],
+  DO: ['Santo Domingo','Santiago de los Caballeros'],
+  UY: ['Montevideo','Punta del Este','Salto'],
+  VE: ['Caracas','Maracaibo','Valencia'],
+};
+
+function actualizarCiudadesSugeridas() {
+  const pais = document.getElementById('f-pais').value;
+  const lista = document.getElementById('ciudad-list');
+  const ciudades = CIUDADES_POR_PAIS[pais] || [];
+  lista.innerHTML = ciudades.map(c => `<option value="${c}"></option>`).join('');
+}
+
+// ══ AVISO DE "DIAGNÓSTICO LISTO" — útil porque el proceso toma algunos minutos
+// y el vendedor suele pasar a otra pestaña mientras espera ══
+const TITULO_ORIGINAL = document.title;
+let flashTitleTimer = null;
+
+function pedirPermisoNotificaciones() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().catch(()=>{});
+  }
+}
+
+function avisarDiagnosticoListo(nombreEmpresa) {
+  // 1) Notificación nativa del sistema (si el usuario dio permiso y la pestaña no está activa)
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    try {
+      const n = new Notification('✅ Diagnóstico listo', {
+        body: `El diagnóstico de "${nombreEmpresa}" ya está disponible para revisar.`,
+        tag: 'guru-diagnostico-listo',
+      });
+      n.onclick = () => { window.focus(); n.close(); };
+    } catch(e) { /* algunos navegadores bloquean Notification fuera de gesto del usuario, ignoramos */ }
+  }
+  // 2) Parpadeo del título de la pestaña hasta que el vendedor vuelva a mirarla
+  if (document.hidden) {
+    let mostrandoAviso = false;
+    flashTitleTimer = setInterval(() => {
+      document.title = mostrandoAviso ? TITULO_ORIGINAL : '✅ Diagnóstico listo';
+      mostrandoAviso = !mostrandoAviso;
+    }, 1000);
+    document.addEventListener('visibilitychange', function limpiarFlash() {
+      if (!document.hidden) {
+        clearInterval(flashTitleTimer);
+        document.title = TITULO_ORIGINAL;
+        document.removeEventListener('visibilitychange', limpiarFlash);
+      }
+    });
+  }
+}
+
 window.addEventListener('load',()=>{
-  document.getElementById('f-pais').addEventListener('input',function(){this.value=this.value.toUpperCase();});
+  document.getElementById('f-pais').addEventListener('change', actualizarCiudadesSugeridas);
+  actualizarCiudadesSugeridas();
+  pedirPermisoNotificaciones();
 });
 </script>
