@@ -48,7 +48,7 @@ body { font-family:var(--font) }
   font-size:13px; outline:none; transition:border-color 0.15s; width:100%;
   font-family:var(--font); color:var(--text-primary); background:#fff; cursor:pointer }
 .field select:focus { border-color:var(--pu500); box-shadow:0 0 0 3px rgba(139,92,246,0.12) }
-.field-row { display:grid; grid-template-columns:1fr 178px; gap:8px }
+.field-row { display:grid; grid-template-columns:178px 1fr; gap:8px }
 .field-hint { font-size:10.5px; color:var(--text-muted); line-height:1.5; margin-top:-8px }
 .field-hint strong { color:var(--pu600); font-weight:700 }
 .divider { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600;
@@ -112,6 +112,18 @@ body { font-family:var(--font) }
 .load-hero { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:18px; height:76px }
 .load-antenna, .load-receiver { font-size:32px; position:relative; z-index:2; flex-shrink:0; display:inline-block }
 
+/* Anillo de radar girando detrás de la antena — refuerzo visual de "escaneo en curso",
+   una rotación es imposible de no notar, a diferencia de un simple pulso de opacidad */
+.load-antenna-wrap { position:relative; width:56px; height:56px; display:flex; align-items:center; justify-content:center; flex-shrink:0 }
+.load-antenna-wrap::before {
+  content:''; position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(from 0deg, transparent 0deg, var(--pu400) 55deg, transparent 120deg, transparent 360deg);
+  -webkit-mask:radial-gradient(circle,transparent 58%,#000 60%);
+  mask:radial-gradient(circle,transparent 58%,#000 60%);
+  animation:radarSpin 2.4s linear infinite;
+}
+@keyframes radarSpin { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }
+
 /* Ondas que salen de la antena emisora, tipo señal de wifi */
 .load-antenna::before, .load-antenna::after {
   content:''; position:absolute; top:-4px; right:-8px; width:14px; height:14px;
@@ -127,37 +139,40 @@ body { font-family:var(--font) }
 }
 
 .load-signal-track { flex:1 1 auto; min-width:120px; max-width:210px; width:210px; height:3px; margin:0 18px;
-  position:relative; overflow:visible; display:flex; align-items:center; justify-content:space-between;
+  position:relative; overflow:visible;
   background:repeating-linear-gradient(90deg,var(--pu200) 0 6px,transparent 6px 12px) }
-.load-dot { position:relative; width:9px; height:9px; border-radius:50%;
+/* Paquetes que viajan de punta a punta del track (antena → satélite). A diferencia de un
+   pulso en el mismo lugar, el desplazamiento en "left" se nota siempre, sin importar qué
+   tan rápido lo mire alguien. */
+.load-packet { position:absolute; top:50%; left:0; width:9px; height:9px; margin-top:-4.5px; border-radius:50%;
   background:radial-gradient(circle at 35% 35%,#fff,var(--pu500) 55%,var(--pu700));
-  box-shadow:0 0 10px 3px var(--pu400); opacity:0.15; transform:scale(0.7);
-  will-change:transform,opacity; animation:dotChase 1.2s ease-in-out infinite }
-.load-dot:nth-child(1) { animation-delay:0s }
-.load-dot:nth-child(2) { animation-delay:0.2s }
-.load-dot:nth-child(3) { animation-delay:0.4s }
-.load-dot:nth-child(4) { animation-delay:0.6s }
-.load-dot:nth-child(5) { animation-delay:0.8s }
-@keyframes dotChase {
-  0%,100% { opacity:0.15; transform:scale(0.7) }
-  40% { opacity:1; transform:scale(1.25) }
-  70% { opacity:0.5; transform:scale(0.9) }
+  box-shadow:0 0 10px 3px var(--pu400); opacity:0;
+  will-change:left,opacity,transform; animation:packetTravel 1.8s linear infinite }
+.load-packet:nth-child(1) { animation-delay:0s }
+.load-packet:nth-child(2) { animation-delay:0.6s }
+.load-packet:nth-child(3) { animation-delay:1.2s }
+@keyframes packetTravel {
+  0%   { left:0%; opacity:0; transform:scale(0.6) }
+  8%   { opacity:1; transform:scale(1.15) }
+  50%  { transform:scale(1) }
+  88%  { opacity:1 }
+  100% { left:calc(100% - 9px); opacity:0; transform:scale(0.6) }
 }
 
-/* Antena receptora: "atrapa" cada punto que llega, cada 0.6s (mismo ritmo que los puntos) */
-.load-receiver { animation:receiveBlip 0.6s ease-in-out infinite }
+/* Antena receptora: "atrapa" cada paquete que llega, sincronizada con el ciclo de 1.8s */
+.load-receiver { animation:receiveBlip 1.8s ease-in-out infinite }
 @keyframes receiveBlip {
-  0%,78%,100% { transform:rotate(0deg) scale(1) }
-  88% { transform:rotate(-9deg) scale(1.12) }
-  95% { transform:rotate(5deg) scale(1.05) }
+  0%,84%,100% { transform:rotate(0deg) scale(1) }
+  90% { transform:rotate(-9deg) scale(1.14) }
+  96% { transform:rotate(5deg) scale(1.06) }
 }
 .load-receiver::before {
   content:''; position:absolute; inset:-9px; border-radius:50%;
-  box-shadow:0 0 0 0 rgba(124,58,237,0); animation:receiveGlow 0.6s ease-in-out infinite
+  box-shadow:0 0 0 0 rgba(124,58,237,0); animation:receiveGlow 1.8s ease-in-out infinite
 }
 @keyframes receiveGlow {
-  0%,75% { box-shadow:0 0 0 0 rgba(124,58,237,0) }
-  88% { box-shadow:0 0 0 7px rgba(124,58,237,.28) }
+  0%,82% { box-shadow:0 0 0 0 rgba(124,58,237,0) }
+  90% { box-shadow:0 0 0 8px rgba(124,58,237,.3) }
   100% { box-shadow:0 0 0 0 rgba(124,58,237,0) }
 }
 
@@ -165,8 +180,11 @@ body { font-family:var(--font) }
   border-radius:12px; padding:14px 18px; font-size:12.5px; color:var(--text-secondary);
   line-height:1.55; text-align:center; margin-bottom:20px }
 .load-message strong { color:var(--pu700) }
+.load-message .lm-notice { display:block; margin-top:8px; padding-top:8px; border-top:1px dashed var(--pu200);
+  color:var(--pu700); font-weight:600 }
 @media (prefers-reduced-motion:reduce) {
-  .load-antenna::before, .load-antenna::after, .load-dot, .load-receiver, .load-receiver::before { animation:none !important }
+  .load-antenna::before, .load-antenna::after, .load-antenna-wrap::before,
+  .load-packet, .load-receiver, .load-receiver::before { animation:none !important }
 }
 
 /* RESULTADOS */
@@ -358,11 +376,6 @@ body { font-family:var(--font) }
     </div>
     <div class="field-row">
       <div class="field">
-        <label>Ciudad</label>
-        <input id="f-ciudad" type="text" list="ciudad-list" placeholder="Buenos Aires" autocomplete="off" />
-        <datalist id="ciudad-list"></datalist>
-      </div>
-      <div class="field">
         <label>País</label>
         <select id="f-pais">
           <option value="AR">Argentina</option>
@@ -385,6 +398,11 @@ body { font-family:var(--font) }
           <option value="UY">Uruguay</option>
           <option value="VE">Venezuela</option>
         </select>
+      </div>
+      <div class="field">
+        <label>Ciudad</label>
+        <input id="f-ciudad" type="text" list="ciudad-list" placeholder="Buenos Aires" autocomplete="off" />
+        <datalist id="ciudad-list"></datalist>
       </div>
     </div>
     <p class="field-hint">Selecciona el país y te sugerimos las ciudades principales — así evitamos errores de tipeo. Si la ciudad no aparece en la lista, puedes escribirla igual.</p>
@@ -442,11 +460,11 @@ body { font-family:var(--font) }
     <!-- LOADING -->
     <div class="loading" id="stLoading">
       <div class="load-hero">
-        <div class="load-antenna">📡</div>
-        <div class="load-signal-track"><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span><span class="load-dot"></span></div>
+        <div class="load-antenna-wrap"><div class="load-antenna">📡</div></div>
+        <div class="load-signal-track"><span class="load-packet"></span><span class="load-packet"></span><span class="load-packet"></span></div>
         <div class="load-receiver">🛰️</div>
       </div>
-      <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar algunos minutos</strong>, vale la pena la espera.</div>
+      <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar algunos minutos</strong>, vale la pena la espera. <span class="lm-notice">🔔 Podés cambiar de pestaña tranquilo — te avisamos apenas esté listo.</span></div>
       <div class="load-title">Analizando <span id="loadName" style="color:var(--pu600)">—</span>…</div>
       <div class="load-progress"><div class="load-progress-bar" id="loadProgressBar"></div></div>
       <div id="stepsList">
