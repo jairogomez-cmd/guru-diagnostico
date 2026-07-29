@@ -48,7 +48,7 @@ body { font-family:var(--font) }
   font-size:13px; outline:none; transition:border-color 0.15s; width:100%;
   font-family:var(--font); color:var(--text-primary); background:#fff; cursor:pointer }
 .field select:focus { border-color:var(--pu500); box-shadow:0 0 0 3px rgba(139,92,246,0.12) }
-.field-row { display:grid; grid-template-columns:178px 1fr; gap:8px }
+.field-row { display:grid; grid-template-columns:2fr 3fr; gap:8px }
 .field-hint { font-size:10.5px; color:var(--text-muted); line-height:1.5; margin-top:-8px }
 .field-hint strong { color:var(--pu600); font-weight:700 }
 .divider { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600;
@@ -182,9 +182,45 @@ body { font-family:var(--font) }
 .load-message strong { color:var(--pu700) }
 .load-message .lm-notice { display:block; margin-top:8px; padding-top:8px; border-top:1px dashed var(--pu200);
   color:var(--pu700); font-weight:600 }
+
+/* Radar grande, tipo torre de control de aeropuerto — el centro visual de la espera,
+   ubicado justo encima de la lista de pasos. El haz gira con "transform:rotate",
+   el movimiento más inequívoco que existe en CSS: no depende de opacidad ni de
+   escala, así que es imposible que se perciba como "quieto". */
+.radar-big-wrap { display:flex; justify-content:center; margin:2px 0 20px }
+.radar-big { position:relative; width:136px; height:136px; border-radius:50%;
+  background:radial-gradient(circle, var(--pu50) 0%, #fff 72%);
+  border:1.5px solid var(--pu200); overflow:hidden;
+  box-shadow:0 10px 26px -10px rgba(124,58,237,.4), inset 0 0 0 1px rgba(255,255,255,.6) }
+.radar-ring { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  border:1px solid var(--pu200); border-radius:50% }
+.radar-ring.r1 { width:36%; height:36% }
+.radar-ring.r2 { width:66%; height:66% }
+.radar-ring.r3 { width:96%; height:96% }
+.radar-cross { position:absolute; inset:0 }
+.radar-cross::before, .radar-cross::after { content:''; position:absolute; background:var(--pu100) }
+.radar-cross::before { top:50%; left:2%; right:2%; height:1px; transform:translateY(-50%) }
+.radar-cross::after { left:50%; top:2%; bottom:2%; width:1px; transform:translateX(-50%) }
+.radar-sweep { position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(from 0deg, rgba(124,58,237,.6), rgba(124,58,237,.15) 18%, transparent 40%);
+  animation:radarBigSpin 2.8s linear infinite; transform-origin:50% 50% }
+@keyframes radarBigSpin { to { transform:rotate(360deg) } }
+.radar-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-size:28px; z-index:3; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)) }
+.radar-blip { position:absolute; width:7px; height:7px; border-radius:50%; background:var(--pu600);
+  box-shadow:0 0 9px 3px rgba(124,58,237,.55); opacity:0; animation:blipPing 2.8s ease-out infinite }
+.radar-blip.b1 { top:26%; left:64%; animation-delay:.2s }
+.radar-blip.b2 { top:68%; left:30%; animation-delay:1.1s }
+.radar-blip.b3 { top:34%; left:24%; animation-delay:2s }
+@keyframes blipPing {
+  0%, 90%, 100% { opacity:0; transform:scale(.4) }
+  6%, 22% { opacity:1; transform:scale(1) }
+  40% { opacity:0; transform:scale(1.3) }
+}
 @media (prefers-reduced-motion:reduce) {
   .load-antenna::before, .load-antenna::after, .load-antenna-wrap::before,
-  .load-packet, .load-receiver, .load-receiver::before { animation:none !important }
+  .load-packet, .load-receiver, .load-receiver::before,
+  .radar-sweep, .radar-blip { animation:none !important }
 }
 
 /* RESULTADOS */
@@ -467,6 +503,19 @@ body { font-family:var(--font) }
       <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar algunos minutos</strong>, vale la pena la espera. <span class="lm-notice">🔔 Podés cambiar de pestaña tranquilo — te avisamos apenas esté listo.</span></div>
       <div class="load-title">Analizando <span id="loadName" style="color:var(--pu600)">—</span>…</div>
       <div class="load-progress"><div class="load-progress-bar" id="loadProgressBar"></div></div>
+      <div class="radar-big-wrap">
+        <div class="radar-big">
+          <div class="radar-ring r1"></div>
+          <div class="radar-ring r2"></div>
+          <div class="radar-ring r3"></div>
+          <div class="radar-cross"></div>
+          <div class="radar-sweep"></div>
+          <div class="radar-blip b1"></div>
+          <div class="radar-blip b2"></div>
+          <div class="radar-blip b3"></div>
+          <div class="radar-center">🔎</div>
+        </div>
+      </div>
       <div id="stepsList">
         <div class="step"><div class="step-dot active" id="sd0">🔍</div><div class="step-info"><div class="sn">Validando y normalizando datos</div><div class="sd">URL, ciudad, formulario</div></div></div>
         <div class="step"><div class="step-dot" id="sd1">🌐</div><div class="step-info"><div class="sn">Descargando sitio web</div><div class="sd">HTML, SSL, redirecciones</div></div></div>
@@ -556,7 +605,13 @@ body { font-family:var(--font) }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const { jsPDF } = window.jspdf;
+// Defensivo: si cdnjs falla por cualquier motivo (bloqueador de anuncios, firewall
+// corporativo, hiccup de red), esto NO debe tumbar el resto del script — sin esta
+// protección, un solo CDN caído deja toda la página muerta (nada responde a los
+// clicks) sin ningún aviso visible para quien la usa.
+const jsPDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : function () {
+  throw new Error('jsPDF no se cargó (revisa la conexión o el bloqueador de anuncios)');
+};
 let ultimoDato = null, ultimoData = {}, stepTimers = [];
 const DELAYS = [500,1600,3000,4600,6400,8200,10200];
 
