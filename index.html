@@ -108,73 +108,18 @@ body { font-family:var(--font) }
 .step-info .sn { font-size:13px; font-weight:500; color:var(--text-primary) }
 .step-info .sd { font-size:11px; color:var(--text-muted) }
 
-/* LOADING — antena transmitiendo señal a una antena receptora */
-.load-hero { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:18px; height:76px }
-.load-antenna, .load-receiver { font-size:32px; position:relative; z-index:2; flex-shrink:0; display:inline-block }
-
-/* Anillo de radar girando detrás de la antena — refuerzo visual de "escaneo en curso",
-   una rotación es imposible de no notar, a diferencia de un simple pulso de opacidad */
-.load-antenna-wrap { position:relative; width:56px; height:56px; display:flex; align-items:center; justify-content:center; flex-shrink:0 }
-.load-antenna-wrap::before {
-  content:''; position:absolute; inset:0; border-radius:50%;
-  background:conic-gradient(from 0deg, transparent 0deg, var(--pu400) 55deg, transparent 120deg, transparent 360deg);
-  -webkit-mask:radial-gradient(circle,transparent 58%,#000 60%);
-  mask:radial-gradient(circle,transparent 58%,#000 60%);
-  animation:radarSpin 2.4s linear infinite;
-}
-@keyframes radarSpin { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }
-
-/* Ondas que salen de la antena emisora, tipo señal de wifi */
-.load-antenna::before, .load-antenna::after {
-  content:''; position:absolute; top:-4px; right:-8px; width:14px; height:14px;
-  border-top:2.5px solid var(--pu500); border-right:2.5px solid var(--pu500);
-  border-radius:0 70% 0 0; opacity:0; transform:scale(0.5) rotate(45deg);
-  transform-origin:0% 100%; animation:wavePulse 1.6s ease-out infinite
-}
-.load-antenna::after { width:24px; height:24px; top:-10px; right:-14px; animation-delay:0.4s; border-width:2px }
-@keyframes wavePulse {
-  0% { opacity:0; transform:scale(0.4) rotate(45deg) }
-  25% { opacity:.9 }
-  100% { opacity:0; transform:scale(1.25) rotate(45deg) }
-}
-
-.load-signal-track { flex:1 1 auto; min-width:120px; max-width:210px; width:210px; height:3px; margin:0 18px;
-  position:relative; overflow:visible;
-  background:repeating-linear-gradient(90deg,var(--pu200) 0 6px,transparent 6px 12px) }
-/* Paquetes que viajan de punta a punta del track (antena → satélite). A diferencia de un
-   pulso en el mismo lugar, el desplazamiento en "left" se nota siempre, sin importar qué
-   tan rápido lo mire alguien. */
-.load-packet { position:absolute; top:50%; left:0; width:9px; height:9px; margin-top:-4.5px; border-radius:50%;
-  background:radial-gradient(circle at 35% 35%,#fff,var(--pu500) 55%,var(--pu700));
-  box-shadow:0 0 10px 3px var(--pu400); opacity:0;
-  will-change:left,opacity,transform; animation:packetTravel 1.8s linear infinite }
-.load-packet:nth-child(1) { animation-delay:0s }
-.load-packet:nth-child(2) { animation-delay:0.6s }
-.load-packet:nth-child(3) { animation-delay:1.2s }
-@keyframes packetTravel {
-  0%   { left:0%; opacity:0; transform:scale(0.6) }
-  8%   { opacity:1; transform:scale(1.15) }
-  50%  { transform:scale(1) }
-  88%  { opacity:1 }
-  100% { left:calc(100% - 9px); opacity:0; transform:scale(0.6) }
-}
-
-/* Antena receptora: "atrapa" cada paquete que llega, sincronizada con el ciclo de 1.8s */
-.load-receiver { animation:receiveBlip 1.8s ease-in-out infinite }
-@keyframes receiveBlip {
-  0%,84%,100% { transform:rotate(0deg) scale(1) }
-  90% { transform:rotate(-9deg) scale(1.14) }
-  96% { transform:rotate(5deg) scale(1.06) }
-}
-.load-receiver::before {
-  content:''; position:absolute; inset:-9px; border-radius:50%;
-  box-shadow:0 0 0 0 rgba(124,58,237,0); animation:receiveGlow 1.8s ease-in-out infinite
-}
-@keyframes receiveGlow {
-  0%,82% { box-shadow:0 0 0 0 rgba(124,58,237,0) }
-  90% { box-shadow:0 0 0 8px rgba(124,58,237,.3) }
-  100% { box-shadow:0 0 0 0 rgba(124,58,237,0) }
-}
+/* LOADING — indicador simple y a prueba de balas: un spinner clásico de borde
+   (el mismo patrón que usan GitHub, Google, etc.) en vez de la antena/radar
+   anterior. Menos vistoso, pero garantizado: no depende de conic-gradient,
+   de mask, ni de si el sistema operativo tiene alguna preferencia de
+   "reducir movimiento" activada (algo que sí puede apagar animaciones más
+   elaboradas sin que se note por qué). */
+.load-hero { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:18px; height:60px }
+.load-spinner { width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  border:4px solid var(--pu100); border-top-color:var(--pu500);
+  animation:spin 0.85s linear infinite }
+@keyframes spin { to { transform:rotate(360deg) } }
+.load-hero-emoji { font-size:28px; flex-shrink:0 }
 
 .load-message { background:linear-gradient(135deg,var(--pu50),#fff); border:1px solid var(--pu100);
   border-radius:12px; padding:14px 18px; font-size:12.5px; color:var(--text-secondary);
@@ -182,46 +127,6 @@ body { font-family:var(--font) }
 .load-message strong { color:var(--pu700) }
 .load-message .lm-notice { display:block; margin-top:8px; padding-top:8px; border-top:1px dashed var(--pu200);
   color:var(--pu700); font-weight:600 }
-
-/* Radar grande, tipo torre de control de aeropuerto — el centro visual de la espera,
-   ubicado justo encima de la lista de pasos. El haz gira con "transform:rotate",
-   el movimiento más inequívoco que existe en CSS: no depende de opacidad ni de
-   escala, así que es imposible que se perciba como "quieto". */
-.radar-big-wrap { display:flex; justify-content:center; margin:2px 0 20px }
-.radar-big { position:relative; width:136px; height:136px; border-radius:50%;
-  background:radial-gradient(circle, var(--pu50) 0%, #fff 72%);
-  border:1.5px solid var(--pu200); overflow:hidden;
-  box-shadow:0 10px 26px -10px rgba(124,58,237,.4), inset 0 0 0 1px rgba(255,255,255,.6) }
-.radar-ring { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  border:1px solid var(--pu200); border-radius:50% }
-.radar-ring.r1 { width:36%; height:36% }
-.radar-ring.r2 { width:66%; height:66% }
-.radar-ring.r3 { width:96%; height:96% }
-.radar-cross { position:absolute; inset:0 }
-.radar-cross::before, .radar-cross::after { content:''; position:absolute; background:var(--pu100) }
-.radar-cross::before { top:50%; left:2%; right:2%; height:1px; transform:translateY(-50%) }
-.radar-cross::after { left:50%; top:2%; bottom:2%; width:1px; transform:translateX(-50%) }
-.radar-sweep { position:absolute; inset:0; border-radius:50%;
-  background:conic-gradient(from 0deg, rgba(124,58,237,.6), rgba(124,58,237,.15) 18%, transparent 40%);
-  animation:radarBigSpin 2.8s linear infinite; transform-origin:50% 50% }
-@keyframes radarBigSpin { to { transform:rotate(360deg) } }
-.radar-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  font-size:28px; z-index:3; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)) }
-.radar-blip { position:absolute; width:7px; height:7px; border-radius:50%; background:var(--pu600);
-  box-shadow:0 0 9px 3px rgba(124,58,237,.55); opacity:0; animation:blipPing 2.8s ease-out infinite }
-.radar-blip.b1 { top:26%; left:64%; animation-delay:.2s }
-.radar-blip.b2 { top:68%; left:30%; animation-delay:1.1s }
-.radar-blip.b3 { top:34%; left:24%; animation-delay:2s }
-@keyframes blipPing {
-  0%, 90%, 100% { opacity:0; transform:scale(.4) }
-  6%, 22% { opacity:1; transform:scale(1) }
-  40% { opacity:0; transform:scale(1.3) }
-}
-@media (prefers-reduced-motion:reduce) {
-  .load-antenna::before, .load-antenna::after, .load-antenna-wrap::before,
-  .load-packet, .load-receiver, .load-receiver::before,
-  .radar-sweep, .radar-blip { animation:none !important }
-}
 
 /* RESULTADOS */
 .results { display:none }
@@ -496,26 +401,12 @@ body { font-family:var(--font) }
     <!-- LOADING -->
     <div class="loading" id="stLoading">
       <div class="load-hero">
-        <div class="load-antenna-wrap"><div class="load-antenna">📡</div></div>
-        <div class="load-signal-track"><span class="load-packet"></span><span class="load-packet"></span><span class="load-packet"></span></div>
-        <div class="load-receiver">🛰️</div>
+        <div class="load-spinner" aria-hidden="true"></div>
+        <div class="load-hero-emoji">📡</div>
       </div>
       <div class="load-message">Estamos armando un diagnóstico completo: SEO, presencia en Inteligencia Artificial, publicidad, redes sociales y mucho más — el tipo de análisis a fondo que te da argumentos concretos para ayudar a este cliente a mejorar sus resultados. <strong>Puede tardar algunos minutos</strong>, vale la pena la espera. <span class="lm-notice">🔔 Podés cambiar de pestaña tranquilo — te avisamos apenas esté listo.</span></div>
       <div class="load-title">Analizando <span id="loadName" style="color:var(--pu600)">—</span>…</div>
       <div class="load-progress"><div class="load-progress-bar" id="loadProgressBar"></div></div>
-      <div class="radar-big-wrap">
-        <div class="radar-big">
-          <div class="radar-ring r1"></div>
-          <div class="radar-ring r2"></div>
-          <div class="radar-ring r3"></div>
-          <div class="radar-cross"></div>
-          <div class="radar-sweep"></div>
-          <div class="radar-blip b1"></div>
-          <div class="radar-blip b2"></div>
-          <div class="radar-blip b3"></div>
-          <div class="radar-center">🔎</div>
-        </div>
-      </div>
       <div id="stepsList">
         <div class="step"><div class="step-dot active" id="sd0">🔍</div><div class="step-info"><div class="sn">Validando y normalizando datos</div><div class="sd">URL, ciudad, formulario</div></div></div>
         <div class="step"><div class="step-dot" id="sd1">🌐</div><div class="step-info"><div class="sn">Descargando sitio web</div><div class="sd">HTML, SSL, redirecciones</div></div></div>
@@ -712,7 +603,19 @@ function runDiagnostico() {
     // Si hay wrapper {data: {...}} también normalizar
     if (data.data && !data.scores && !data.gbp) data = data.data;
     completarPasos();
-    setTimeout(() => mostrarResultados(data), 400);
+    setTimeout(() => {
+      try {
+        mostrarResultados(data);
+      } catch (renderErr) {
+        // Antes, un error acá dejaba la pantalla de "Analizando…" trabada para
+        // siempre, sin ningún aviso — el vendedor veía la pestaña parpadear
+        // (el diagnóstico sí llegó) pero nunca aparecía el resultado.
+        console.error('Error mostrando el resultado:', renderErr);
+        setState('stEmpty');
+        errEl.textContent = 'El diagnóstico llegó pero hubo un problema mostrándolo. Revisa la consola (F12) o reintenta.';
+        errEl.className = 'err-box v';
+      }
+    }, 400);
     ultimoDato = data;
     document.getElementById('btnPdf').disabled = !data.empresa;
     if (!data.empresa) console.warn('La respuesta de n8n no trae "empresa":', data);
@@ -912,64 +815,79 @@ function mostrarResultados(rawData) {
   }).join('');
   switchTab('overview');
 
-  // CHART BARRAS
-  const labels = conf.map(b=>b.n.replace(' ',''));
-  const vals = conf.map(b=>data.scores?.[b.key]||0);
-  const barColors = vals.map(v=>SC(v)+'CC');
+  // CHART BARRAS + DONUT — en un try/catch a propósito: si Chart.js no llegó a
+  // cargar por cualquier motivo (CDN caído, bloqueador de anuncios, red lenta),
+  // esto NO debe impedir que se muestren las oportunidades ni el resto del
+  // informe. Antes, un fallo acá dejaba todo lo de abajo sin renderizar.
+  try {
+    if (typeof Chart === 'undefined') throw new Error('Chart.js no está disponible (¿CDN bloqueado?)');
 
-  if (chartBar) chartBar.destroy();
-  chartBar = new Chart(document.getElementById('chartRadar'),{
-    type:'bar',
-    data:{ labels, datasets:[{
-      label:'Score',data:vals,
-      backgroundColor:barColors,borderRadius:6,borderSkipped:false
-    }]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Score: '+c.raw+'/100'}}},
-      scales:{
-        y:{min:0,max:100,grid:{color:'#EDE9FE'},ticks:{color:'#7C3AED',font:{size:10}}},
-        x:{grid:{display:false},ticks:{color:'#374151',font:{size:9},maxRotation:35}}
+    // CHART BARRAS
+    const labels = conf.map(b=>b.n.replace(' ',''));
+    const vals = conf.map(b=>data.scores?.[b.key]||0);
+    const barColors = vals.map(v=>SC(v)+'CC');
+
+    if (chartBar) chartBar.destroy();
+    chartBar = new Chart(document.getElementById('chartRadar'),{
+      type:'bar',
+      data:{ labels, datasets:[{
+        label:'Score',data:vals,
+        backgroundColor:barColors,borderRadius:6,borderSkipped:false
+      }]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Score: '+c.raw+'/100'}}},
+        scales:{
+          y:{min:0,max:100,grid:{color:'#EDE9FE'},ticks:{color:'#7C3AED',font:{size:10}}},
+          x:{grid:{display:false},ticks:{color:'#374151',font:{size:9},maxRotation:35}}
+        }
       }
+    });
+    document.getElementById('legendRadar').innerHTML = '';
+
+    // CHART DONUT
+    const donutLabels = ['SEO Local','Posicionamiento','Construcción','Publicidad','AISO','Conversión','Redes'];
+    const donutVals = conf.map(b=>data.scores?.[b.key]||0);
+    const donutColors = ['#7C3AED','#8B5CF6','#A78BFA','#6D28D9','#5B21B6','#4C1D95','#C4B5FD'];
+
+    if (chartDonut) chartDonut.destroy();
+    chartDonut = new Chart(document.getElementById('chartDonut'),{
+      type:'doughnut',
+      data:{ labels:donutLabels, datasets:[{data:donutVals,backgroundColor:donutColors,borderWidth:2,borderColor:'#fff'}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,cutout:'65%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.raw+'/100'}}}
+      }
+    });
+    document.getElementById('legendDonut').innerHTML = donutLabels.map((l,i)=>
+      `<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-secondary)">
+        <span style="width:8px;height:8px;border-radius:2px;background:${donutColors[i]};flex-shrink:0"></span>${l}
+      </span>`).join('');
+  } catch (chartErr) {
+    console.warn('No se pudieron dibujar los gráficos (el resto del informe sigue mostrándose igual):', chartErr);
+  }
+
+  // OPORTUNIDADES — también protegido: los datos del webhook pueden variar de forma
+  // en distintos diagnósticos, y esta sección no debe poder tumbar todo lo anterior.
+  try {
+    const opps = (data.oportunidades||[]).map(op=>({
+      bloque:op.area||op.bloque||'',
+      texto:op.desc||op.oportunidad||'',
+      producto:op.producto||''
+    }));
+    const oppsGrid = document.getElementById('oppsGrid');
+    const oppsSection = document.getElementById('oppsSection');
+    if (opps.length>0) {
+      oppsSection.style.display='block';
+      oppsGrid.innerHTML = opps.map(o=>`
+        <div class="opp-card">
+          <div class="opp-area">${o.bloque}</div>
+          <div class="opp-txt">${o.texto}</div>
+          <span class="opp-prod">${o.producto}</span>
+        </div>`).join('');
     }
-  });
-  document.getElementById('legendRadar').innerHTML = '';
-
-  // CHART DONUT
-  const donutLabels = ['SEO Local','Posicionamiento','Construcción','Publicidad','AISO','Conversión','Redes'];
-  const donutVals = conf.map(b=>data.scores?.[b.key]||0);
-  const donutColors = ['#7C3AED','#8B5CF6','#A78BFA','#6D28D9','#5B21B6','#4C1D95','#C4B5FD'];
-
-  if (chartDonut) chartDonut.destroy();
-  chartDonut = new Chart(document.getElementById('chartDonut'),{
-    type:'doughnut',
-    data:{ labels:donutLabels, datasets:[{data:donutVals,backgroundColor:donutColors,borderWidth:2,borderColor:'#fff'}]},
-    options:{
-      responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+c.raw+'/100'}}}
-    }
-  });
-  document.getElementById('legendDonut').innerHTML = donutLabels.map((l,i)=>
-    `<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-secondary)">
-      <span style="width:8px;height:8px;border-radius:2px;background:${donutColors[i]};flex-shrink:0"></span>${l}
-    </span>`).join('');
-
-  // OPORTUNIDADES
-  const opps = (data.oportunidades||[]).map(op=>({
-    bloque:op.area||op.bloque||'',
-    texto:op.desc||op.oportunidad||'',
-    producto:op.producto||''
-  }));
-  const oppsGrid = document.getElementById('oppsGrid');
-  const oppsSection = document.getElementById('oppsSection');
-  if (opps.length>0) {
-    oppsSection.style.display='block';
-    oppsGrid.innerHTML = opps.map(o=>`
-      <div class="opp-card">
-        <div class="opp-area">${o.bloque}</div>
-        <div class="opp-txt">${o.texto}</div>
-        <span class="opp-prod">${o.producto}</span>
-      </div>`).join('');
+  } catch (oppsErr) {
+    console.warn('No se pudo renderizar la sección de oportunidades:', oppsErr);
   }
 }
 
