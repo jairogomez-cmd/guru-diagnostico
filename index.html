@@ -480,7 +480,7 @@ body { font-family:var(--font) }
       <!-- ACCIONES -->
       <div class="actions">
         <button class="btn-sec" onclick="nuevoDiag()"><i class="ti ti-refresh" aria-hidden="true"></i> Nuevo análisis</button>
-        <button class="btn-pdf" id="btnPdf" onclick="generarPDF()" disabled><i class="ti ti-file-download" aria-hidden="true"></i> Descargar PDF profesional</button>
+        <button class="btn-pdf" id="btnPdf" onclick="generarPDF()" disabled><i class="ti ti-file-download" aria-hidden="true"></i> Volver a descargar PDF (debió llegar a tu correo)</button>
       </div>
 
     </div><!-- /results -->
@@ -959,7 +959,7 @@ async function generarPDF() {
     showToast('Error generando el PDF: ' + err.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-file-download" aria-hidden="true"></i> Descargar PDF profesional';
+    btn.innerHTML = '<i class="ti ti-file-download" aria-hidden="true"></i> Volver a descargar PDF (debió llegar a tu correo)';
   }
 }
 
