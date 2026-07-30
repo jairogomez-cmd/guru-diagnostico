@@ -136,6 +136,33 @@ async function enviarCorreos(diagnostico, pdfBuffer, slug) {
   });
 }
 
+// Le pide a la base que marque este diagnóstico como "correo ya enviado", pero
+// SOLO si todavía no lo estaba. Postgres garantiza que, aunque lleguen dos
+// pedidos al mismo tiempo (el automático de n8n y un click manual), nada más
+// uno de los dos gana esa carrera — sin depender de timers ni de que Drive
+// termine antes o después.
+async function intentarReclamarEnvioCorreos(jobId) {
+  if (!jobId || !process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return true;
+  try {
+    const url = `${process.env.SUPABASE_URL}/rest/v1/audit_jobs?id=eq.${jobId}&pdf_correo_enviado=eq.false`;
+    const r = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify({ pdf_correo_enviado: true }),
+    });
+    const rows = await r.json();
+    return Array.isArray(rows) && rows.length > 0; // true = esta ejecución ganó, manda los correos
+  } catch (e) {
+    console.error('No se pudo reclamar el envío de correos (se manda igual, por las dudas):', e.message);
+    return true;
+  }
+}
+
 async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Método no permitido' });
@@ -179,13 +206,19 @@ async function handler(req, res) {
     // res.end() llegue a terminar de ejecutarse — el runtime puede cortar la ejecución
     // apenas la respuesta se considera "enviada". Por eso esperamos acá, dentro del
     // mismo ciclo de vida de la función, antes de cerrar la respuesta.
-    console.log('Intentando enviar correos para:', diagnostico.empresa);
-    try {
-      await enviarCorreos(diagnostico, pdfBuffer, slug);
-      console.log('Envío de correos finalizado sin excepciones.');
-    } catch (emailErr) {
-      // Un correo que falla nunca debe impedir que el vendedor reciba su PDF.
-      console.error('Error en el envío de correos:', emailErr);
+    const jobId = diagnostico.jobId || diagnostico.audit_job_id || null;
+    const debeEnviar = await intentarReclamarEnvioCorreos(jobId);
+    if (!debeEnviar) {
+      console.log('Ya se habían enviado los correos de este diagnóstico antes (audit_job_id:', jobId, ') — se omite el reenvío.');
+    } else {
+      console.log('Intentando enviar correos para:', diagnostico.empresa);
+      try {
+        await enviarCorreos(diagnostico, pdfBuffer, slug);
+        console.log('Envío de correos finalizado sin excepciones.');
+      } catch (emailErr) {
+        // Un correo que falla nunca debe impedir que el vendedor reciba su PDF.
+        console.error('Error en el envío de correos:', emailErr);
+      }
     }
 
     res.statusCode = 200;
