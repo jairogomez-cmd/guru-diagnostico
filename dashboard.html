@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Dashboard — Guru Diagnóstico Digital</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --pu50:#F5F3FF; --pu100:#EDE9FE; --pu200:#DDD6FE; --pu400:#A78BFA;
+  --pu500:#8B5CF6; --pu600:#7C3AED; --pu700:#6D28D9; --pu900:#2E1065;
+  --navy:#1A1A2E; --navy2:#2E1B4E;
+  --teal:#0F9B8E; --gold:#F5A623; --orange:#E08A3C; --coral:#E94560;
+  --logo-y:#FDCE30; --logo-p:#FE009D; --logo-b:#186DAF; --logo-c:#02CFEB; --logo-g:#13C93D;
+  --ink:#171723; --ink2:#5b5b6b; --ink3:#9494a3; --line:#EAE7F5; --bg:#F7F6FC;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+}
+* { box-sizing:border-box; margin:0; padding:0 }
+body { font-family:var(--font); background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased }
+a { color:inherit }
+
+/* ===== HEADER ===== */
+.hdr { background:#fff; border-bottom:1px solid var(--line); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:20 }
+.hdr-left { display:flex; align-items:center; gap:12px }
+.logo-dots { display:flex; gap:3px }
+.dot { width:7px; height:7px; border-radius:50% }
+.d1{background:var(--logo-y)}.d2{background:var(--logo-p)}.d3{background:var(--pu500)}.d4{background:var(--logo-c)}.d5{background:var(--logo-g)}
+.logo-word { font-size:17px; font-weight:800; color:#111 }
+.hdr-title { font-size:14.5px; font-weight:700; color:var(--pu700); padding-left:12px; border-left:1.5px solid var(--line) }
+.hdr-right { display:flex; align-items:center; gap:14px }
+.hdr-updated { font-size:11.5px; color:var(--ink3) }
+.btn-logout {
+  font-size:12.5px; font-weight:600; color:var(--ink2); background:#fff; border:1.5px solid var(--line);
+  padding:8px 14px; border-radius:9px; cursor:pointer; font-family:var(--font); transition:.15s;
+}
+.btn-logout:hover { border-color:var(--coral); color:var(--coral) }
+
+.wrap { max-width:1320px; margin:0 auto; padding:26px 28px 60px }
+
+/* ===== FILTROS ===== */
+.filters {
+  background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px 20px; margin-bottom:22px;
+  display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; box-shadow:0 1px 3px rgba(30,20,60,.04);
+}
+.f-field { display:flex; flex-direction:column; gap:6px; min-width:130px }
+.f-field.grow { flex:1 1 200px }
+.f-field label { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--pu600) }
+.f-field input, .f-field select {
+  padding:9px 11px; border:1.5px solid var(--line); border-radius:9px; font-size:13px; font-family:var(--font);
+  background:var(--bg); transition:.15s;
+}
+.f-field input:focus, .f-field select:focus { outline:none; border-color:var(--pu500); background:#fff }
+.f-score-row { display:flex; gap:8px; align-items:center }
+.f-score-row input { width:62px; text-align:center }
+.btn-clear {
+  font-size:12.5px; font-weight:600; color:var(--pu600); background:var(--pu50); border:1.5px solid var(--pu200);
+  padding:9px 14px; border-radius:9px; cursor:pointer; font-family:var(--font); white-space:nowrap;
+}
+.btn-clear:hover { background:var(--pu100) }
+
+/* ===== KPIs ===== */
+.kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px }
+@media (max-width:900px) { .kpis { grid-template-columns:repeat(2,1fr) } }
+.kpi {
+  border-radius:16px; padding:20px 22px; position:relative; overflow:hidden; color:#fff;
+  box-shadow:0 10px 26px -12px rgba(30,20,60,.35);
+}
+.kpi::after { content:''; position:absolute; top:-30%; right:-15%; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,.08) }
+.kpi.k1 { background:linear-gradient(135deg,var(--navy),var(--navy2)) }
+.kpi.k2 { background:linear-gradient(135deg,var(--pu700),var(--pu500)) }
+.kpi.k3 { background:linear-gradient(135deg,#0d7d73,var(--teal)) }
+.kpi.k4 { background:linear-gradient(135deg,#c2790f,var(--gold)) }
+.kpi-label { font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; opacity:.85; display:flex; align-items:center; gap:6px }
+.kpi-num { font-size:32px; font-weight:800; margin-top:8px; line-height:1 }
+.kpi-sub { font-size:11.5px; opacity:.75; margin-top:6px }
+
+/* ===== CHARTS ===== */
+.charts-row { display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:16px }
+@media (max-width:980px) { .charts-row { grid-template-columns:1fr } }
+.panel { background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 22px; box-shadow:0 1px 3px rgba(30,20,60,.04) }
+.panel-title { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:2px }
+.panel-sub { font-size:11.5px; color:var(--ink3); margin-bottom:14px }
+.chart-box { position:relative; height:260px }
+.chart-box.tall { height:300px }
+.empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--ink3); gap:8px; text-align:center; padding:20px }
+.empty-state .em-icon { font-size:26px; opacity:.5 }
+.empty-state .em-txt { font-size:12.5px; max-width:260px }
+
+/* ===== TABLA ===== */
+.table-panel { background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 22px; box-shadow:0 1px 3px rgba(30,20,60,.04) }
+.table-head-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px }
+.btn-csv {
+  display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,var(--pu600),var(--pu500)); border:none; padding:10px 16px; border-radius:10px;
+  cursor:pointer; text-decoration:none; transition:.15s; font-family:var(--font);
+}
+.btn-csv:hover { transform:translateY(-1px); box-shadow:0 8px 18px -6px rgba(124,58,237,.45) }
+.table-scroll { overflow-x:auto }
+table { width:100%; border-collapse:collapse; font-size:13px }
+thead th {
+  text-align:left; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  color:var(--ink3); padding:10px 12px; border-bottom:1.5px solid var(--line); white-space:nowrap;
+}
+tbody td { padding:11px 12px; border-bottom:1px solid var(--line); white-space:nowrap; color:var(--ink2) }
+tbody tr:hover { background:var(--pu50) }
+tbody td.empresa-cell { color:var(--ink); font-weight:600 }
+.score-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700 }
+.pdf-btn {
+  display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; color:var(--pu600);
+  background:var(--pu50); border:1.5px solid var(--pu200); padding:5px 10px; border-radius:8px; text-decoration:none;
+}
+.pdf-btn:hover { background:var(--pu100) }
+.pdf-none { font-size:11.5px; color:var(--ink3) }
+.table-foot { display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:12px; color:var(--ink3) }
+.pager { display:flex; gap:6px }
+.pager button {
+  font-size:12px; font-weight:600; color:var(--pu600); background:#fff; border:1.5px solid var(--line);
+  padding:6px 12px; border-radius:8px; cursor:pointer; font-family:var(--font);
+}
+.pager button:disabled { opacity:.4; cursor:not-allowed }
+.pager button:hover:not(:disabled) { border-color:var(--pu400) }
+
+.loading-screen {
+  position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:100;
+}
+.spin { width:38px; height:38px; border-radius:50%; border:4px solid var(--pu100); border-top-color:var(--pu500); animation:spin .85s linear infinite }
+@keyframes spin { to{ transform:rotate(360deg) } }
+.loading-screen .lt { font-size:13px; color:var(--ink3); font-weight:600 }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="spin"></div>
+  <div class="lt">Cargando métricas…</div>
+</div>
+
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="logo-dots"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span><span class="dot d5"></span></div>
+    <span class="logo-word">guru</span>
+    <span class="hdr-title">Dashboard interno</span>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-updated" id="hdrUpdated"></span>
+    <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="filters">
+    <div class="f-field">
+      <label>Desde</label>
+      <input type="date" id="fDesde" />
+    </div>
+    <div class="f-field">
+      <label>Hasta</label>
+      <input type="date" id="fHasta" />
+    </div>
+    <div class="f-field">
+      <label>Vendedor</label>
+      <select id="fVendedor"><option value="">Todos</option></select>
+    </div>
+    <div class="f-field">
+      <label>País</label>
+      <select id="fPais"><option value="">Todos</option></select>
+    </div>
+    <div class="f-field grow">
+      <label>Empresa</label>
+      <input type="text" id="fEmpresa" placeholder="Buscar por nombre…" />
+    </div>
+    <div class="f-field">
+      <label>Score</label>
+      <div class="f-score-row">
+        <input type="number" id="fScoreMin" placeholder="Min" min="0" max="100" />
+        <span style="color:var(--ink3)">–</span>
+        <input type="number" id="fScoreMax" placeholder="Max" min="0" max="100" />
+      </div>
+    </div>
+    <button class="btn-clear" id="btnClear">Limpiar filtros</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi k1">
+      <div class="kpi-label">📊 Diagnósticos</div>
+      <div class="kpi-num" id="kpiTotal">0</div>
+      <div class="kpi-sub" id="kpiTotalSub">&nbsp;</div>
+    </div>
+    <div class="kpi k2">
+      <div class="kpi-label">💰 Costo total</div>
+      <div class="kpi-num" id="kpiCosto">$0</div>
+      <div class="kpi-sub" id="kpiCostoSub">&nbsp;</div>
+    </div>
+    <div class="kpi k3">
+      <div class="kpi-label">⏱️ Tiempo promedio</div>
+      <div class="kpi-num" id="kpiTiempo">0s</div>
+      <div class="kpi-sub">por diagnóstico</div>
+    </div>
+    <div class="kpi k4">
+      <div class="kpi-label">🎯 Score promedio</div>
+      <div class="kpi-num" id="kpiScore">0</div>
+      <div class="kpi-sub">de 100 — presencia digital</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="panel">
+      <div class="panel-title">Diagnósticos por vendedor</div>
+      <div class="panel-sub">Cantidad de análisis realizados en el período filtrado</div>
+      <div class="chart-box"><canvas id="chartVendedor"></canvas><div class="empty-state" id="emptyVendedor" style="display:none"><span class="em-icon">📭</span><span class="em-txt">No hay diagnósticos que coincidan con estos filtros.</span></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Tendencia semanal</div>
+      <div class="panel-sub">Diagnósticos generados por semana</div>
+      <div class="chart-box"><canvas id="chartTendencia"></canvas><div class="empty-state" id="emptyTendencia" style="display:none"><span class="em-icon">📭</span><span class="em-txt">Sin datos suficientes para una tendencia.</span></div></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="panel">
+      <div class="panel-title">Costo por vendedor (USD)</div>
+      <div class="panel-sub">Suma de todos los costos de API por vendedor</div>
+      <div class="chart-box"><canvas id="chartCosto"></canvas><div class="empty-state" id="emptyCosto" style="display:none"><span class="em-icon">📭</span><span class="em-txt">No hay datos de costo en este período.</span></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Score promedio por vendedor</div>
+      <div class="panel-sub">¿Quién diagnostica empresas con mejor o peor presencia digital?</div>
+      <div class="chart-box"><canvas id="chartScoreVendedor"></canvas><div class="empty-state" id="emptyScoreVendedor" style="display:none"><span class="em-icon">📭</span><span class="em-txt">Sin datos suficientes.</span></div></div>
+    </div>
+  </div>
+
+  <div class="table-panel">
+    <div class="table-head-row">
+      <div>
+        <div class="panel-title">Detalle de diagnósticos</div>
+        <div class="panel-sub" id="tableCount">0 resultados</div>
+      </div>
+      <a class="btn-csv" href="/api/dashboard-csv" id="btnCsv">⬇ Descargar todos los datos (CSV)</a>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Empresa</th><th>Vendedor</th><th>País</th>
+            <th>Score</th><th>Costo</th><th>Duración</th><th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="table-foot">
+      <span id="pagerInfo"></span>
+      <div class="pager">
+        <button id="btnPrev">‹ Anterior</button>
+        <button id="btnNext">Siguiente ›</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let TODOS = [];
+let FILTRADOS = [];
+let pagina = 1;
+const FILAS_POR_PAGINA = 25;
+let chartVendedor, chartTendencia, chartCosto, chartScoreVendedor;
+
+const PALETA = ['#FDCE30', '#FE009D', '#8B5CF6', '#02CFEB', '#13C93D', '#E94560', '#F5A623'];
+
+function chartJsDisponible(emptyElId, mensaje) {
+  if (typeof Chart !== 'undefined') return true;
+  const el = document.getElementById(emptyElId);
+  if (el) {
+    el.style.display = 'flex';
+    const txt = el.querySelector('.em-txt');
+    if (txt) txt.textContent = mensaje || 'No se pudo cargar la librería de gráficos. Los números de arriba y la tabla de abajo siguen funcionando bien.';
+  }
+  return false;
+}
+
+function colorTier(score) {
+  if (score == null) return { bg: '#F1F0F5', fg: '#8b8b98' };
+  if (score >= 80) return { bg: '#DCF6F3', fg: '#0F9B8E' };
+  if (score >= 60) return { bg: '#FDF0DA', fg: '#B9791A' };
+  if (score >= 40) return { bg: '#FBE7D6', fg: '#C2620F' };
+  return { bg: '#FCE2E6', fg: '#C81E38' };
+}
+
+function fmtUSD(n) {
+  return '$' + (n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtFecha(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function fmtDuracion(seg) {
+  if (seg == null) return '—';
+  if (seg < 60) return seg + 's';
+  const m = Math.floor(seg / 60), s = seg % 60;
+  return `${m}m ${s}s`;
+}
+
+function animarNumero(el, valorFinal, formateador) {
+  const inicio = 0;
+  const duracionMs = 700;
+  const t0 = performance.now();
+  function paso(t) {
+    const p = Math.min(1, (t - t0) / duracionMs);
+    const easeOut = 1 - Math.pow(1 - p, 3);
+    const actual = inicio + (valorFinal - inicio) * easeOut;
+    el.textContent = formateador(actual);
+    if (p < 1) requestAnimationFrame(paso);
+    else el.textContent = formateador(valorFinal);
+  }
+  requestAnimationFrame(paso);
+}
+
+async function cargarDatos() {
+  // Supabase devuelve las columnas "numeric" (score_global, costo_total_usd,
+  // seo_local, etc.) como texto — ej. "65.00" en vez de 65 — para no perder
+  // precisión decimal. Si no se convierten, sumas como scores.reduce((a,b)=>a+b)
+  // concatenan texto en vez de sumar números, dando promedios rotos.
+  const CAMPOS_NUMERICOS = ['score_global','costo_total_usd','duracion_segundos',
+    'seo_local','posicionamiento','construccion','publicidad','aiso','conversion','redes'];
+  function normalizarNumeros(filas) {
+    return filas.map(fila => {
+      const copia = { ...fila };
+      CAMPOS_NUMERICOS.forEach(campo => {
+        if (copia[campo] !== null && copia[campo] !== undefined) {
+          const n = Number(copia[campo]);
+          copia[campo] = Number.isNaN(n) ? null : n;
+        }
+      });
+      return copia;
+    });
+  }
+
+  try {
+    const r = await fetch('/api/dashboard-data');
+    if (r.status === 401) {
+      window.location.href = '/dashboard-login.html';
+      return;
+    }
+    const data = await r.json();
+    if (!data.ok) throw new Error(data.error || 'Error desconocido');
+    TODOS = normalizarNumeros(data.data || []);
+    poblarFiltros();
+    aplicarFiltros();
+    document.getElementById('hdrUpdated').textContent =
+      'Actualizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    console.error('Error cargando el dashboard:', e);
+    document.getElementById('loadingScreen').innerHTML =
+      '<div style="font-size:14px;color:#E94560;font-weight:600;max-width:320px;text-align:center">No se pudieron cargar los datos. Recargá la página o avisale a Jairo si el problema sigue.</div>';
+    return;
+  }
+  document.getElementById('loadingScreen').style.display = 'none';
+}
+
+function poblarFiltros() {
+  const vendedores = [...new Set(TODOS.map(d => d.nombre_vendedor).filter(Boolean))].sort();
+  const paises = [...new Set(TODOS.map(d => d.pais).filter(Boolean))].sort();
+  const selV = document.getElementById('fVendedor');
+  const selP = document.getElementById('fPais');
+  vendedores.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; selV.appendChild(o); });
+  paises.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; selP.appendChild(o); });
+}
+
+function leerFiltros() {
+  return {
+    desde: document.getElementById('fDesde').value,
+    hasta: document.getElementById('fHasta').value,
+    vendedor: document.getElementById('fVendedor').value,
+    pais: document.getElementById('fPais').value,
+    empresa: document.getElementById('fEmpresa').value.trim().toLowerCase(),
+    scoreMin: document.getElementById('fScoreMin').value,
+    scoreMax: document.getElementById('fScoreMax').value,
+  };
+}
+
+function aplicarFiltros() {
+  const f = leerFiltros();
+  FILTRADOS = TODOS.filter(d => {
+    if (f.desde && (!d.created_at || d.created_at.slice(0, 10) < f.desde)) return false;
+    if (f.hasta && (!d.created_at || d.created_at.slice(0, 10) > f.hasta)) return false;
+    if (f.vendedor && d.nombre_vendedor !== f.vendedor) return false;
+    if (f.pais && d.pais !== f.pais) return false;
+    if (f.empresa && !(d.empresa || '').toLowerCase().includes(f.empresa)) return false;
+    if (f.scoreMin !== '' && (d.score_global == null || d.score_global < Number(f.scoreMin))) return false;
+    if (f.scoreMax !== '' && (d.score_global == null || d.score_global > Number(f.scoreMax))) return false;
+    return true;
+  });
+  pagina = 1;
+  renderTodo();
+}
+
+function renderTodo() {
+  renderKPIs();
+  // Cada gráfico va en su propio try/catch: si Chart.js no llegó a cargar
+  // (CDN lento, bloqueador de anuncios) o un gráfico puntual falla, el resto
+  // del dashboard — incluida la tabla de abajo — se sigue mostrando igual.
+  const graficos = [renderChartVendedor, renderChartTendencia, renderChartCosto, renderChartScoreVendedor];
+  graficos.forEach(fn => {
+    try { fn(); } catch (e) { console.warn('No se pudo dibujar un gráfico (el resto del dashboard sigue funcionando):', e); }
+  });
+  renderTabla();
+}
+
+function renderKPIs() {
+  const total = FILTRADOS.length;
+  const costoTotal = FILTRADOS.reduce((s, d) => s + (Number(d.costo_total_usd) || 0), 0);
+  const duraciones = FILTRADOS.filter(d => d.duracion_segundos != null).map(d => d.duracion_segundos);
+  const tiempoProm = duraciones.length ? Math.round(duraciones.reduce((a, b) => a + b, 0) / duraciones.length) : 0;
+  const scores = FILTRADOS.filter(d => d.score_global != null).map(d => d.score_global);
+  const scoreProm = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+
+  animarNumero(document.getElementById('kpiTotal'), total, v => Math.round(v).toLocaleString('es-AR'));
+  animarNumero(document.getElementById('kpiCosto'), costoTotal, v => fmtUSD(v));
+  animarNumero(document.getElementById('kpiTiempo'), tiempoProm, v => fmtDuracion(Math.round(v)));
+  animarNumero(document.getElementById('kpiScore'), scoreProm, v => Math.round(v).toString());
+
+  const vendedoresUnicos = new Set(FILTRADOS.map(d => d.nombre_vendedor).filter(Boolean)).size;
+  document.getElementById('kpiTotalSub').textContent = vendedoresUnicos ? `de ${vendedoresUnicos} vendedor(es)` : ' ';
+  document.getElementById('kpiCostoSub').textContent = total ? `≈ ${fmtUSD(costoTotal / total)} c/u` : ' ';
+}
+
+function agruparPor(arr, campo) {
+  const mapa = {};
+  arr.forEach(d => {
+    const k = d[campo] || '—';
+    mapa[k] = (mapa[k] || 0) + 1;
+  });
+  return mapa;
+}
+
+function renderChartVendedor() {
+  if (!chartJsDisponible('emptyVendedor')) return;
+  const mapa = agruparPor(FILTRADOS, 'nombre_vendedor');
+  const labels = Object.keys(mapa);
+  const empty = document.getElementById('emptyVendedor');
+  if (!labels.length) { empty.style.display = 'flex'; if (chartVendedor) chartVendedor.destroy(); return; }
+  empty.style.display = 'none';
+  const vals = labels.map(l => mapa[l]);
+  if (chartVendedor) chartVendedor.destroy();
+  chartVendedor = new Chart(document.getElementById('chartVendedor'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: labels.map((_, i) => PALETA[i % PALETA.length]), borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EEE9FA' } }, x: { grid: { display: false } } } }
+  });
+}
+
+function renderChartTendencia() {
+  if (!chartJsDisponible('emptyTendencia')) return;
+  const semanas = {};
+  FILTRADOS.forEach(d => {
+    if (!d.created_at) return;
+    const dt = new Date(d.created_at);
+    const inicioSemana = new Date(dt); inicioSemana.setDate(dt.getDate() - dt.getDay());
+    const key = inicioSemana.toISOString().slice(0, 10);
+    semanas[key] = (semanas[key] || 0) + 1;
+  });
+  const labels = Object.keys(semanas).sort();
+  const empty = document.getElementById('emptyTendencia');
+  if (labels.length < 1) { empty.style.display = 'flex'; if (chartTendencia) chartTendencia.destroy(); return; }
+  empty.style.display = 'none';
+  const vals = labels.map(l => semanas[l]);
+  const labelsFmt = labels.map(l => new Date(l).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' }));
+  if (chartTendencia) chartTendencia.destroy();
+  chartTendencia = new Chart(document.getElementById('chartTendencia'), {
+    type: 'line',
+    data: { labels: labelsFmt, datasets: [{ data: vals, borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,.12)',
+      fill: true, tension: .35, pointBackgroundColor: '#7C3AED', pointRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#EEE9FA' } }, x: { grid: { display: false } } } }
+  });
+}
+
+function renderChartCosto() {
+  if (!chartJsDisponible('emptyCosto')) return;
+  const mapa = {};
+  FILTRADOS.forEach(d => { const k = d.nombre_vendedor || '—'; mapa[k] = (mapa[k] || 0) + (Number(d.costo_total_usd) || 0); });
+  const labels = Object.keys(mapa);
+  const empty = document.getElementById('emptyCosto');
+  if (!labels.length) { empty.style.display = 'flex'; if (chartCosto) chartCosto.destroy(); return; }
+  empty.style.display = 'none';
+  const vals = labels.map(l => Number(mapa[l].toFixed(4)));
+  if (chartCosto) chartCosto.destroy();
+  chartCosto = new Chart(document.getElementById('chartCosto'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: '#0F9B8E', borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: c => fmtUSD(c.raw) } } },
+      scales: { y: { beginAtZero: true, grid: { color: '#EEE9FA' } }, x: { grid: { display: false } } } }
+  });
+}
+
+function renderChartScoreVendedor() {
+  if (!chartJsDisponible('emptyScoreVendedor')) return;
+  const suma = {}, cuenta = {};
+  FILTRADOS.forEach(d => {
+    if (d.score_global == null) return;
+    const k = d.nombre_vendedor || '—';
+    suma[k] = (suma[k] || 0) + d.score_global;
+    cuenta[k] = (cuenta[k] || 0) + 1;
+  });
+  const labels = Object.keys(suma);
+  const empty = document.getElementById('emptyScoreVendedor');
+  if (!labels.length) { empty.style.display = 'flex'; if (chartScoreVendedor) chartScoreVendedor.destroy(); return; }
+  empty.style.display = 'none';
+  const vals = labels.map(l => Math.round(suma[l] / cuenta[l]));
+  const colores = vals.map(v => colorTier(v).fg);
+  if (chartScoreVendedor) chartScoreVendedor.destroy();
+  chartScoreVendedor = new Chart(document.getElementById('chartScoreVendedor'), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: vals, backgroundColor: colores, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, indexAxis: 'y',
+      scales: { x: { beginAtZero: true, max: 100, grid: { color: '#EEE9FA' } }, y: { grid: { display: false } } } }
+  });
+}
+
+function renderTabla() {
+  const total = FILTRADOS.length;
+  document.getElementById('tableCount').textContent = total.toLocaleString('es-AR') + ' resultado' + (total === 1 ? '' : 's');
+  const totalPaginas = Math.max(1, Math.ceil(total / FILAS_POR_PAGINA));
+  if (pagina > totalPaginas) pagina = totalPaginas;
+  const inicio = (pagina - 1) * FILAS_POR_PAGINA;
+  const pageRows = FILTRADOS.slice(inicio, inicio + FILAS_POR_PAGINA);
+
+  const tbody = document.getElementById('tbody');
+  if (!pageRows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--ink3);padding:30px">Sin resultados para estos filtros.</td></tr>`;
+  } else {
+    tbody.innerHTML = pageRows.map(d => {
+      const tier = colorTier(d.score_global);
+      const scoreTxt = d.score_global != null ? Math.round(d.score_global) : '—';
+      const pdfCell = d.pdf_url
+        ? `<a class="pdf-btn" href="${escapeAttr(d.pdf_url)}" target="_blank" rel="noopener">⬇ PDF</a>`
+        : `<span class="pdf-none">—</span>`;
+      return `<tr>
+        <td>${fmtFecha(d.created_at)}</td>
+        <td class="empresa-cell">${escapeHtml(d.empresa || '—')}</td>
+        <td>${escapeHtml(d.nombre_vendedor || '—')}</td>
+        <td>${escapeHtml(d.pais || '—')}</td>
+        <td><span class="score-badge" style="background:${tier.bg};color:${tier.fg}">${scoreTxt}</span></td>
+        <td>${fmtUSD(d.costo_total_usd)}</td>
+        <td>${fmtDuracion(d.duracion_segundos)}</td>
+        <td>${pdfCell}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('pagerInfo').textContent = total
+    ? `Página ${pagina} de ${totalPaginas} — filas ${inicio + 1}–${Math.min(inicio + FILAS_POR_PAGINA, total)} de ${total}`
+    : '';
+  document.getElementById('btnPrev').disabled = pagina <= 1;
+  document.getElementById('btnNext').disabled = pagina >= totalPaginas;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+// ===== Eventos =====
+['fDesde','fHasta','fVendedor','fPais'].forEach(id => {
+  document.getElementById(id).addEventListener('change', aplicarFiltros);
+});
+let debounceFiltro;
+['fEmpresa','fScoreMin','fScoreMax'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    clearTimeout(debounceFiltro);
+    debounceFiltro = setTimeout(aplicarFiltros, 250);
+  });
+});
+document.getElementById('btnClear').addEventListener('click', () => {
+  ['fDesde','fHasta','fVendedor','fPais','fEmpresa','fScoreMin','fScoreMax'].forEach(id => document.getElementById(id).value = '');
+  aplicarFiltros();
+});
+document.getElementById('btnPrev').addEventListener('click', () => { if (pagina > 1) { pagina--; renderTabla(); } });
+document.getElementById('btnNext').addEventListener('click', () => { pagina++; renderTabla(); });
+document.getElementById('btnLogout').addEventListener('click', async () => {
+  await fetch('/api/dashboard-logout', { method: 'POST' }).catch(() => {});
+  window.location.href = '/dashboard-login.html';
+});
+
+cargarDatos();
+</script>
+</body>
+</html>
