@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Acceso restringido — Guru Dashboard</title>
+<style>
+:root {
+  --pu50:#F5F3FF; --pu100:#EDE9FE; --pu200:#DDD6FE; --pu400:#A78BFA;
+  --pu500:#8B5CF6; --pu600:#7C3AED; --pu700:#6D28D9; --pu900:#2E1065;
+  --coral:#E94560; --font:'Inter',system-ui,-apple-system,sans-serif;
+}
+* { box-sizing:border-box; margin:0; padding:0 }
+body {
+  font-family:var(--font); min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 20% 20%, #2E1B4E 0%, #1A1A2E 55%, #14101f 100%);
+  padding:20px;
+}
+.card {
+  width:100%; max-width:400px; background:#fff; border-radius:20px; padding:38px 34px;
+  box-shadow:0 30px 70px -20px rgba(0,0,0,0.5); animation:riseIn .5s ease both;
+}
+@keyframes riseIn { from{opacity:0; transform:translateY(18px)} to{opacity:1; transform:translateY(0)} }
+.logo-row { display:flex; align-items:center; gap:10px; margin-bottom:26px }
+.logo-dots { display:flex; gap:3px }
+.dot { width:7px; height:7px; border-radius:50% }
+.d1{background:#FDCE30}.d2{background:#FE009D}.d3{background:#8B5CF6}.d4{background:#02CFEB}.d5{background:#13C93D}
+.logo-word { font-size:19px; font-weight:800; color:#111 }
+.lock-wrap {
+  width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--pu100),var(--pu50));
+  display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px;
+}
+.eyebrow { font-size:11.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--pu500) }
+h1 { font-size:22px; font-weight:800; color:#111; margin:4px 0 6px }
+.sub { font-size:13.5px; color:#6b6b78; line-height:1.5; margin-bottom:26px }
+.field { margin-bottom:16px }
+.field label { display:block; font-size:12px; font-weight:700; color:var(--pu700); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px }
+.field input {
+  width:100%; padding:12px 14px; border:1.5px solid #E5E1F5; border-radius:10px; font-size:14.5px;
+  font-family:var(--font); transition:border-color .15s, box-shadow .15s; background:#FBFAFF;
+}
+.field input:focus { outline:none; border-color:var(--pu500); box-shadow:0 0 0 3px rgba(139,92,246,.15); background:#fff }
+.btn {
+  width:100%; padding:13px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--pu600),var(--pu500));
+  color:#fff; font-size:14.5px; font-weight:700; cursor:pointer; margin-top:6px;
+  transition:transform .15s, box-shadow .15s; font-family:var(--font);
+}
+.btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 20px -6px rgba(124,58,237,.5) }
+.btn:disabled { opacity:.6; cursor:not-allowed }
+.err {
+  display:none; background:#FEF2F3; border:1px solid #FBD1D6; color:#B91C2C; font-size:12.5px;
+  padding:10px 12px; border-radius:9px; margin-bottom:16px; line-height:1.4;
+}
+.err.v { display:block }
+.foot { text-align:center; font-size:11.5px; color:#9b9ba8; margin-top:22px; line-height:1.5 }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-row">
+      <div class="logo-dots"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span><span class="dot d5"></span></div>
+      <span class="logo-word">guru</span>
+    </div>
+    <div class="lock-wrap">🔒</div>
+    <div class="eyebrow">Acceso restringido</div>
+    <h1>Dashboard interno</h1>
+    <p class="sub">Esta sección es solo para administradores — métricas de uso, costos y descarga de diagnósticos del equipo.</p>
+
+    <div class="err" id="errBox"></div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="usuario">Usuario</label>
+        <input id="usuario" name="usuario" type="text" autocomplete="username" required />
+      </div>
+      <div class="field">
+        <label for="clave">Contraseña</label>
+        <input id="clave" name="clave" type="password" autocomplete="current-password" required />
+      </div>
+      <button class="btn" id="btnLogin" type="submit">Ingresar</button>
+    </form>
+
+    <div class="foot">Guru Soluciones — uso interno exclusivo del equipo.</div>
+  </div>
+
+<script>
+const form = document.getElementById('loginForm');
+const btn = document.getElementById('btnLogin');
+const errBox = document.getElementById('errBox');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errBox.className = 'err';
+  errBox.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+
+  const usuario = document.getElementById('usuario').value.trim();
+  const clave = document.getElementById('clave').value;
+
+  try {
+    const r = await fetch('/api/dashboard-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario, clave }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.ok) {
+      window.location.href = '/dashboard.html';
+      return;
+    }
+    errBox.textContent = data.error || 'Usuario o contraseña incorrectos.';
+    errBox.className = 'err v';
+  } catch (err) {
+    errBox.textContent = 'No se pudo conectar. Revisá tu conexión e intentá de nuevo.';
+    errBox.className = 'err v';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+});
+</script>
+</body>
+</html>
