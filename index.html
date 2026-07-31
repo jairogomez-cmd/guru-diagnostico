@@ -23,6 +23,20 @@ body { font-family:var(--font) }
   display:flex; align-items:center; gap:6px }
 .hdr-badge .live-dot { width:6px; height:6px; border-radius:50%; background:#22C55E;
   box-shadow:0 0 0 0 rgba(34,197,94,0.6); animation:livePulse 2s infinite }
+/* Oculta visualmente el <h2> del título (bueno para SEO/lectores de pantalla)
+   sin ocupar espacio en pantalla — la clase ya existía en el HTML pero nunca
+   se había definido, por eso el título se veía gigante arriba de todo. */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+/* Acceso al dashboard interno — deliberadamente discreto: mismo tono gris
+   que el resto de textos secundarios, sin color llamativo, para que un
+   vendedor no sienta la tentación de clickear "porque sí". */
+.hdr-right { display:flex; align-items:center; gap:16px }
+.hdr-dash-link { display:flex; flex-direction:column; align-items:flex-end;
+  text-decoration:none; line-height:1.3; padding:4px 2px }
+.hdr-dash-link .hdr-dash-title { font-size:12.5px; font-weight:600; color:#8A8A9A }
+.hdr-dash-link:hover .hdr-dash-title { color:var(--pu600) }
+.hdr-dash-link .hdr-dash-note { font-size:10px; color:#B5B5C0; letter-spacing:.02em }
 @keyframes livePulse {
   0% { box-shadow:0 0 0 0 rgba(34,197,94,0.5) }
   70% { box-shadow:0 0 0 6px rgba(34,197,94,0) }
@@ -294,7 +308,13 @@ body { font-family:var(--font) }
     <img class="logo-mark" id="hdrLogo" alt="Guru" />
     <span class="logo-text">Diagnóstico <span>Digital</span></span>
   </div>
-  <span class="hdr-badge"><span class="live-dot"></span>Herramienta interna</span>
+  <div class="hdr-right">
+    <span class="hdr-badge"><span class="live-dot"></span>Herramienta interna</span>
+    <a class="hdr-dash-link" href="/dashboard.html" title="Métricas internas — acceso restringido">
+      <span class="hdr-dash-title">🔒 Dashboard</span>
+      <span class="hdr-dash-note">Solo administradores</span>
+    </a>
+  </div>
 </header>
 
 <!-- MAIN LAYOUT -->
