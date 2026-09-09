@@ -63,6 +63,10 @@ body { font-family:var(--font) }
 .field-row { display:grid; grid-template-columns:2fr 3fr; gap:8px }
 .field-hint { font-size:10.5px; color:var(--text-muted); line-height:1.5; margin-top:-8px }
 .field-hint strong { color:var(--pu600); font-weight:700 }
+.field.invalid input, .field.invalid select { border-color:#EF4444; background:#FEF2F2 }
+.field.invalid input:focus, .field.invalid select:focus { box-shadow:0 0 0 3px rgba(239,68,68,0.15) }
+.field-required-note { display:none; font-size:10.5px; font-weight:600; color:#EF4444; margin-top:-2px }
+.field.invalid .field-required-note { display:block }
 .divider { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600;
   color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px }
 .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--pu100) }
@@ -354,16 +358,18 @@ body { font-family:var(--font) }
       <div class="form-sub">Ingresa los datos del cliente y genera el diagnóstico en algunos minutos</div>
     </div>
 
-    <div class="field">
+    <div class="field" id="field-empresa">
       <label>Nombre de la empresa</label>
       <input id="f-empresa" type="text" placeholder="Ej: nombre de tu empresa" />
+      <span class="field-required-note">Campo obligatorio</span>
     </div>
-    <div class="field">
+    <div class="field" id="field-url">
       <label>Sitio web</label>
       <input id="f-url" type="text" placeholder="www.empresa.com" />
+      <span class="field-required-note">Campo obligatorio</span>
     </div>
     <div class="field-row">
-      <div class="field">
+      <div class="field" id="field-pais">
         <label>País</label>
         <select id="f-pais">
           <option value="AR">Argentina</option>
@@ -386,26 +392,30 @@ body { font-family:var(--font) }
           <option value="UY">Uruguay</option>
           <option value="VE">Venezuela</option>
         </select>
+        <span class="field-required-note">Campo obligatorio</span>
       </div>
-      <div class="field">
+      <div class="field" id="field-ciudad">
         <label>Ciudad</label>
         <input id="f-ciudad" type="text" list="ciudad-list" placeholder="Buenos Aires" autocomplete="off" />
         <datalist id="ciudad-list"></datalist>
+        <span class="field-required-note">Campo obligatorio</span>
       </div>
     </div>
     <p class="field-hint">Selecciona el país y te sugerimos las ciudades principales — así evitamos errores de tipeo. Si la ciudad no aparece en la lista, puedes escribirla igual.</p>
-    <div class="field">
+    <div class="field" id="field-direccion">
       <label>Dirección</label>
       <input id="f-direccion" type="text" placeholder="Av. Principal 1234" />
+      <span class="field-required-note">Campo obligatorio</span>
     </div>
     <div class="divider">Envío del informe</div>
-    <div class="field">
+    <div class="field" id="field-ecli">
       <label>Email del cliente <span style="font-weight:400;text-transform:none;font-size:10px">(opcional)</span></label>
       <input id="f-ecli" type="email" placeholder="cliente@empresa.com" />
     </div>
-    <div class="field">
+    <div class="field" id="field-even">
       <label>Tu email (Guru)</label>
       <input id="f-even" type="email" placeholder="nombre@gurusoluciones.com" />
+      <span class="field-required-note">Campo obligatorio</span>
     </div>
     <input id="f-wh" type="hidden" value="" />
 
@@ -663,8 +673,35 @@ function runDiagnostico() {
   const wh = 'https://n8n.srv1005169.hstgr.cloud/webhook/guru-diagnostico';
 
   const errEl = document.getElementById('errBox');
-  if (!empresa) { errEl.textContent='Ingresa el nombre de la empresa'; errEl.className='err-box v'; return; }
-  if (!url) { errEl.textContent='Ingresa el sitio web'; errEl.className='err-box v'; return; }
+
+  // Campos obligatorios: id del input -> id del div .field que lo envuelve
+  const requeridos = [
+    ['f-empresa','field-empresa'],
+    ['f-url','field-url'],
+    ['f-pais','field-pais'],
+    ['f-ciudad','field-ciudad'],
+    ['f-direccion','field-direccion'],
+    ['f-even','field-even'],
+  ];
+
+  let primerInvalido = null;
+  requeridos.forEach(([inputId, fieldId]) => {
+    const valor = document.getElementById(inputId).value.trim();
+    const fieldEl = document.getElementById(fieldId);
+    if (!valor) {
+      fieldEl.classList.add('invalid');
+      if (!primerInvalido) primerInvalido = inputId;
+    } else {
+      fieldEl.classList.remove('invalid');
+    }
+  });
+
+  if (primerInvalido) {
+    errEl.textContent = 'Completa los campos marcados en rojo antes de continuar';
+    errEl.className = 'err-box v';
+    document.getElementById(primerInvalido).focus();
+    return;
+  }
   errEl.className = 'err-box';
 
   const btn = document.getElementById('btnRun');
@@ -993,6 +1030,10 @@ function nuevoDiag() {
     if (el) el.value = '';
   });
   document.getElementById('f-pais').value = 'AR';
+  ['field-empresa','field-url','field-pais','field-ciudad','field-direccion','field-even'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('invalid');
+  });
   actualizarCiudadesSugeridas();
   switchTab('overview');
 }
@@ -1125,5 +1166,22 @@ window.addEventListener('load',()=>{
   document.getElementById('f-pais').addEventListener('change', actualizarCiudadesSugeridas);
   actualizarCiudadesSugeridas();
   pedirPermisoNotificaciones();
+
+  // Apenas el usuario empieza a corregir un campo marcado en rojo, se limpia
+  // el estado inválido -- no lo dejamos rojo después de que ya lo completó.
+  [
+    ['f-empresa','field-empresa'],
+    ['f-url','field-url'],
+    ['f-pais','field-pais'],
+    ['f-ciudad','field-ciudad'],
+    ['f-direccion','field-direccion'],
+    ['f-even','field-even'],
+  ].forEach(([inputId, fieldId]) => {
+    const inputEl = document.getElementById(inputId);
+    const evento = inputEl.tagName === 'SELECT' ? 'change' : 'input';
+    inputEl.addEventListener(evento, () => {
+      if (inputEl.value.trim()) document.getElementById(fieldId).classList.remove('invalid');
+    });
+  });
 });
 </script>
