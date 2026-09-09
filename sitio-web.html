@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnóstico de Sitio Web — Gurú Soluciones</title>
+<style>
+  :root {
+    --primario: #2A0845;
+    --primario2: #3B0A60;
+    --acento: #7B2CBF;
+    --acento-claro: #9D4EDD;
+    --acento-muyclaro: #C77DFF;
+    --bg-contenedor: #F8F7FF;
+    --texto: #1A1A1A;
+    --error: #E63946;
+    --exito: #2A9D8F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: Arial, Roboto, sans-serif; color: var(--texto);
+    background: linear-gradient(160deg, var(--primario) 0%, var(--primario2) 55%, var(--acento) 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .tarjeta {
+    background: #fff; border-radius: 16px; padding: 40px; width: 100%; max-width: 460px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .marca { font-size: 12px; letter-spacing: 2px; color: var(--acento); font-weight: bold; margin-bottom: 6px; }
+  h1 { font-size: 22px; color: var(--primario); margin: 0 0 8px 0; }
+  p.sub { color: #666; font-size: 13px; margin: 0 0 28px 0; }
+  label { display: block; font-size: 13px; font-weight: bold; color: var(--primario); margin-bottom: 6px; margin-top: 18px; }
+  input {
+    width: 100%; padding: 12px 14px; border: 1.5px solid #E0DDE8; border-radius: 8px;
+    font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s;
+  }
+  input:focus { border-color: var(--acento); }
+  .opcional { font-weight: normal; color: #999; font-size: 11px; }
+  button {
+    width: 100%; margin-top: 28px; padding: 14px; border: none; border-radius: 8px;
+    background: var(--primario); color: #fff; font-size: 15px; font-weight: bold; cursor: pointer;
+    transition: background .15s;
+  }
+  button:hover { background: var(--acento); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .estado { margin-top: 18px; font-size: 13px; padding: 12px; border-radius: 8px; display: none; }
+  .estado.ok { display: block; background: #E9F7F5; color: var(--exito); }
+  .estado.error { display: block; background: #FDECEE; color: var(--error); }
+  .estado.cargando { display: block; background: var(--bg-contenedor); color: var(--acento); }
+</style>
+</head>
+<body>
+  <div class="tarjeta">
+    <div class="marca">GURÚ SOLUCIONES</div>
+    <h1>Diagnóstico de Sitio Web</h1>
+    <p class="sub">Auditoría técnica completa de un sitio web: SEO, accesibilidad, enlaces rotos, imágenes, formularios y más. El informe llega por correo en PDF.</p>
+
+    <form id="formDiagnostico">
+      <label for="domain">Dominio del sitio web</label>
+      <input type="text" id="domain" name="domain" placeholder="ejemplo.com" required>
+
+      <label for="email_principal">Tu email (Gurú Soluciones)</label>
+      <input type="email" id="email_principal" name="email_principal" placeholder="tuusuario@gurusoluciones.com" required>
+
+      <label for="email_opcional">Email del cliente <span class="opcional">(opcional)</span></label>
+      <input type="email" id="email_opcional" name="email_opcional" placeholder="cliente@empresa.com">
+
+      <button type="submit" id="btnEnviar">Generar diagnóstico</button>
+    </form>
+
+    <div class="estado" id="estado"></div>
+  </div>
+
+<script>
+  // Cambia esta URL por la de tu webhook real de n8n cuando esté activo en producción.
+  const WEBHOOK_URL = 'https://n8n.srv1005169.hstgr.cloud/webhook/diagnostico-sitio-web';
+
+  const form = document.getElementById('formDiagnostico');
+  const btn = document.getElementById('btnEnviar');
+  const estado = document.getElementById('estado');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      domain: document.getElementById('domain').value.trim(),
+      email_principal: document.getElementById('email_principal').value.trim(),
+      email_opcional: document.getElementById('email_opcional').value.trim() || undefined
+    };
+
+    btn.disabled = true;
+    estado.className = 'estado cargando';
+    estado.textContent = 'Analizando el sitio... esto puede tardar hasta 1 minuto.';
+
+    try {
+      const resp = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(() => ({}));
+
+      if (resp.ok) {
+        estado.className = 'estado ok';
+        estado.textContent = 'Listo. El informe llega por correo en unos minutos.' +
+          (data.scoreGlobal != null ? ` Puntuación: ${data.scoreGlobal}/100.` : '');
+        form.reset();
+      } else {
+        estado.className = 'estado error';
+        estado.textContent = data.error || 'Ocurrió un error generando el diagnóstico. Intenta de nuevo.';
+      }
+    } catch (err) {
+      estado.className = 'estado error';
+      estado.textContent = 'No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
