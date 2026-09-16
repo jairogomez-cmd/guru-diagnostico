@@ -144,7 +144,6 @@ tbody td.dominio-cell { color:var(--ink); font-weight:600 }
   </div>
   <div class="hdr-right">
     <span class="hdr-updated" id="hdrUpdated"></span>
-    <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
   </div>
 </header>
 
@@ -701,10 +700,6 @@ document.getElementById('btnClear').addEventListener('click', () => {
 document.getElementById('btnPrev').addEventListener('click', () => { if (pagina > 1) { pagina--; renderTabla(); } });
 document.getElementById('btnNext').addEventListener('click', () => { pagina++; renderTabla(); });
 document.getElementById('btnCsv').addEventListener('click', descargarCSV);
-document.getElementById('btnLogout').addEventListener('click', async () => {
-  await fetch('/api/dashboard-logout', { method: 'POST' }).catch(() => {});
-  window.location.href = '/dashboard-login.html';
-});
 
 document.querySelectorAll('#tablaRanking thead th.sortable').forEach(th => {
   th.addEventListener('click', () => {
