@@ -1,9 +1,9 @@
-const { requiereSesionValida } = require('../lib/dashboardAuth');
+// Este dashboard NO requiere login — a diferencia del de Diagnóstico 360,
+// entrar acá es libre, sin usuario ni contraseña (decisión explícita del
+// proyecto: la consulta rápida por dominio tiene que ser de acceso directo).
 const { traerTodasLasFilasSitioWeb } = require('../lib/dashboardDataSitioWeb');
 
 module.exports = async function handler(req, res) {
-  if (!requiereSesionValida(req, res)) return; // ya respondió 401 adentro
-
   try {
     const filas = await traerTodasLasFilasSitioWeb();
     res.setHeader('Content-Type', 'application/json');
