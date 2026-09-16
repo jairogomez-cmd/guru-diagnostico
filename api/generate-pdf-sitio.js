@@ -70,7 +70,7 @@ async function handler(req, res) {
       success: true,
       filename: nombreArchivo,
       emailEnviado: true,
-      pdfBase64: pdfBuffer.toString('base64'),
+      pdfBase64: Buffer.from(pdfBuffer).toString('base64'),
     });
   } catch (err) {
     console.error('Error generando/enviando el informe:', err);
