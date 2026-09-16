@@ -143,6 +143,7 @@ tbody td.dominio-cell { color:var(--ink); font-weight:600 }
     <span class="hdr-title">Dashboard interno · Auditoría de Sitios Web</span>
   </div>
   <div class="hdr-right">
+    <a href="/sitio-web.html" class="btn-logout" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">← Volver a diagnóstico</a>
     <span class="hdr-updated" id="hdrUpdated"></span>
   </div>
 </header>
@@ -370,6 +371,10 @@ async function cargarDatos() {
     if (!data.ok) throw new Error(data.error || 'Error desconocido');
     TODOS = normalizarNumeros(data.data || []);
     poblarFiltros();
+    // Si se llegó desde el modal de "este sitio ya fue auditado" (con ?dominio=...),
+    // dejamos el filtro de Dominio ya cargado con esa búsqueda.
+    const dominioURL = new URLSearchParams(window.location.search).get('dominio');
+    if (dominioURL) document.getElementById('fDominio').value = dominioURL;
     aplicarFiltros();
     document.getElementById('hdrUpdated').textContent =
       'Actualizado ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
