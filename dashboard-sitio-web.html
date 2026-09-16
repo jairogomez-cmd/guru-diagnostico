@@ -393,6 +393,15 @@ function poblarFiltros() {
   vendedores.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; selV.appendChild(o); });
 }
 
+// Compara dominios ignorando https://, www. y la barra final — así da igual
+// cómo se haya escrito (con protocolo, con barra al final, etc.).
+function normalizarDominio(v) {
+  return (v || '').trim().toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/\/+$/, '');
+}
+
 function leerFiltros() {
   return {
     dominio: document.getElementById('fDominio').value.trim().toLowerCase(),
@@ -406,8 +415,9 @@ function leerFiltros() {
 
 function aplicarFiltros() {
   const f = leerFiltros();
+  const dominioFiltroNormalizado = normalizarDominio(f.dominio);
   FILTRADOS = TODOS.filter(d => {
-    if (f.dominio && !(d.dominio || '').toLowerCase().includes(f.dominio)) return false;
+    if (dominioFiltroNormalizado && !normalizarDominio(d.dominio).includes(dominioFiltroNormalizado)) return false;
     if (f.desde && (!d.creado_en || d.creado_en.slice(0, 10) < f.desde)) return false;
     if (f.hasta && (!d.creado_en || d.creado_en.slice(0, 10) > f.hasta)) return false;
     if (f.vendedor && d.vendedor !== f.vendedor) return false;
