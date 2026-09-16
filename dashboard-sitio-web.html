@@ -66,8 +66,8 @@ a { color:inherit }
 .btn-clear:hover { background:var(--pu100) }
 
 /* ===== KPIs ===== */
-.kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px }
-@media (max-width:900px) { .kpis { grid-template-columns:repeat(2,1fr) } }
+.kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:22px }
+@media (max-width:900px) { .kpis { grid-template-columns:1fr } }
 .kpi {
   border-radius:16px; padding:20px 22px; position:relative; overflow:hidden; color:#fff;
   box-shadow:0 10px 26px -12px rgba(30,20,60,.35);
@@ -84,6 +84,9 @@ a { color:inherit }
 /* ===== CHARTS ===== */
 .charts-row { display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:16px }
 @media (max-width:980px) { .charts-row { grid-template-columns:1fr } }
+.charts-row-3 { grid-template-columns:repeat(3,1fr) }
+@media (max-width:1180px) { .charts-row-3 { grid-template-columns:1fr 1fr } }
+@media (max-width:980px) { .charts-row-3 { grid-template-columns:1fr } }
 .panel { background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 22px; box-shadow:0 1px 3px rgba(30,20,60,.04) }
 .panel-title { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:2px }
 .panel-sub { font-size:11.5px; color:var(--ink3); margin-bottom:14px }
@@ -184,11 +187,6 @@ tbody td.dominio-cell { color:var(--ink); font-weight:600 }
       <div class="kpi-num" id="kpiTotal">0</div>
       <div class="kpi-sub" id="kpiTotalSub">&nbsp;</div>
     </div>
-    <div class="kpi k2">
-      <div class="kpi-label">💰 Costo total</div>
-      <div class="kpi-num" id="kpiCosto">$0</div>
-      <div class="kpi-sub" id="kpiCostoSub">&nbsp;</div>
-    </div>
     <div class="kpi k3">
       <div class="kpi-label">⏱️ Tiempo promedio</div>
       <div class="kpi-num" id="kpiTiempo">0s</div>
@@ -201,7 +199,7 @@ tbody td.dominio-cell { color:var(--ink); font-weight:600 }
     </div>
   </div>
 
-  <div class="charts-row">
+  <div class="charts-row charts-row-3">
     <div class="panel">
       <div class="panel-title">Auditorías por vendedor</div>
       <div class="panel-sub" id="subVendedor">Cantidad de auditorías realizadas en el período filtrado</div>
@@ -211,14 +209,6 @@ tbody td.dominio-cell { color:var(--ink); font-weight:600 }
       <div class="panel-title">Tendencia semanal</div>
       <div class="panel-sub">Auditorías generadas por semana</div>
       <div class="chart-box"><canvas id="chartTendencia"></canvas><div class="empty-state" id="emptyTendencia" style="display:none"><span class="em-icon">📭</span><span class="em-txt">Sin datos suficientes para una tendencia.</span></div></div>
-    </div>
-  </div>
-
-  <div class="charts-row">
-    <div class="panel">
-      <div class="panel-title">Costo por vendedor (USD)</div>
-      <div class="panel-sub" id="subCosto">Suma de los costos estimados de API por vendedor</div>
-      <div class="chart-box"><canvas id="chartCosto"></canvas><div class="empty-state" id="emptyCosto" style="display:none"><span class="em-icon">📭</span><span class="em-txt">No hay datos de costo en este período.</span></div></div>
     </div>
     <div class="panel">
       <div class="panel-title">Promedio por categoría</div>
@@ -240,7 +230,6 @@ tbody td.dominio-cell { color:var(--ink); font-weight:600 }
           <tr>
             <th data-sort="vendedor" class="sortable">Vendedor</th>
             <th data-sort="cantidad" class="sortable">Auditorías</th>
-            <th data-sort="costo" class="sortable">Costo</th>
             <th data-sort="score" class="sortable">Score prom.</th>
           </tr>
         </thead>
@@ -262,7 +251,7 @@ tbody td.dominio-cell { color:var(--ink); font-weight:600 }
         <thead>
           <tr>
             <th>Fecha</th><th>Dominio</th><th>Vendedor</th>
-            <th>Score</th><th>Costo</th><th>Duración</th><th>PDF</th>
+            <th>Score</th><th>Duración</th><th>PDF</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -284,7 +273,7 @@ let TODOS = [];
 let FILTRADOS = [];
 let pagina = 1;
 const FILAS_POR_PAGINA = 25;
-let chartVendedor, chartTendencia, chartCosto, chartCategorias;
+let chartVendedor, chartTendencia, chartCategorias;
 let ordenRanking = { campo: 'cantidad', dir: 'desc' };
 const TOP_N_GRAFICO = 10; // más de esto en un gráfico de barras se apiña — pasa a la tabla de ranking
 
@@ -434,7 +423,7 @@ function renderTodo() {
   // Cada gráfico va en su propio try/catch: si Chart.js no llegó a cargar
   // (CDN lento, bloqueador de anuncios) o un gráfico puntual falla, el resto
   // del dashboard — incluida la tabla de abajo — se sigue mostrando igual.
-  const graficos = [renderChartVendedor, renderChartTendencia, renderChartCosto, renderChartCategorias];
+  const graficos = [renderChartVendedor, renderChartTendencia, renderChartCategorias];
   graficos.forEach(fn => {
     try { fn(); } catch (e) { console.warn('No se pudo dibujar un gráfico (el resto del dashboard sigue funcionando):', e); }
   });
@@ -444,20 +433,17 @@ function renderTodo() {
 
 function renderKPIs() {
   const total = FILTRADOS.length;
-  const costoTotal = FILTRADOS.reduce((s, d) => s + (Number(d.costo_estimado_usd) || 0), 0);
   const duraciones = FILTRADOS.filter(d => d.tiempo_procesamiento_seg != null).map(d => d.tiempo_procesamiento_seg);
   const tiempoProm = duraciones.length ? Math.round(duraciones.reduce((a, b) => a + b, 0) / duraciones.length) : 0;
   const scores = FILTRADOS.filter(d => d.score_global != null).map(d => d.score_global);
   const scoreProm = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
 
   animarNumero(document.getElementById('kpiTotal'), total, v => Math.round(v).toLocaleString('es-AR'));
-  animarNumero(document.getElementById('kpiCosto'), costoTotal, v => fmtUSD(v));
   animarNumero(document.getElementById('kpiTiempo'), tiempoProm, v => fmtDuracion(Math.round(v)));
   animarNumero(document.getElementById('kpiScore'), scoreProm, v => Math.round(v).toString());
 
   const vendedoresUnicos = new Set(FILTRADOS.map(d => d.vendedor).filter(Boolean)).size;
   document.getElementById('kpiTotalSub').textContent = vendedoresUnicos ? `de ${vendedoresUnicos} vendedor(es)` : ' ';
-  document.getElementById('kpiCostoSub').textContent = total ? `≈ ${fmtUSD(costoTotal / total)} c/u` : ' ';
 }
 
 function agruparPor(arr, campo) {
@@ -527,28 +513,6 @@ function renderChartTendencia() {
   });
 }
 
-function renderChartCosto() {
-  if (!chartJsDisponible('emptyCosto')) return;
-  const mapa = {};
-  FILTRADOS.forEach(d => { const k = d.vendedor || '—'; mapa[k] = (mapa[k] || 0) + (Number(d.costo_estimado_usd) || 0); });
-  const totalUnicos = Object.keys(mapa).length;
-  const empty = document.getElementById('emptyCosto');
-  if (!totalUnicos) { empty.style.display = 'flex'; if (chartCosto) chartCosto.destroy(); return; }
-  empty.style.display = 'none';
-  const limitado = limitarTop(mapa, totalUnicos, 'subCosto', 'Suma de los costos estimados de API por vendedor');
-  const labels = limitado.map(e => e[0]);
-  const vals = limitado.map(e => Number(e[1].toFixed(4)));
-  if (chartCosto) chartCosto.destroy();
-  chartCosto = new Chart(document.getElementById('chartCosto'), {
-    type: 'bar',
-    data: { labels, datasets: [{ data: vals, backgroundColor: '#0F9B8E', borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false },
-      tooltip: { callbacks: { label: c => fmtUSD(c.raw) } } },
-      scales: { y: { beginAtZero: true, grid: { color: '#EEE9FA' } },
-        x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 55, minRotation: 40, font: { size: 9 } } } } }
-  });
-}
-
 // Promedia, para cada una de las 6 categorías fijas, el campo "promedio"
 // dentro del array resumen_por_categoria de cada auditoría filtrada.
 function renderChartCategorias() {
@@ -580,16 +544,14 @@ function calcularRankingVendedores() {
   const grupos = {};
   FILTRADOS.forEach(d => {
     const k = d.vendedor || '—';
-    if (!grupos[k]) grupos[k] = { vendedor: k, cantidad: 0, costo: 0, sumaScore: 0, cuentaScore: 0 };
+    if (!grupos[k]) grupos[k] = { vendedor: k, cantidad: 0, sumaScore: 0, cuentaScore: 0 };
     const g = grupos[k];
     g.cantidad += 1;
-    g.costo += Number(d.costo_estimado_usd) || 0;
     if (d.score_global != null) { g.sumaScore += d.score_global; g.cuentaScore += 1; }
   });
   return Object.values(grupos).map(g => ({
     vendedor: g.vendedor,
     cantidad: g.cantidad,
-    costo: g.costo,
     score: g.cuentaScore ? Math.round(g.sumaScore / g.cuentaScore) : null,
   }));
 }
@@ -611,7 +573,7 @@ function renderRankingVendedores() {
 
   const tbody = document.getElementById('tbodyRanking');
   if (!filas.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--ink3);padding:24px">Sin datos para estos filtros.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--ink3);padding:24px">Sin datos para estos filtros.</td></tr>`;
   } else {
     tbody.innerHTML = filas.map(f => {
       const tier = colorTier(f.score);
@@ -621,7 +583,6 @@ function renderRankingVendedores() {
       return `<tr>
         <td>${escapeHtml(f.vendedor)}</td>
         <td>${f.cantidad}</td>
-        <td>${fmtUSD(f.costo)}</td>
         <td>${scoreCell}</td>
       </tr>`;
     }).join('');
@@ -638,7 +599,7 @@ function renderTabla() {
 
   const tbody = document.getElementById('tbody');
   if (!pageRows.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:30px">Sin resultados para estos filtros.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:30px">Sin resultados para estos filtros.</td></tr>`;
   } else {
     tbody.innerHTML = pageRows.map(d => {
       const tier = colorTier(d.score_global);
@@ -652,7 +613,6 @@ function renderTabla() {
         <td class="dominio-cell">${escapeHtml(d.dominio || '—')}</td>
         <td>${escapeHtml(d.vendedor || '—')}</td>
         <td><span class="score-badge" style="background:${tier.bg};color:${tier.fg}">${scoreTxt}</span></td>
-        <td>${fmtUSD(d.costo_estimado_usd)}</td>
         <td>${fmtDuracion(d.tiempo_procesamiento_seg)}</td>
         <td>${pdfCell}</td>
       </tr>`;
@@ -674,13 +634,12 @@ function escapeAttr(s) { return escapeHtml(s); }
 // CSV armado en el navegador a partir de lo ya filtrado — no depende de
 // ningún endpoint extra en Vercel.
 function descargarCSV() {
-  const encabezados = ['Fecha', 'Dominio', 'Vendedor', 'Score', 'Costo USD', 'Duración (seg)', 'PDF'];
+  const encabezados = ['Fecha', 'Dominio', 'Vendedor', 'Score', 'Duración (seg)', 'PDF'];
   const filas = FILTRADOS.map(d => [
     d.creado_en || '',
     d.dominio || '',
     d.vendedor || '',
     d.score_global ?? '',
-    d.costo_estimado_usd ?? '',
     d.tiempo_procesamiento_seg ?? '',
     d.pdf_view_url || '',
   ]);
