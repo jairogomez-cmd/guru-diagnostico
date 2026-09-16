@@ -370,6 +370,26 @@
   .error-state p { margin-top: 8px; font-size: 13.5px; color: var(--ink2); line-height: 1.6; }
   .error-state .btn-secondary { margin-top: 20px; width: 100%; }
 
+  /* ── Modal: "este dominio ya fue auditado" ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(20,10,40,0.5); backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  }
+  .modal-overlay.v { display: flex; }
+  .modal-card {
+    background: #fff; border-radius: 18px; padding: 32px 28px; max-width: 380px; width: 100%;
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,0.4); text-align: center; animation: modalIn .25s ease both;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .modal-icon {
+    width: 46px; height: 46px; margin: 0 auto 14px; border-radius: 50%; background: var(--pu50);
+    display: flex; align-items: center; justify-content: center; font-size: 21px;
+  }
+  .modal-card h3 { font-size: 17.5px; font-weight: 800; color: var(--ink); margin-bottom: 9px; }
+  .modal-card p { font-size: 13.5px; color: var(--ink2); line-height: 1.6; margin-bottom: 22px; }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+
+
   @media (max-width: 900px) {
     .stage { grid-template-columns: 1fr; }
     .scan-panel { padding: 28px 24px 34px; min-height: 0; }
@@ -382,7 +402,7 @@
 </head>
 <body>
 
-<a href="/dashboard-sitio-web.html" class="historial-link">
+<a href="/dashboard-sitio-web.html" class="historial-link" target="_blank" rel="noopener">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
   <span class="historial-txt">
     <span class="historial-eyebrow">Consulta rápida</span>
@@ -561,6 +581,18 @@
 
 </div>
 
+<div class="modal-overlay" id="modalDuplicado">
+  <div class="modal-card">
+    <div class="modal-icon">🔎</div>
+    <h3>Este sitio ya fue auditado</h3>
+    <p id="modalDuplicadoTexto">Este dominio ya tiene una auditoría registrada.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-run" id="btnModalSi" style="margin-top:0;">Sí, generar de nuevo</button>
+      <button type="button" class="btn-secondary" id="btnModalNo">No, ver el histórico</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   // Cambia esta URL por la del webhook de n8n en producción si cambia el dominio del servidor.
@@ -592,6 +624,10 @@
     btnOtra: document.getElementById('btnOtra'),
     errorText: document.getElementById('errorText'),
     btnReintentar: document.getElementById('btnReintentar'),
+    modalDuplicado: document.getElementById('modalDuplicado'),
+    modalDuplicadoTexto: document.getElementById('modalDuplicadoTexto'),
+    btnModalSi: document.getElementById('btnModalSi'),
+    btnModalNo: document.getElementById('btnModalNo'),
   };
 
   const PASOS = [
@@ -761,20 +797,48 @@
     mostrarEstado('stateError');
   }
 
-  els.form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  function normalizarDominio(v) {
+    return (v || '').trim().toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/+$/, '');
+  }
 
-    const domainOk = validarCampo(els.domain, els.fieldDomain, { requerido: true, esEmail: false });
-    const emailPOk = validarCampo(els.emailPrincipal, els.fieldEmailPrincipal, { requerido: true, esEmail: true });
-    const emailOOk = validarCampo(els.emailOpcional, els.fieldEmailOpcional, { requerido: false, esEmail: true });
-    if (!domainOk || !emailPOk || !emailOOk) return;
+  // Si esto falla (endpoint caído, etc.) devolvemos null y dejamos pasar al
+  // usuario sin bloquearlo — la verificación es una ayuda, no un requisito.
+  async function buscarAuditoriaPrevia(dominioNormalizado) {
+    try {
+      const resp = await fetch('/api/dashboard-data-sitio');
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      if (!data.ok || !Array.isArray(data.data)) return null;
+      // data.data ya viene ordenado por fecha (más reciente primero) desde el backend.
+      return data.data.find(fila => normalizarDominio(fila.dominio) === dominioNormalizado) || null;
+    } catch (e) {
+      return null;
+    }
+  }
 
-    const payload = {
-      domain: els.domain.value.trim(),
-      email_principal: els.emailPrincipal.value.trim(),
-      email_opcional: els.emailOpcional.value.trim() || undefined,
+  function mostrarModalDuplicado(previa, payload) {
+    const fecha = previa.creado_en
+      ? new Date(previa.creado_en).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'una fecha anterior';
+    const score = previa.score_global != null ? `${Math.round(previa.score_global)}/100` : 'sin puntaje registrado';
+    els.modalDuplicadoTexto.textContent =
+      `Este dominio ya fue auditado el ${fecha}, con un puntaje de ${score}. ¿Querés generar un diagnóstico nuevo igual?`;
+    els.modalDuplicado.classList.add('v');
+
+    els.btnModalSi.onclick = () => {
+      els.modalDuplicado.classList.remove('v');
+      ejecutarAuditoria(payload);
     };
+    els.btnModalNo.onclick = () => {
+      els.modalDuplicado.classList.remove('v');
+      window.open('/dashboard-sitio-web.html?dominio=' + encodeURIComponent(payload.domain), '_blank', 'noopener');
+    };
+  }
 
+  async function ejecutarAuditoria(payload) {
     els.btn.disabled = true;
     mostrarEstado('stateScanning');
     iniciarLogFeed();
@@ -812,6 +876,36 @@
       }
     } finally {
       els.btn.disabled = false;
+    }
+  }
+
+  els.form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const domainOk = validarCampo(els.domain, els.fieldDomain, { requerido: true, esEmail: false });
+    const emailPOk = validarCampo(els.emailPrincipal, els.fieldEmailPrincipal, { requerido: true, esEmail: true });
+    const emailOOk = validarCampo(els.emailOpcional, els.fieldEmailOpcional, { requerido: false, esEmail: true });
+    if (!domainOk || !emailPOk || !emailOOk) return;
+
+    const payload = {
+      domain: els.domain.value.trim(),
+      email_principal: els.emailPrincipal.value.trim(),
+      email_opcional: els.emailOpcional.value.trim() || undefined,
+    };
+
+    els.btn.disabled = true;
+    const textoOriginalBtn = els.btn.innerHTML;
+    els.btn.innerHTML = '<span>Verificando…</span>';
+
+    const previa = await buscarAuditoriaPrevia(normalizarDominio(payload.domain));
+
+    els.btn.innerHTML = textoOriginalBtn;
+    els.btn.disabled = false;
+
+    if (previa) {
+      mostrarModalDuplicado(previa, payload);
+    } else {
+      ejecutarAuditoria(payload);
     }
   });
 
