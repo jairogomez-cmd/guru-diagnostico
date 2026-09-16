@@ -565,7 +565,7 @@
 (function () {
   // Cambia esta URL por la del webhook de n8n en producción si cambia el dominio del servidor.
   const WEBHOOK_URL = 'https://n8n.srv1005169.hstgr.cloud/webhook/diagnostico-sitio-web';
-  const TIEMPO_MAX_ESPERA_MS = 4 * 60 * 1000; // 4 minutos — sitios grandes tardan; pasado esto, avisamos por correo en vez de tildar la pantalla.
+  const TIEMPO_MAX_ESPERA_MS = 9 * 60 * 1000; // 9 minutos — un sitio de 16 páginas ya tardó 4m 5s; con el tope de 45 páginas puede tardar bastante más. Pasado esto, avisamos por correo en vez de tildar la pantalla.
 
   const els = {
     form: document.getElementById('formDiagnostico'),
