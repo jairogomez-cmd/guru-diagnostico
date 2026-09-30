@@ -67,6 +67,43 @@
 })();
 </script>
 
+<!-- ============================================================
+     AUTOCOMPLETAR "TU EMAIL (GURU)" -- 100% aditivo, no toca nada
+     del bloque de acceso corporativo de arriba. Observa cuándo el
+     overlay de login se oculta (señal de que guruDiagUser ya quedó
+     guardado en localStorage, ya sea por sesión previa o por login
+     recién hecho) y en ese momento completa el campo #f-even con el
+     email de esa cuenta, solo si el campo todavía está vacío. El
+     campo "EMAIL DEL CLIENTE" (#f-ecli) no se toca en ningún caso.
+     ============================================================ -->
+<script>
+(function(){
+  function gcPrefillVendorEmail(){
+    try{
+      var saved = localStorage.getItem('guruDiagUser');
+      if(!saved) return;
+      var user = JSON.parse(saved);
+      var field = document.getElementById('f-even');
+      if(user.email && field && !field.value){ field.value = user.email; }
+    }catch(e){}
+  }
+  function gcWatchOverlay(){
+    var ov = document.getElementById('gcOverlay');
+    if(!ov){ setTimeout(gcWatchOverlay, 200); return; }
+    if(ov.style.display === 'none'){ gcPrefillVendorEmail(); return; }
+    var obs = new MutationObserver(function(){
+      if(ov.style.display === 'none'){ gcPrefillVendorEmail(); obs.disconnect(); }
+    });
+    obs.observe(ov, { attributes:true, attributeFilter:['style'] });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', gcWatchOverlay);
+  } else {
+    gcWatchOverlay();
+  }
+})();
+</script>
+
 
 <h2 class="sr-only">Guru Diagnóstico Digital — Dashboard de presencia digital con generador de PDF</h2>
 
